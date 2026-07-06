@@ -3,192 +3,200 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تسجيل الدخول - لوحة التحكم</title>
+    <title>تسجيل الدخول - ميلانو OTC</title>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         body {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-family: 'Cairo', sans-serif;
+            padding: 20px;
         }
-        
         .login-container {
             background: white;
-            border-radius: 16px;
-            padding: 40px;
+            border-radius: 20px;
+            padding: 48px 40px 40px;
             width: 100%;
-            max-width: 400px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 420px;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
         }
-        
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #c9a96e, #e8d5a3, #c9a96e);
+        }
         .login-header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 36px;
         }
-        
         .login-header img {
-            height: 60px;
-            margin-bottom: 15px;
+            height: 56px;
+            margin-bottom: 16px;
         }
-        
         .login-header h1 {
-            color: #2c3e50;
-            font-size: 1.5rem;
-            margin-bottom: 5px;
+            color: #1a1a2e;
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 4px;
         }
-        
         .login-header p {
-            color: #7f8c8d;
+            color: #636e72;
+            font-size: 0.9rem;
         }
-        
         .login-form .form-group {
             margin-bottom: 20px;
         }
-        
-        .login-form .input-icon {
+        .login-form label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #1a1a2e;
+            font-size: 0.9rem;
+        }
+        .login-form .input-wrap {
             position: relative;
         }
-        
-        .login-form .input-icon i {
+        .login-form .input-wrap i {
             position: absolute;
-            right: 15px;
+            right: 16px;
             top: 50%;
             transform: translateY(-50%);
-            color: #7f8c8d;
+            color: #b2bec3;
+            font-size: 1rem;
         }
-        
-        .login-form .input-icon input {
-            padding-right: 45px;
+        .login-form .input-wrap input {
+            width: 100%;
+            padding: 14px 45px 14px 16px;
+            border: 2px solid #e8ecf0;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
         }
-        
+        .login-form .input-wrap input:focus {
+            outline: none;
+            border-color: #c9a96e;
+            box-shadow: 0 0 0 4px rgba(201,169,110,0.15);
+        }
         .login-form .btn-login {
             width: 100%;
             padding: 15px;
-            background: linear-gradient(135deg, #c9a96e, #b8956a);
+            background: linear-gradient(135deg, #c9a96e, #a8884e);
             color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: 600;
+            border-radius: 10px;
+            font-size: 1.05rem;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
+            font-family: inherit;
+            margin-top: 8px;
         }
-        
         .login-form .btn-login:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(201, 169, 110, 0.4);
+            box-shadow: 0 12px 35px rgba(201,169,110,0.4);
         }
-        
         .login-error {
-            background: #ffebee;
-            color: #c62828;
-            padding: 12px;
-            border-radius: 8px;
+            background: #fff5f5;
+            color: #e17055;
+            padding: 12px 16px;
+            border-radius: 10px;
             margin-bottom: 20px;
             display: none;
             align-items: center;
             gap: 10px;
-        }
-        
-        .login-error.show {
-            display: flex;
-        }
-        
-        .demo-credentials {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f5f5f5;
-            border-radius: 8px;
             font-size: 0.9rem;
-            color: #666;
+            border: 1px solid #fab1a0;
         }
-        
-        .demo-credentials strong {
-            color: #2c3e50;
+        .login-error.show { display: flex; }
+        .demo-notes {
+            margin-top: 24px;
+            padding: 16px 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            color: #636e72;
+            text-align: center;
+            border: 1px dashed #e8ecf0;
         }
+        .demo-notes strong { color: #1a1a2e; }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #b2bec3;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover { color: #c9a96e; }
     </style>
 </head>
 <body>
     <div class="login-container">
         <div class="login-header">
-            <img src="../assets/logo.png" alt="ميلانو" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>'">
+            <img src="../assets/logo.png" alt="ميلانو OTC">
             <h1>لوحة التحكم</h1>
             <p>مركز تتبع الطلب ميلانو OTC</p>
         </div>
         
-        <div id="loginError" class="login-error">
-            <i class="fas fa-exclamation-circle"></i>
-            <span>اسم المستخدم أو كلمة المرور غير صحيحة</span>
-        </div>
+        <div id="loginError" class="login-error"><i class="fas fa-exclamation-circle"></i><span>اسم المستخدم أو كلمة المرور غير صحيحة</span></div>
         
         <form class="login-form" id="loginForm">
             <div class="form-group">
-                <label for="username">اسم المستخدم</label>
-                <div class="input-icon">
+                <label>اسم المستخدم</label>
+                <div class="input-wrap">
                     <i class="fas fa-user"></i>
                     <input type="text" id="username" required placeholder="أدخل اسم المستخدم">
                 </div>
             </div>
-            
             <div class="form-group">
-                <label for="password">كلمة المرور</label>
-                <div class="input-icon">
+                <label>كلمة المرور</label>
+                <div class="input-wrap">
                     <i class="fas fa-lock"></i>
                     <input type="password" id="password" required placeholder="أدخل كلمة المرور">
                 </div>
             </div>
-            
-            <button type="submit" class="btn-login">
-                <i class="fas fa-sign-in-alt"></i>
-                تسجيل الدخول
-            </button>
+            <button type="submit" class="btn-login"><i class="fas fa-sign-in-alt"></i>تسجيل الدخول</button>
         </form>
         
-        <div class="demo-credentials">
+        <div class="demo-notes">
             <strong>بيانات تجريبية:</strong><br>
-            اسم المستخدم: <strong>admin</strong><br>
-            كلمة المرور: <strong>123456</strong>
+            اسم المستخدم: <strong>admin</strong> | كلمة المرور: <strong>123456</strong>
         </div>
+        
+        <a href="../index.html" class="back-link"><i class="fas fa-arrow-right"></i> العودة للرئيسية</a>
     </div>
     
     <script>
-        // Default admin credentials (in real app, this would be server-side)
-        const defaultCredentials = {
-            username: 'admin',
-            password: '123456'
-        };
-        
+        const defaultCredentials = { username: 'admin', password: '123456' };
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const loginError = document.getElementById('loginError');
-            
-            // Check credentials
-            if (username === defaultCredentials.username && password === defaultCredentials.password) {
-                // Set session
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            if (u === defaultCredentials.username && p === defaultCredentials.password) {
                 sessionStorage.setItem('adminLoggedIn', 'true');
-                sessionStorage.setItem('adminUser', username);
-                
-                // Redirect to admin dashboard
+                sessionStorage.setItem('adminUser', u);
                 window.location.href = 'index.html';
             } else {
-                loginError.classList.add('show');
+                document.getElementById('loginError').classList.add('show');
             }
         });
-        
-        // Check if already logged in
-        if (sessionStorage.getItem('adminLoggedIn') === 'true') {
-            window.location.href = 'index.html';
-        }
+        if (sessionStorage.getItem('adminLoggedIn') === 'true') window.location.href = 'index.html';
     </script>
 </body>
 </html>

@@ -837,6 +837,157 @@ input, select, textarea { font-family: inherit; }
     to { opacity: 1; transform: translateY(0); }
 }
 
+/* ===== Admin status-badge (used in admin table) ===== */
+.status-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: white;
+}
+.status-badge.pending { background: var(--warning); }
+.status-badge.in-transit { background: var(--info); }
+.status-badge.delivered { background: var(--success); }
+.status-badge.exception { background: var(--danger); }
+
+/* ===== Admin alerts ===== */
+.alert {
+    padding: 14px 18px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.95rem;
+}
+.alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.alert-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+.alert-warning { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+.alert-info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+
+/* ===== Modal ===== */
+.modal {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+.modal.active { opacity: 1; visibility: visible; }
+.modal-content {
+    background: white;
+    border-radius: 16px;
+    padding: 32px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: scale(0.9);
+    transition: all 0.3s ease;
+}
+.modal.active .modal-content { transform: scale(1); }
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--border);
+}
+.modal-header h3 { font-size: 1.2rem; color: var(--dark); }
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.modal-close:hover { color: var(--danger); }
+
+/* ===== Data Table ===== */
+.table-container { overflow-x: auto; }
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.data-table th, .data-table td {
+    padding: 14px 16px;
+    text-align: right;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+}
+.data-table th {
+    background: #f8f9fa;
+    color: var(--dark);
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+.data-table tr:hover td { background: #fafbfc; }
+
+/* ===== Form controls for admin ===== */
+.form-group { margin-bottom: 20px; }
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: var(--dark);
+    font-size: 0.9rem;
+}
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    background: white;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 4px rgba(201,169,110,0.12);
+}
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+/* ===== Admin action buttons ===== */
+.btn-group { display: flex; gap: 6px; }
+.btn {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: inherit;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn-view { background: #dfe6e9; color: #2d3436; }
+.btn-view:hover { background: #b2bec3; }
+.btn-edit { background: #74b9ff; color: white; }
+.btn-edit:hover { background: #0984e3; }
+.btn-delete { background: #fab1a0; color: white; }
+.btn-delete:hover { background: #e17055; }
+
 /* =========================================
    RESPONSIVE
    ========================================= */
