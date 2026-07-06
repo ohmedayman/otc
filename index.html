@@ -10,7 +10,7 @@
 </head>
 <body>
 
-    <!-- ===== Header ===== -->
+    <!-- Header -->
     <header class="header">
         <div class="header-inner">
             <div class="logo">
@@ -29,7 +29,7 @@
         </div>
     </header>
 
-    <!-- ===== Hero Section ===== -->
+    <!-- Hero -->
     <section class="hero">
         <div class="hero-particles"></div>
         <div class="hero-overlay"></div>
@@ -41,26 +41,38 @@
             <h1>تتبع شحنتك الأن</h1>
             <p class="hero-subtitle">أدخل رقم التتبع الخاص بك لمعرفة حالة طلبك في لحظات</p>
 
-            <div class="tracking-form-wrapper">
+            <!-- Single Track -->
+            <div class="tracking-form-wrapper" id="singleTrackSection">
                 <form class="tracking-form" id="trackingForm" autocomplete="off">
                     <div class="input-group">
-                        <div class="input-icon-left">
-                            <i class="fas fa-barcode"></i>
-                        </div>
+                        <div class="input-icon-left"><i class="fas fa-barcode"></i></div>
                         <input type="text" id="trackingNumber" placeholder="أدخل رقم التتبع (EE123456789EG)" maxlength="13" dir="ltr" autofocus>
-                        <button type="submit" id="trackBtn">
-                            <i class="fas fa-search"></i>
-                            <span>تتبع</span>
-                        </button>
+                        <button type="submit" id="trackBtn"><i class="fas fa-search"></i><span>تتبع</span></button>
                     </div>
                 </form>
-                <p class="input-hint">
-                    <i class="fas fa-info-circle"></i>
-                    رقم التتبع مكون من 13 حرف — مثال: EE123456789EG
-                </p>
+                <p class="input-hint"><i class="fas fa-info-circle"></i> رقم التتبع مكون من 13 حرف — مثال: EE123456789EG</p>
             </div>
 
-            <!-- Quick track examples -->
+            <!-- Toggle Bulk -->
+            <div class="bulk-toggle">
+                <button id="toggleBulkBtn" class="quick-track-btn"><i class="fas fa-layer-group"></i> تتبع جماعي</button>
+            </div>
+
+            <!-- Bulk Track -->
+            <div class="bulk-section hidden" id="bulkSection">
+                <div class="bulk-form-box">
+                    <h3><i class="fas fa-layer-group"></i> تتبع جماعي</h3>
+                    <p>أدخل أرقام التتبع (كل رقم في سطر منفصل)</p>
+                    <textarea id="bulkInput" rows="5" placeholder="EE123456789EG&#10;EE987654321EG&#10;EE112233445EG"></textarea>
+                    <div class="bulk-actions">
+                        <button id="bulkTrackBtn" class="support-btn"><i class="fas fa-search"></i> تتبع الكل</button>
+                        <button id="clearBulkBtn" class="support-btn" style="background:#636e72;"><i class="fas fa-trash"></i> مسح</button>
+                        <button id="backToSingleBtn" class="support-btn" style="background:transparent;border:2px solid rgba(255,255,255,0.3);color:white;"><i class="fas fa-arrow-right"></i> تتبع فردي</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Track -->
             <div class="quick-tracks">
                 <span>تجربة سريعة:</span>
                 <button class="quick-track-btn" data-code="EE123456789EG">EE123456789EG</button>
@@ -70,7 +82,7 @@
         </div>
     </section>
 
-    <!-- ===== Main Content ===== -->
+    <!-- Main Content -->
     <main class="main-content">
 
         <!-- Loading -->
@@ -90,34 +102,25 @@
                 <div class="error-icon"><i class="fas fa-exclamation-triangle"></i></div>
                 <h3>لم نتمكن من العثور على الشحنة</h3>
                 <p id="errorText">تأكد من صحة رقم التتبع وحاول مرة أخرى</p>
-                <button class="error-retry" onclick="retryTracking()">
-                    <i class="fas fa-redo"></i>
-                    إعادة المحاولة
-                </button>
             </div>
         </div>
 
-        <!-- Result -->
+        <!-- Single Result -->
         <div id="trackingResult" class="result-section hidden">
             <div class="result-container">
-                
-                <!-- Result Header -->
                 <div class="result-header">
                     <div class="result-header-left">
                         <div class="result-label">رقم التتبع</div>
                         <div class="result-number" id="resultTrackingNumber">-</div>
                     </div>
                     <div class="result-header-right">
-                        <div class="result-status-wrapper">
-                            <span class="result-status" id="resultStatus">-</span>
-                        </div>
-                        <button id="closeResult" class="result-close" title="إغلاق">
-                            <i class="fas fa-times"></i>
+                        <button class="copy-btn" id="copyTrackingBtn" title="نسخ رقم التتبع">
+                            <i class="fas fa-copy"></i> نسخ
                         </button>
+                        <span class="result-status" id="resultStatus">-</span>
+                        <button id="closeResult" class="result-close"><i class="fas fa-times"></i></button>
                     </div>
                 </div>
-
-                <!-- Result Cards -->
                 <div class="result-cards">
                     <div class="result-card">
                         <div class="card-icon"><i class="fas fa-calendar-alt"></i></div>
@@ -135,132 +138,71 @@
                         <div class="card-value" id="resultLastEvent">-</div>
                     </div>
                 </div>
-
-                <!-- Timeline -->
                 <div class="result-timeline">
-                    <div class="timeline-header">
-                        <h3><i class="fas fa-list-timeline"></i> مسار الشحنة</h3>
-                    </div>
-                    <div class="timeline-body" id="trackingEvents">
-                        <!-- Events rendered by JS -->
-                    </div>
+                    <div class="timeline-header"><h3><i class="fas fa-list-timeline"></i> مسار الشحنة</h3></div>
+                    <div class="timeline-body" id="trackingEvents"></div>
                 </div>
             </div>
         </div>
 
-        <!-- ===== Features ===== -->
-        <section class="features" id="features">
+        <!-- Bulk Results -->
+        <div id="bulkResults" class="hidden">
+            <div class="result-container">
+                <div class="result-header">
+                    <h3 style="color:white;font-size:1.1rem;"><i class="fas fa-layer-group" style="margin-left:8px;"></i>نتائج التتبع الجماعي</h3>
+                    <button class="copy-btn" id="copyAllBtn" title="نسخ كل الأرقام"><i class="fas fa-copy"></i> نسخ الكل</button>
+                </div>
+                <div id="bulkResultsBody" style="padding:24px;"></div>
+            </div>
+        </div>
+
+        <!-- Features -->
+        <section class="features">
             <div class="section-header">
                 <h2>لماذا تختار ميلانو OTC؟</h2>
                 <p>خدمة تتبع متطورة توفر لك تجربة سلسة وآمنة</p>
             </div>
             <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-bolt"></i>
-                    </div>
-                    <h3>تتبع فوري</h3>
-                    <p>احصل على آخر تحديثات شحنتك بشكل فوري ومباشر</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-shield-alt"></i>
-                    </div>
-                    <h3>بيانات موثوقة</h3>
-                    <p>معلومات محدثة بشكل دقيق ومباشر</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-mobile-alt"></i>
-                    </div>
-                    <h3>متوافق مع الجوال</h3>
-                    <p>تصميم متجاوب يعمل على جميع الأجهزة والهواتف</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-headset"></i>
-                    </div>
-                    <h3>دعم فني متواصل</h3>
-                    <p>فريق دعم جاهز لمساعدتك في أي وقت</p>
-                </div>
+                <div class="feature-card"><div class="feature-icon"><i class="fas fa-bolt"></i></div><h3>تتبع فوري</h3><p>احصل على آخر تحديثات شحنتك بشكل فوري ومباشر</p></div>
+                <div class="feature-card"><div class="feature-icon"><i class="fas fa-copy"></i></div><h3>نسخ سريع</h3><p>انسخ رقم التتبع بضغطة وحدة لمشاركته</p></div>
+                <div class="feature-card"><div class="feature-icon"><i class="fas fa-mobile-alt"></i></div><h3>تتبع جماعي</h3><p>تتبع أكتر من شحنة في نفس الوقت</p></div>
+                <div class="feature-card"><div class="feature-icon"><i class="fas fa-headset"></i></div><h3>دعم فني متواصل</h3><p>فريق دعم جاهز لمساعدتك في أي وقت</p></div>
             </div>
         </section>
 
-        <!-- ===== How it works ===== -->
+        <!-- How it works -->
         <section class="how-it-works">
-            <div class="section-header">
-                <h2>كيفية التتبع</h2>
-                <p>ثلاث خطوات بسيطة لتتبع شحنتك</p>
-            </div>
+            <div class="section-header"><h2>كيفية التتبع</h2><p>ثلاث خطوات بسيطة لتتبع شحنتك</p></div>
             <div class="steps-row">
-                <div class="step-item">
-                    <div class="step-number">1</div>
-                    <div class="step-content">
-                        <div class="step-icon"><i class="fas fa-receipt"></i></div>
-                        <h4>احصل على الرقم</h4>
-                        <p>رقم التتبع موجود في رسالة التأكيد أو فاتورة الشحن</p>
-                    </div>
-                </div>
+                <div class="step-item"><div class="step-number">1</div><div class="step-content"><div class="step-icon"><i class="fas fa-receipt"></i></div><h4>احصل على الرقم</h4><p>رقم التتبع موجود في رسالة التأكيد أو فاتورة الشحن</p></div></div>
                 <div class="step-connector"><i class="fas fa-arrow-left"></i></div>
-                <div class="step-item">
-                    <div class="step-number">2</div>
-                    <div class="step-content">
-                        <div class="step-icon"><i class="fas fa-keyboard"></i></div>
-                        <h4>أدخل الرقم</h4>
-                        <p>اكتب رقم التتبع في خانة البحث بالأعلى</p>
-                    </div>
-                </div>
+                <div class="step-item"><div class="step-number">2</div><div class="step-content"><div class="step-icon"><i class="fas fa-keyboard"></i></div><h4>أدخل الرقم</h4><p>اكتب رقم التتبع في خانة البحث بالأعلى</p></div></div>
                 <div class="step-connector"><i class="fas fa-arrow-left"></i></div>
-                <div class="step-item">
-                    <div class="step-number">3</div>
-                    <div class="step-content">
-                        <div class="step-icon"><i class="fas fa-search-plus"></i></div>
-                        <h4>تابع شحنتك</h4>
-                        <p>اطلع على حالة شحنتك وتفاصيل التتبع الكاملة</p>
-                    </div>
-                </div>
+                <div class="step-item"><div class="step-number">3</div><div class="step-content"><div class="step-icon"><i class="fas fa-search-plus"></i></div><h4>تابع شحنتك</h4><p>اطلع على حالة شحنتك وتفاصيل التتبع الكاملة</p></div></div>
             </div>
         </section>
 
-        <!-- ===== FAQ ===== -->
+        <!-- FAQ -->
         <section class="faq">
-            <div class="section-header">
-                <h2>أسئلة شائعة</h2>
-            </div>
+            <div class="section-header"><h2>أسئلة شائعة</h2></div>
             <div class="faq-list">
                 <div class="faq-item">
-                    <button class="faq-question">
-                        <span>ما هو رقم التتبع؟</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </button>
-                    <div class="faq-answer">
-                        <p>رقم التتبع هو كود فريد مكون من 13 حرف وأرقام (مثل EE123456789EG) يتم إرساله لك عند شحن طلبك، يمكنك استخدامه لتتبع حالة شحنتك.</p>
-                    </div>
+                    <button class="faq-question"><span>ما هو رقم التتبع؟</span><i class="fas fa-chevron-down"></i></button>
+                    <div class="faq-answer"><p>رقم التتبع هو كود فريد مكون من 13 حرف وأرقام (مثل EE123456789EG) يتم إرساله لك عند شحن طلبك.</p></div>
                 </div>
                 <div class="faq-item">
-                    <button class="faq-question">
-                        <span>كيف أحصل على رقم التتبع؟</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </button>
-                    <div class="faq-answer">
-                        <p>ستتلقى رقم التتبع عبر رسالة نصية أو إيميل بعد تأكيد طلبك. يمكنك أيضاً إيجاده في فاتورة الشحن الخاصة بك.</p>
-                    </div>
+                    <button class="faq-question"><span>كيف أحصل على رقم التتبع؟</span><i class="fas fa-chevron-down"></i></button>
+                    <div class="faq-answer"><p>ستتلقى رقم التتبع عبر رسالة نصية أو إيميل بعد تأكيد طلبك.</p></div>
                 </div>
                 <div class="faq-item">
-                    <button class="faq-question">
-                        <span>ماذا لو لم يظهر رقم التتبع؟</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </button>
-                    <div class="faq-answer">
-                        <p>إذا لم تظهر النتائج، قد يكون الطلب لم يتم شحنه بعد. يرجى الانتظار 24-48 ساعة من تاريخ الشحن والمحاولة مرة أخرى.</p>
-                    </div>
+                    <button class="faq-question"><span>ماذا لو لم يظهر رقم التتبع؟</span><i class="fas fa-chevron-down"></i></button>
+                    <div class="faq-answer"><p>إذا لم تظهر النتائج، قد يكون الطلب لم يتم شحنه بعد. يرجى الانتظار 24-48 ساعة والمحاولة مرة أخرى.</p></div>
                 </div>
             </div>
         </section>
-
     </main>
 
-    <!-- ===== Footer ===== -->
+    <!-- Footer -->
     <footer class="footer">
         <div class="footer-inner">
             <div class="footer-brand">
@@ -276,21 +218,19 @@
             </div>
             <div class="footer-support">
                 <h4>الدعم الفني</h4>
-                <a href="tel:01029293339" class="footer-phone">
-                    <i class="fas fa-phone-alt"></i>
-                    01029293339
-                </a>
+                <a href="tel:01029293339" class="footer-phone"><i class="fas fa-phone-alt"></i> 01029293339</a>
                 <p>خدمة العملاء متاحة يومياً من 9 صباحاً حتى 9 مساءً</p>
             </div>
         </div>
-        <div class="footer-bottom">
-            <p>&copy; 2026 ميلانو OTC — جميع الحقوق محفوظة</p>
-        </div>
+        <div class="footer-bottom"><p>&copy; 2026 ميلانو OTC — جميع الحقوق محفوظة</p></div>
     </footer>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden"></div>
 
     <script src="js/tracking.js"></script>
     <script>
-        // FAQ accordion
+        // FAQ
         document.querySelectorAll('.faq-question').forEach(btn => {
             btn.addEventListener('click', function() {
                 const item = this.parentElement;
@@ -300,12 +240,31 @@
             });
         });
 
-        // Quick track buttons
-        document.querySelectorAll('.quick-track-btn').forEach(btn => {
+        // Quick track
+        document.querySelectorAll('.quick-track-btn[data-code]').forEach(btn => {
             btn.addEventListener('click', function() {
                 document.getElementById('trackingNumber').value = this.dataset.code;
                 document.getElementById('trackBtn').click();
             });
+        });
+
+        // Toggle bulk/single
+        document.getElementById('toggleBulkBtn').addEventListener('click', function() {
+            document.getElementById('singleTrackSection').classList.add('hidden');
+            document.getElementById('bulkSection').classList.remove('hidden');
+            document.querySelector('.quick-tracks').classList.add('hidden');
+        });
+        document.getElementById('backToSingleBtn').addEventListener('click', function() {
+            document.getElementById('bulkSection').classList.add('hidden');
+            document.getElementById('singleTrackSection').classList.remove('hidden');
+            document.querySelector('.quick-tracks').classList.remove('hidden');
+        });
+
+        // Bulk track
+        document.getElementById('bulkTrackBtn').addEventListener('click', bulkTrack);
+        document.getElementById('clearBulkBtn').addEventListener('click', function() {
+            document.getElementById('bulkInput').value = '';
+            document.getElementById('bulkResults').classList.add('hidden');
         });
 
         // URL param auto-track

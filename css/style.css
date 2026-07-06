@@ -837,7 +837,76 @@ input, select, textarea { font-family: inherit; }
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* ===== Admin status-badge (used in admin table) ===== */
+/* ===== Toast ===== */
+.toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    padding: 14px 28px;
+    border-radius: 12px;
+    color: white;
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 9999;
+    transition: transform 0.4s cubic-bezier(.4,0,.2,1);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+.toast.hidden { transform: translateX(-50%) translateY(100px); }
+.toast:not(.hidden) { transform: translateX(-50%) translateY(0); }
+.toast-success { background: linear-gradient(135deg, #00b894, #00a381); }
+.toast-error { background: linear-gradient(135deg, #e17055, #d63031); }
+
+/* ===== Copy Button ===== */
+.copy-btn {
+    padding: 8px 18px;
+    background: rgba(255,255,255,0.15);
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 8px;
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.copy-btn:hover { background: rgba(255,255,255,0.25); border-color: rgba(255,255,255,0.5); }
+
+/* ===== Bulk Section ===== */
+.bulk-section { max-width: 600px; margin: 0 auto 20px; }
+.bulk-form-box {
+    background: white;
+    border-radius: var(--radius);
+    padding: 32px;
+    box-shadow: var(--shadow-lg);
+    text-align: right;
+}
+.bulk-form-box h3 { font-size: 1.15rem; color: var(--dark); margin-bottom: 8px; }
+.bulk-form-box h3 i { color: var(--gold); margin-left: 8px; }
+.bulk-form-box p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px; }
+.bulk-form-box textarea {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    font-family: monospace;
+    font-size: 0.95rem;
+    resize: vertical;
+    direction: ltr;
+    text-align: left;
+    margin-bottom: 16px;
+}
+.bulk-form-box textarea:focus { outline: none; border-color: var(--gold); }
+.bulk-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.bulk-toggle { margin-top: 16px; }
+
+/* ===== Admin status-badge ===== */
 .status-badge {
     display: inline-block;
     padding: 6px 16px;
