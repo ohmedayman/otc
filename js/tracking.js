@@ -55,6 +55,27 @@ if (closeResult) closeResult.addEventListener('click', () => { trackingResult.cl
 if (copyTrackingBtn) copyTrackingBtn.addEventListener('click', () => copyToClipboard(resultTrackingNumber.textContent));
 if (copyAllBtn) copyAllBtn.addEventListener('click', copyAllBulk);
 
+// ===== Get order from localStorage (added by admin) =====
+function getAdminOrder(num) {
+    const orders = JSON.parse(localStorage.getItem('milanoOrders') || '[]');
+    const o = orders.find(x => x.trackingNumber === num);
+    if (!o) return null;
+    const statusMap = { 'pending':'قيد المعالجة', 'in-transit':'في الطريق', 'delivered':'تم التوصيل', 'exception':'مشكلة في التوصيل' };
+    const statusLoc = { 'pending':'مستودع البائع', 'in-transit':'في الطريق', 'delivered':'تم التوصيل', 'exception':'مركز الخدمة' };
+    return {
+        trackingNumber: o.trackingNumber,
+        status: o.status,
+        statusText: statusMap[o.status] || o.status,
+        lastUpdate: o.createdAt || '-',
+        location: o.address || statusLoc[o.status] || '-',
+        lastEvent: statusMap[o.status] || o.status,
+        events: [
+            { date: o.createdAt || '-', status: statusMap[o.status] || o.status, location: o.address || '-' },
+            ...(o.notes ? [{ date: o.createdAt || '-', status: o.notes, location: o.address || '-' }] : [])
+        ]
+    };
+}
+
 // ===== Track =====
 async function trackPackage() {
     const num = trackingInput.value.trim().toUpperCase();
@@ -65,7 +86,8 @@ async function trackPackage() {
     loadingSpinner.classList.remove('hidden');
     await new Promise(r => setTimeout(r, 1200));
 
-    const data = trackingData[num] || generateDemoData(num);
+    // 1. Check demo data, 2. Check admin localStorage, 3. Generate generic
+    const data = trackingData[num] || getAdminOrder(num) || generateDemoData(num);
     displayResults(data);
 }
 
@@ -83,7 +105,7 @@ async function bulkTrack() {
 
     bulkResultsBody.innerHTML = '';
     numbers.forEach(num => {
-        const data = trackingData[num] || generateDemoData(num);
+        const data = trackingData[num] || getAdminOrder(num) || generateDemoData(num);
         const statusColors = { 'pending':'#fdcb6e', 'in-transit':'#0984e3', 'delivered':'#00b894', 'exception':'#e17055' };
         const row = document.createElement('div');
         row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:var(--bg);border-radius:10px;margin-bottom:10px;border:1px solid var(--border);';
