@@ -44,7 +44,7 @@ button { cursor: pointer; font-family: inherit; }
 input, select, textarea { font-family: inherit; }
 
 /* ===== Utilities ===== */
-.hidden { display: none !important; }
+.hidden { display: none !important; visibility: hidden !important; }
 
 /* =========================================
    HEADER

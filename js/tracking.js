@@ -102,32 +102,19 @@ async function trackPackage() {
 
     hideAll();
     loadingSpinner.classList.remove('hidden');
-    loadingSpinner.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1800));
+    await new Promise(resolve => setTimeout(resolve, 1500));
 
+    // Check local demo data first, then show demo for any number
     if (trackingData[trackingNumber]) {
         displayResults(trackingData[trackingNumber]);
     } else {
-        // Try from Egypt Post API
-        try {
-            const result = await fetchFromEgyptPost(trackingNumber);
-            if (result) {
-                displayResults(result);
-            } else {
-                showError('لم يتم العثور على شحنة بهذا الرقم. تأكد من صحة الرقم وحاول مرة أخرى.');
-            }
-        } catch (error) {
-            displayDemoData(trackingNumber);
-        }
+        displayDemoData(trackingNumber);
     }
 }
 
 // ===== Fetch from Egypt Post =====
 async function fetchFromEgyptPost(trackingNumber) {
-    // Integration placeholder — replace with real API call
-    // Example: const res = await fetch(`/api/track/${trackingNumber}`);
     return null;
 }
 
@@ -157,7 +144,7 @@ function displayResults(data) {
     resultStatus.className = 'result-status ' + data.status;
     resultLastUpdate.textContent = data.lastUpdate;
     resultLocation.textContent = data.location;
-    resultLastEvent.textContent = data.lastEvent;
+    if (resultLastEvent) resultLastEvent.textContent = data.lastEvent;
 
     // Render timeline
     trackingEvents.innerHTML = '';
@@ -182,7 +169,6 @@ function showError(message) {
     hideAll();
     errorText.textContent = message;
     errorMessage.classList.remove('hidden');
-    errorMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 // ===== Hide All =====
@@ -200,38 +186,4 @@ function shakeInput() {
         trackingInput.style.animation = 'shake 0.4s ease';
         setTimeout(() => trackingInput.style.animation = '', 500);
     }
-}
-
-// ===== Admin Storage Functions =====
-function loadOrders() {
-    const orders = localStorage.getItem('milanoOrders');
-    return orders ? JSON.parse(orders) : [];
-}
-function saveOrders(orders) {
-    localStorage.setItem('milanoOrders', JSON.stringify(orders));
-}
-function addOrder(order) {
-    const orders = loadOrders();
-    order.id = Date.now();
-    order.createdAt = new Date().toLocaleString('ar-EG');
-    orders.push(order);
-    saveOrders(orders);
-    return order;
-}
-function updateOrder(id, updatedData) {
-    const orders = loadOrders();
-    const index = orders.findIndex(order => order.id === id);
-    if (index !== -1) {
-        orders[index] = { ...orders[index], ...updatedData };
-        saveOrders(orders);
-        return orders[index];
-    }
-    return null;
-}
-function deleteOrder(id) {
-    const orders = loadOrders();
-    saveOrders(orders.filter(order => order.id !== id));
-}
-function getOrderByTracking(trackingNumber) {
-    return loadOrders().find(order => order.trackingNumber === trackingNumber);
 }
