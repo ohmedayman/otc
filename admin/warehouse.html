@@ -231,6 +231,25 @@
         </div>
     </div>
 
+    <div class="wh-modal" id="purchaseEditModal" onclick="if(event.target===this)this.classList.remove('active')">
+        <div class="wh-modal-content">
+            <h3 style="margin-bottom:16px;"><i class="fas fa-edit" style="color:var(--gold);margin-left:8px;"></i>تعديل الفاتورة</h3>
+            <input type="hidden" id="editPurchaseId">
+            <div class="wh-form-group"><label>رقم الفاتورة</label><input type="text" id="editPurchaseInvoiceNo" readonly style="background:var(--bg);font-weight:700;"></div>
+            <div class="wh-form-row">
+                <div class="wh-form-group"><label>التاريخ</label><input type="date" id="editPurchaseDate"></div>
+                <div class="wh-form-group"><label>المورد</label><input type="text" id="editPurchaseSupplier"></div>
+            </div>
+            <div class="wh-form-group"><label>طريقة الدفع</label><select id="editPurchasePayMethod"><option value="كاش">كاش</option><option value="فودافون كاش">فودافون كاش</option><option value="Easy Pay">Easy Pay</option><option value="تحويل بنكي">تحويل بنكي</option><option value="آجل">آجل</option></select></div>
+            <div class="wh-form-group"><label>المنتجات</label><div id="editPurchaseItems"></div></div>
+            <div class="wh-form-group"><label>الإجمالي</label><div id="editPurchaseTotal" style="font-size:1.2rem;font-weight:800;color:var(--gold-dark);">0 ج.م</div></div>
+            <div style="display:flex;gap:10px;margin-top:16px;">
+                <button class="wh-btn wh-btn-primary" onclick="saveEditPurchase()"><i class="fas fa-save"></i> حفظ التعديلات</button>
+                <button class="wh-btn wh-btn-secondary" onclick="document.getElementById('purchaseEditModal').classList.remove('active')">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ===== المنتجات ===== -->
     <div class="wh-section" id="page-products">
         <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:20px;"><i class="fas fa-boxes" style="color:var(--gold);margin-left:8px;"></i>المنتجات</h2>
@@ -799,10 +818,19 @@ async function delProduct(id) {
 }
 
 function populateProductSelects() {
-    const opts = productsData.map(p => `<option value="${p._fbId}">${esc(p.name)} (رصيد: ${p.stock||0})</option>`).join('');
+    const opts = productsData.map(p => {
+        const inCart = purchaseCart.filter(c => c.productId === p._fbId).reduce((s, c) => s + c.qty, 0);
+        const avail = Math.max(0, (p.stock || 0) - inCart);
+        const warn = inCart > 0 ? ' ⚠️' : '';
+        return `<option value="${p._fbId}">${esc(p.name)} (رصيد: ${avail}${warn})</option>`;
+    }).join('');
     ['stockinProduct', 'stockoutProduct', 'purchaseProduct'].forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.innerHTML = '<option value="">اختر المنتج</option>' + opts;
+        if (el) {
+            const prev = el.value;
+            el.innerHTML = '<option value="">اختر المنتج</option>' + opts;
+            el.value = prev;
+        }
     });
 }
 
@@ -865,11 +893,12 @@ async function addToCart() {
     if (existing) { existing.qty += qty; existing.price = price; }
     else { purchaseCart.push({ productId, productName: p.name, qty, price }); }
     renderCart();
+    populateProductSelects();
     document.getElementById('purchaseQty').value = '1';
     document.getElementById('purchasePrice').value = p.price || '';
 }
 
-function removeFromCart(index) { purchaseCart.splice(index, 1); renderCart(); }
+function removeFromCart(index) { purchaseCart.splice(index, 1); renderCart(); populateProductSelects(); }
 
 function renderCart() {
     const cartEl = document.getElementById('cartItems');
@@ -888,7 +917,7 @@ function renderCart() {
     document.getElementById('cartTotalAmount').textContent = total.toLocaleString('ar-EG') + ' ج.م';
 }
 
-function clearCart() { purchaseCart = []; renderCart(); }
+function clearCart() { purchaseCart = []; renderCart(); populateProductSelects(); }
 
 async function savePurchase() {
     if (!purchaseCart.length) { showWhAlert('error', 'السلة فاضية'); return; }
@@ -909,8 +938,57 @@ async function savePurchase() {
 function renderPurchases() {
     document.getElementById('purchasesTable').innerHTML = purchasesData.slice(0, 30).map((r, idx) => {
         const itemsText = r.items ? r.items.map(i => i.productName + ' ×' + i.qty).join(', ') : '-';
-        return `<tr><td>${r.date||'-'}</td><td><code style="font-weight:700;color:var(--info);font-size:0.8rem;">${esc(r.invoiceNo||'-')}</code></td><td>${esc(r.supplier)}</td><td style="max-width:200px;font-size:0.82rem;">${esc(itemsText)}</td><td><strong>${(r.total||0).toLocaleString('ar-EG')} ج.م</strong></td><td><span class="wh-badge wh-badge-info">${esc(r.payMethod)}</span></td><td style="display:flex;gap:6px;"><button class="wh-btn wh-btn-info" style="padding:5px 10px;font-size:0.78rem;" onclick="showReceipt(${idx})"><i class="fas fa-receipt"></i> إيصال</button><button onclick="deleteRecord('${WH_PURCHASES}','${r._fbId}','فاتورة ${esc(r.invoiceNo||'')}')" style="background:#fee2e2;color:#b91c1c;border:none;border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:0.8rem;"><i class="fas fa-trash"></i></button></td></tr>`;
+        return `<tr><td>${r.date||'-'}</td><td><code style="font-weight:700;color:var(--info);font-size:0.8rem;">${esc(r.invoiceNo||'-')}</code></td><td>${esc(r.supplier)}</td><td style="max-width:200px;font-size:0.82rem;">${esc(itemsText)}</td><td><strong>${(r.total||0).toLocaleString('ar-EG')} ج.م</strong></td><td><span class="wh-badge wh-badge-info">${esc(r.payMethod)}</span></td><td style="display:flex;gap:6px;"><button class="wh-btn wh-btn-info" style="padding:5px 10px;font-size:0.78rem;" onclick="showReceipt(${idx})"><i class="fas fa-receipt"></i> إيصال</button><button class="wh-btn wh-btn-primary" style="padding:5px 10px;font-size:0.78rem;" onclick="editPurchase(${idx})"><i class="fas fa-edit"></i> تعديل</button><button onclick="deleteRecord('${WH_PURCHASES}','${r._fbId}','فاتورة ${esc(r.invoiceNo||'')}')" style="background:#fee2e2;color:#b91c1c;border:none;border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:0.8rem;"><i class="fas fa-trash"></i></button></td></tr>`;
     }).join('');
+}
+
+function editPurchase(idx) {
+    const r = purchasesData[idx];
+    if (!r) return;
+    document.getElementById('editPurchaseId').value = r._fbId;
+    document.getElementById('editPurchaseInvoiceNo').value = r.invoiceNo || '';
+    document.getElementById('editPurchaseDate').value = r.date || '';
+    document.getElementById('editPurchaseSupplier').value = r.supplier || '';
+    document.getElementById('editPurchasePayMethod').value = r.payMethod || 'كاش';
+    const itemsHtml = (r.items || []).map((item, i) => `<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;padding:8px;background:#f8fafc;border-radius:6px;border:1px solid var(--border);">
+        <span style="flex:1;font-weight:600;font-size:0.85rem;">${esc(item.productName)}</span>
+        <input type="number" class="edit-pi-qty" data-idx="${i}" value="${item.qty}" min="1" style="width:60px;padding:4px;border:1px solid var(--border);border-radius:4px;text-align:center;">
+        <span style="color:var(--text-sub);font-size:0.8rem;">× ${item.price} ج.م = <strong>${(item.qty * item.price).toLocaleString('ar-EG')} ج.م</strong></span>
+    </div>`).join('');
+    document.getElementById('editPurchaseItems').innerHTML = itemsHtml || '<p style="color:var(--text-sub);">لا توجد منتجات</p>';
+    document.getElementById('editPurchaseTotal').textContent = (r.total || 0).toLocaleString('ar-EG') + ' ج.م';
+    document.getElementById('purchaseEditModal').classList.add('active');
+}
+
+async function saveEditPurchase() {
+    const fbId = document.getElementById('editPurchaseId').value;
+    const r = purchasesData.find(x => x._fbId === fbId);
+    if (!r) return;
+    const newSupplier = document.getElementById('editPurchaseSupplier').value.trim();
+    const newDate = document.getElementById('editPurchaseDate').value;
+    const newPayMethod = document.getElementById('editPurchasePayMethod').value;
+    const qtyInputs = document.querySelectorAll('.edit-pi-qty');
+    let newItems = JSON.parse(JSON.stringify(r.items || []));
+    let newTotal = 0;
+    qtyInputs.forEach(inp => {
+        const i = parseInt(inp.dataset.idx);
+        const newQty = parseInt(inp.value) || 1;
+        newItems[i].qty = newQty;
+        newTotal += newQty * newItems[i].price;
+    });
+    const oldTotal = r.total || 0;
+    const oldItems = r.items || [];
+    for (const oldItem of oldItems) {
+        const p = productsData.find(x => x._fbId === oldItem.productId);
+        if (p) await updateProductStock(oldItem.productId, (p.stock||0) - oldItem.qty);
+    }
+    for (const newItem of newItems) {
+        const p = productsData.find(x => x._fbId === newItem.productId);
+        if (p) await updateProductStock(newItem.productId, (p.stock||0) + newItem.qty);
+    }
+    await fbUpdateDoc(WH_PURCHASES, fbId, { supplier: newSupplier, date: newDate, payMethod: newPayMethod, items: newItems, total: newTotal });
+    document.getElementById('purchaseEditModal').classList.remove('active');
+    showWhAlert('success', 'تم تعديل الفاتورة بنجاح');
 }
 
 // ===== RECEIPT =====
