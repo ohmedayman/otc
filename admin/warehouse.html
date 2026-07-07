@@ -142,6 +142,9 @@
         <div class="wh-nav-item" data-page="vodafone"><i class="fas fa-mobile-alt"></i><span>فودافون كاش</span></div>
         <div class="wh-nav-item" data-page="easypay"><i class="fas fa-credit-card"></i><span>Easy Pay</span></div>
 
+        <div class="wh-nav-section">التقارير</div>
+        <div class="wh-nav-item" data-page="reports"><i class="fas fa-chart-line"></i><span>التقارير الشاملة</span></div>
+
         <div class="wh-nav-section">روابط</div>
         <a href="index.html" class="wh-nav-item"><i class="fas fa-arrow-right"></i><span>لوحة التحكم</span></a>
         <a href="../index.html" class="wh-nav-item"><i class="fas fa-home"></i><span>الرئيسية</span></a>
@@ -153,6 +156,7 @@
 
     <!-- Alert -->
     <div id="whAlert" class="wh-alert" style="display:none;"></div>
+    <div id="connectionStatus" style="padding:8px 16px;border-radius:8px;font-size:0.8rem;font-weight:600;margin-bottom:16px;text-align:center;background:#e5e7eb;color:#6b7280;"><i class="fas fa-circle" style="font-size:8px;margin-left:4px;"></i> جاري الاتصال بقاعدة البيانات...</div>
 
     <!-- ===== Dashboard ===== -->
     <div class="wh-section active" id="page-dashboard">
@@ -191,6 +195,7 @@
                     <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);"><span>إجمالي الانصراف</span><strong id="totalExpenses">0 ج.م</strong></div>
                     <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);"><span>إجمالي التحصيل</span><strong id="totalCollections">0 ج.م</strong></div>
                     <div style="display:flex;justify-content:space-between;padding:10px 0;"><span>فودافون كاش</span><strong id="totalVodafone">0 ج.م</strong></div>
+                    <button onclick="resetAllStock()" style="margin-top:12px;width:100%;padding:10px;background:#ef4444;color:#fff;border:none;border-radius:8px;font-family:inherit;font-weight:700;font-size:0.85rem;cursor:pointer;"><i class="fas fa-undo"></i> مسح رصيد كل المنتجات (0)</button>
                 </div>
             </div>
         </div>
@@ -276,7 +281,7 @@
             <div class="wh-card-header"><h3>سجل الإدخال</h3></div>
             <div class="wh-card-body">
                 <table class="wh-table">
-                    <thead><tr><th>التاريخ</th><th>المنتج</th><th>الكمية</th><th>ملاحظات</th></tr></thead>
+                    <thead><tr><th>التاريخ</th><th>المنتج</th><th>الكمية</th><th>ملاحظات</th><th>إجراءات</th></tr></thead>
                     <tbody id="stockinTable"></tbody>
                 </table>
             </div>
@@ -304,7 +309,7 @@
             <div class="wh-card-header"><h3>سجل السحب</h3></div>
             <div class="wh-card-body">
                 <table class="wh-table">
-                    <thead><tr><th>التاريخ</th><th>المنتج</th><th>الكمية</th><th>السبب</th><th>ملاحظات</th></tr></thead>
+                    <thead><tr><th>التاريخ</th><th>المنتج</th><th>الكمية</th><th>السبب</th><th>ملاحظات</th><th>إجراءات</th></tr></thead>
                     <tbody id="stockoutTable"></tbody>
                 </table>
             </div>
@@ -341,7 +346,7 @@
                 <div id="cartItems" style="display:none;"></div>
 
                 <!-- Cart Total -->
-                <div id="cartTotal" style="display:none;background:var(--dark);color:#fff;border-radius:var(--r-sm);padding:16px 20px;margin-top:14px;display:none;justify-content:space-between;align-items:center;">
+                <div id="cartTotal" style="display:none;background:var(--dark);color:#fff;border-radius:var(--r-sm);padding:16px 20px;margin-top:14px;justify-content:space-between;align-items:center;">
                     <div>
                         <div style="font-size:0.8rem;color:rgba(255,255,255,0.5);">الإجمالي</div>
                         <div id="cartTotalAmount" style="font-size:1.4rem;font-weight:900;color:var(--gold);">0 ج.م</div>
@@ -384,7 +389,7 @@
             <div class="wh-card-header"><h3>إضافة مصروف</h3></div>
             <div class="wh-card-body">
                 <div class="wh-form-row">
-                    <div class="wh-form-group"><label>نوع المصروف</label><select id="expenseType"><option value="شحن">شحن</option><option value="أجور">أجور</option><option value="إيجار">إيجار</option><option value=" مواد تغليف">مواد تغليف</option><option value="宣 إعلانات">إعلانات</option><option value="أخرى">أخرى</option></select></div>
+                    <div class="wh-form-group"><label>نوع المصروف</label><select id="expenseType"><option value="شحن">شحن</option><option value="أجور">أجور</option><option value="إيجار">إيجار</option><option value=" مواد تغليف">مواد تغليف</option><option value="إعلانات">إعلانات</option><option value="أخرى">أخرى</option></select></div>
                     <div class="wh-form-group"><label>المبلغ (ج.م)</label><input type="number" id="expenseAmount" min="0" step="0.01" required dir="ltr"></div>
                 </div>
                 <div class="wh-form-row">
@@ -398,7 +403,7 @@
             <div class="wh-card-header"><h3>سجل المصروفات</h3></div>
             <div class="wh-card-body">
                 <table class="wh-table">
-                    <thead><tr><th>التاريخ</th><th>النوع</th><th>البيان</th><th>المبلغ</th></tr></thead>
+                    <thead><tr><th>التاريخ</th><th>النوع</th><th>البيان</th><th>المبلغ</th><th>إجراءات</th></tr></thead>
                     <tbody id="expensesTable"></tbody>
                 </table>
             </div>
@@ -427,7 +432,7 @@
             <div class="wh-card-header"><h3>سجل التحصيل</h3></div>
             <div class="wh-card-body">
                 <table class="wh-table">
-                    <thead><tr><th>التاريخ</th><th>من</th><th>المبلغ</th><th>الطريقة</th><th>ملاحظات</th></tr></thead>
+                    <thead><tr><th>التاريخ</th><th>من</th><th>المبلغ</th><th>الطريقة</th><th>ملاحظات</th><th>إجراءات</th></tr></thead>
                     <tbody id="collectionsTable"></tbody>
                 </table>
             </div>
@@ -459,7 +464,7 @@
             <div class="wh-card-header"><h3>سجل فودافون كاش</h3></div>
             <div class="wh-card-body">
                 <table class="wh-table">
-                    <thead><tr><th>التاريخ</th><th>النوع</th><th>المبلغ</th><th>الموبايل</th><th>الطرف</th><th>ملاحظات</th></tr></thead>
+                    <thead><tr><th>التاريخ</th><th>النوع</th><th>المبلغ</th><th>الموبايل</th><th>الطرف</th><th>ملاحظات</th><th>إجراءات</th></tr></thead>
                     <tbody id="vodafoneTable"></tbody>
                 </table>
             </div>
@@ -491,54 +496,185 @@
             <div class="wh-card-header"><h3>سجل Easy Pay</h3></div>
             <div class="wh-card-body">
                 <table class="wh-table">
-                    <thead><tr><th>التاريخ</th><th>النوع</th><th>المبلغ</th><th>الحساب</th><th>الطرف</th><th>ملاحظات</th></tr></thead>
+                    <thead><tr><th>التاريخ</th><th>النوع</th><th>المبلغ</th><th>الحساب</th><th>الطرف</th><th>ملاحظات</th><th>إجراءات</th></tr></thead>
                     <tbody id="easypayTable"></tbody>
                 </table>
             </div>
         </div>
     </div>
 
+    <!-- ===== التقارير الشاملة ===== -->
+    <div class="wh-section" id="page-reports">
+        <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:20px;"><i class="fas fa-chart-line" style="color:var(--info);margin-left:8px;"></i>التقارير الشاملة</h2>
+
+        <!-- Date Filter -->
+        <div class="wh-card" style="margin-bottom:16px;">
+            <div class="wh-card-header"><h3><i class="fas fa-filter" style="margin-left:8px;"></i>فلترة بالتاريخ</h3></div>
+            <div class="wh-card-body">
+                <div class="wh-form-row">
+                    <div class="wh-form-group"><label>من تاريخ</label><input type="date" id="reportDateFrom"></div>
+                    <div class="wh-form-group"><label>إلى تاريخ</label><input type="date" id="reportDateTo"></div>
+                    <div class="wh-form-group" style="display:flex;align-items:flex-end;gap:8px;">
+                        <button class="wh-btn wh-btn-primary" onclick="generateReport()"><i class="fas fa-search"></i> عرض التقرير</button>
+                        <button class="wh-btn wh-btn-secondary" onclick="resetReport()"><i class="fas fa-undo"></i> مسح الفلتر</button>
+                        <button class="wh-btn wh-btn-info" onclick="printReport()"><i class="fas fa-print"></i> طباعة</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Report Summary Cards -->
+        <div class="wh-stats" id="reportStats" style="display:none;">
+            <div class="wh-stat">
+                <div class="wh-stat-icon" style="background:#dbeafe;color:var(--info);"><i class="fas fa-shopping-cart"></i></div>
+                <div class="wh-stat-value" id="rptTotalPurchases">0</div>
+                <div class="wh-stat-label">إجمالي المشتريات</div>
+            </div>
+            <div class="wh-stat">
+                <div class="wh-stat-icon" style="background:#fee2e2;color:var(--danger);"><i class="fas fa-money-bill-wave"></i></div>
+                <div class="wh-stat-value" id="rptTotalExpenses">0</div>
+                <div class="wh-stat-label">إجمالي المصروفات</div>
+            </div>
+            <div class="wh-stat">
+                <div class="wh-stat-icon" style="background:#d1fae5;color:var(--success);"><i class="fas fa-hand-holding-usd"></i></div>
+                <div class="wh-stat-value" id="rptTotalCollections">0</div>
+                <div class="wh-stat-label">إجمالي التحصيل</div>
+            </div>
+            <div class="wh-stat">
+                <div class="wh-stat-icon" style="background:#fef3c7;color:var(--warning);"><i class="fas fa-balance-scale"></i></div>
+                <div class="wh-stat-value" id="rptNetProfit">0</div>
+                <div class="wh-stat-label">صافي الربح</div>
+            </div>
+        </div>
+
+        <!-- Detailed Report Tables -->
+        <div id="reportContent">
+            <div class="wh-card" style="margin-bottom:16px;">
+                <div class="wh-card-header"><h3><i class="fas fa-shopping-cart" style="margin-left:8px;color:var(--info);"></i>تقرير المشتريات</h3><span id="rptPurchasesCount" class="wh-badge wh-badge-info">0</span></div>
+                <div class="wh-card-body">
+                    <table class="wh-table"><thead><tr><th>التاريخ</th><th>رقم الفاتورة</th><th>المورد</th><th>المنتجات</th><th>الإجمالي</th><th>الدفع</th></tr></thead><tbody id="rptPurchasesBody"></tbody></table>
+                    <div id="rptPurchasesEmpty" style="text-align:center;padding:20px;color:var(--text-sub);">لا توجد مشتريات في الفترة المحددة</div>
+                </div>
+            </div>
+            <div class="wh-card" style="margin-bottom:16px;">
+                <div class="wh-card-header"><h3><i class="fas fa-money-bill-wave" style="margin-left:8px;color:var(--danger);"></i>تقرير المصروفات</h3><span id="rptExpensesCount" class="wh-badge wh-badge-danger">0</span></div>
+                <div class="wh-card-body">
+                    <table class="wh-table"><thead><tr><th>التاريخ</th><th>النوع</th><th>البيان</th><th>المبلغ</th></tr></thead><tbody id="rptExpensesBody"></tbody></table>
+                    <div id="rptExpensesEmpty" style="text-align:center;padding:20px;color:var(--text-sub);">لا توجد مصروفات في الفترة المحددة</div>
+                </div>
+            </div>
+            <div class="wh-card" style="margin-bottom:16px;">
+                <div class="wh-card-header"><h3><i class="fas fa-hand-holding-usd" style="margin-left:8px;color:var(--success);"></i>تقرير التحصيل</h3><span id="rptCollectionsCount" class="wh-badge wh-badge-success">0</span></div>
+                <div class="wh-card-body">
+                    <table class="wh-table"><thead><tr><th>التاريخ</th><th>من</th><th>المبلغ</th><th>الطريقة</th><th>ملاحظات</th></tr></thead><tbody id="rptCollectionsBody"></tbody></table>
+                    <div id="rptCollectionsEmpty" style="text-align:center;padding:20px;color:var(--text-sub);">لا توجد تحصيلات في الفترة المحددة</div>
+                </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                <div class="wh-card" style="margin-bottom:16px;">
+                    <div class="wh-card-header"><h3><i class="fas fa-mobile-alt" style="margin-left:8px;color:#e60000;"></i>فودافون كاش</h3><span id="rptVodafoneCount" class="wh-badge" style="background:#e60000;color:#fff;">0</span></div>
+                    <div class="wh-card-body">
+                        <table class="wh-table"><thead><tr><th>التاريخ</th><th>النوع</th><th>المبلغ</th><th>الموبايل</th></tr></thead><tbody id="rptVodafoneBody"></tbody></table>
+                        <div id="rptVodafoneEmpty" style="text-align:center;padding:20px;color:var(--text-sub);">لا توجد عمليات</div>
+                    </div>
+                </div>
+                <div class="wh-card" style="margin-bottom:16px;">
+                    <div class="wh-card-header"><h3><i class="fas fa-credit-card" style="margin-left:8px;color:#00b4d8;"></i>Easy Pay</h3><span id="rptEasyPayCount" class="wh-badge" style="background:#00b4d8;color:#fff;">0</span></div>
+                    <div class="wh-card-body">
+                        <table class="wh-table"><thead><tr><th>التاريخ</th><th>النوع</th><th>المبلغ</th><th>الحساب</th></tr></thead><tbody id="rptEasyPayBody"></tbody></table>
+                        <div id="rptEasyPayEmpty" style="text-align:center;padding:20px;color:var(--text-sub);">لا توجد عمليات</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </main>
 
-<script>
-// ===== PRODUCTS DATA =====
-const DEFAULT_PRODUCTS = [
-    { id: 1, name: 'اف 16 للصراصير 400ملي', category: 'مبيدات صراصير', price: 50, stock: 0 },
-    { id: 2, name: 'اف 22 للصراصير 400 ملي', category: 'مبيدات صراصير', price: 50, stock: 0 },
-    { id: 3, name: 'اف 16 جامبو للصراصير 650 ملي', category: 'مبيدات صراصير', price: 70, stock: 0 },
-    { id: 4, name: 'اف 16 للصراصير 500ملي', category: 'مبيدات صراصير', price: 60, stock: 0 },
-    { id: 5, name: 'الصاروخ صراصير', category: 'مبيدات صراصير', price: 60, stock: 0 },
-    { id: 6, name: 'اسد صراصير', category: 'مبيدات صراصير', price: 50, stock: 0 },
-    { id: 7, name: 'الصاروخ نمل', category: 'مبيدات نمل', price: 60, stock: 0 },
-    { id: 8, name: 'اف 22 جامبو للنمل 650 ملي', category: 'مبيدات نمل', price: 70, stock: 0 },
-    { id: 9, name: 'اف22 للنمل 500 ملي', category: 'مبيدات نمل', price: 60, stock: 0 },
-    { id: 10, name: 'مبيد اسد للنمل', category: 'مبيدات نمل', price: 50, stock: 0 },
-    { id: 11, name: 'الصاروخ بق', category: 'مبيدات بق', price: 60, stock: 0 },
-    { id: 12, name: 'مبيد اف 35 للبق - بدون رائحة', category: 'مبيدات بق', price: 70, stock: 0 },
-    { id: 13, name: 'الصاروخ ناموس', category: 'مبيدات ناموس', price: 60, stock: 0 },
-    { id: 14, name: 'رينجو للذباب', category: 'مبيدات ذباب', price: 60, stock: 0 },
-    { id: 15, name: 'سوبر 777 حشرات المواشي 1 لتر', category: 'حشرات مواشي', price: 100, stock: 0 },
-    { id: 16, name: 'سوبر 777 لحشرات المواشي', category: 'حشرات مواشي', price: 50, stock: 0 },
-    { id: 17, name: 'نيجي اسبونج', category: 'أخرى', price: 20, stock: 0 }
-];
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="../js/firebase.js?v=2"></script>
+    <script>
+// ===== FIREBASE COLLECTIONS =====
+const WH_PRODUCTS = 'wh_products';
+const WH_STOCKIN = 'wh_stockin';
+const WH_STOCKOUT = 'wh_stockout';
+const WH_PURCHASES = 'wh_purchases';
+const WH_EXPENSES = 'wh_expenses';
+const WH_COLLECTIONS = 'wh_collections';
+const WH_VODAFONE = 'wh_vodafone';
+const WH_EASY_PAY = 'wh_easypay';
 
-// ===== STORAGE =====
-function getProducts() { return JSON.parse(localStorage.getItem('wh_products') || 'null') || DEFAULT_PRODUCTS; }
-function saveProducts(p) { localStorage.setItem('wh_products', JSON.stringify(p)); }
-function getStockIn() { return JSON.parse(localStorage.getItem('wh_stockin') || '[]'); }
-function saveStockIn(d) { localStorage.setItem('wh_stockin', JSON.stringify(d)); }
-function getStockOut() { return JSON.parse(localStorage.getItem('wh_stockout') || '[]'); }
-function saveStockOut(d) { localStorage.setItem('wh_stockout', JSON.stringify(d)); }
-function getPurchases() { return JSON.parse(localStorage.getItem('wh_purchases') || '[]'); }
-function savePurchases(d) { localStorage.setItem('wh_purchases', JSON.stringify(d)); }
-function getExpenses() { return JSON.parse(localStorage.getItem('wh_expenses') || '[]'); }
-function saveExpenses(d) { localStorage.setItem('wh_expenses', JSON.stringify(d)); }
-function getCollections() { return JSON.parse(localStorage.getItem('wh_collections') || '[]'); }
-function saveCollections(d) { localStorage.setItem('wh_collections', JSON.stringify(d)); }
-function getVodafone() { return JSON.parse(localStorage.getItem('wh_vodafone') || '[]'); }
-function saveVodafone(d) { localStorage.setItem('wh_vodafone', JSON.stringify(d)); }
 const today = () => new Date().toLocaleDateString('ar-EG');
 const esc = t => { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; };
+
+// ===== REALTIME DATA STORE =====
+let productsData = [], stockinData = [], stockoutData = [], purchasesData = [];
+let expensesData = [], collectionsData = [], vodafoneData = [], easypayData = [];
+
+
+
+async function fbAddDoc(col, data) {
+    try {
+        const db = await initFirebase();
+        data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+        const ref = await db.collection(col).add(data);
+        return ref.id;
+    } catch(e) { console.error(e); return null; }
+}
+
+async function fbUpdateDoc(col, id, data) {
+    try {
+        const db = await initFirebase();
+        await db.collection(col).doc(id).update(data);
+    } catch(e) { console.error(e); }
+}
+
+async function fbDeleteDoc(col, id) {
+    try {
+        const db = await initFirebase();
+        await db.collection(col).doc(id).delete();
+    } catch(e) { console.error(e); }
+}
+
+// ===== PRODUCTS =====
+const DEFAULT_PRODUCTS = [
+    { name: 'اف 16 للصراصير 400ملي', category: 'مبيدات صراصير', price: 50, stock: 0 },
+    { name: 'اف 22 للصراصير 400 ملي', category: 'مبيدات صراصير', price: 50, stock: 0 },
+    { name: 'اف 16 جامبو للصراصير 650 ملي', category: 'مبيدات صراصير', price: 70, stock: 0 },
+    { name: 'اف 16 للصراصير 500ملي', category: 'مبيدات صراصير', price: 60, stock: 0 },
+    { name: 'الصاروخ صراصير', category: 'مبيدات صراصير', price: 60, stock: 0 },
+    { name: 'اسد صراصير', category: 'مبيدات صراصير', price: 50, stock: 0 },
+    { name: 'الصاروخ نمل', category: 'مبيدات نمل', price: 60, stock: 0 },
+    { name: 'اف 22 جامبو للنمل 650 ملي', category: 'مبيدات نمل', price: 70, stock: 0 },
+    { name: 'اف22 للنمل 500 ملي', category: 'مبيدات نمل', price: 60, stock: 0 },
+    { name: 'مبيد اسد للنمل', category: 'مبيدات نمل', price: 50, stock: 0 },
+    { name: 'الصاروخ بق', category: 'مبيدات بق', price: 60, stock: 0 },
+    { name: 'مبيد اف 35 للبق - بدون رائحة', category: 'مبيدات بق', price: 70, stock: 0 },
+    { name: 'الصاروخ ناموس', category: 'مبيدات ناموس', price: 60, stock: 0 },
+    { name: 'رينجو للذباب', category: 'مبيدات ذباب', price: 60, stock: 0 },
+    { name: 'سوبر 777 حشرات المواشي 1 لتر', category: 'حشرات مواشي', price: 100, stock: 0 },
+    { name: 'سوبر 777 لحشرات المواشي', category: 'حشرات مواشي', price: 50, stock: 0 },
+    { name: 'نيجي اسبونج', category: 'أخرى', price: 20, stock: 0 }
+];
+
+// ===== REALTIME DATA =====
+let productsCache = [];
+
+function getProducts() { return productsCache; }
+
+async function saveProduct(data) {
+    const id = await fbAddDoc(WH_PRODUCTS, data);
+    data._fbId = id;
+}
+
+async function deleteProductDoc(id) {
+    await fbDeleteDoc(WH_PRODUCTS, id);
+}
+
+async function updateProductStock(id, newStock) {
+    await fbUpdateDoc(WH_PRODUCTS, id, { stock: newStock });
+}
 
 // ===== NAVIGATION =====
 document.querySelectorAll('.wh-nav-item[data-page]').forEach(item => {
@@ -552,136 +688,112 @@ document.querySelectorAll('.wh-nav-item[data-page]').forEach(item => {
 
 // ===== DASHBOARD =====
 function updateDashboard() {
-    const products = getProducts();
-    const totalStock = products.reduce((s, p) => s + p.stock, 0);
-    const totalValue = products.reduce((s, p) => s + (p.price * p.stock), 0);
-    const lowStock = products.filter(p => p.stock < 5).length;
-
+    const products = productsData;
+    const totalStock = products.reduce((s, p) => s + (p.stock||0), 0);
+    const totalValue = products.reduce((s, p) => s + (p.price * (p.stock||0)), 0);
+    const lowStock = products.filter(p => (p.stock||0) < 5).length;
     document.getElementById('totalProducts').textContent = products.length;
     document.getElementById('totalStock').textContent = totalStock;
     document.getElementById('lowStock').textContent = lowStock;
     document.getElementById('totalValue').textContent = totalValue.toLocaleString('ar-EG');
+    document.getElementById('totalPurchases').textContent = purchasesData.reduce((s, p) => s + (p.total||0), 0).toLocaleString('ar-EG') + ' ج.م';
+    document.getElementById('totalExpenses').textContent = expensesData.reduce((s, e) => s + (e.amount||0), 0).toLocaleString('ar-EG') + ' ج.م';
+    document.getElementById('totalCollections').textContent = collectionsData.reduce((s, c) => s + (c.amount||0), 0).toLocaleString('ar-EG') + ' ج.م';
+    document.getElementById('totalVodafone').textContent = (vodafoneData.reduce((s, v) => s + (v.amount||0), 0) + easypayData.reduce((s, v) => s + (v.amount||0), 0)).toLocaleString('ar-EG') + ' ج.م';
+    renderRecentActivity();
+}
 
-    // Financial summary
-    const purchases = getPurchases();
-    const expenses = getExpenses();
-    const collections = getCollections();
-    const vodafone = getVodafone();
-    const totP = purchases.reduce((s, p) => s + (p.qty * p.price), 0);
-    const totE = expenses.reduce((s, e) => s + e.amount, 0);
-    const totC = collections.reduce((s, c) => s + c.amount, 0);
-    const totV = vodafone.reduce((s, v) => s + v.amount, 0);
-    document.getElementById('totalPurchases').textContent = totP.toLocaleString('ar-EG') + ' ج.م';
-    document.getElementById('totalExpenses').textContent = totE.toLocaleString('ar-EG') + ' ج.م';
-    document.getElementById('totalCollections').textContent = totC.toLocaleString('ar-EG') + ' ج.م';
-    document.getElementById('totalVodafone').textContent = totV.toLocaleString('ar-EG') + ' ج.م';
-
-    // Recent activity
-    const allOps = [
-        ...purchases.map(p => ({ date: p.date, text: `مشتريات: ${p.supplier} - ${p.productName}`, type: 'purchase' })),
-        ...expenses.map(e => ({ date: e.date, text: `مصروف: ${e.type} - ${e.amount} ج.م`, type: 'expense' })),
-        ...collections.map(c => ({ date: c.date, text: `تحصيل: ${c.from} - ${c.amount} ج.م`, type: 'collection' }))
-    ].sort((a, b) => 0).slice(0, 8);
-
-    const actEl = document.getElementById('recentActivity');
-    if (allOps.length) {
-        actEl.innerHTML = allOps.map(a => `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:0.85rem;"><span>${esc(a.text)}</span><span style="color:var(--text-sub);font-size:0.78rem;">${a.date}</span></div>`).join('');
+function renderRecentActivity() {
+    let items = [];
+    purchasesData.forEach(p => items.push({ date: p.date, text: `مشتريات: ${esc(p.supplier||'')} - ${esc((p.items||[]).map(i=>i.name).join('، '))} — ${(p.total||0).toLocaleString('ar-EG')} ج.م` }));
+    expensesData.forEach(e => items.push({ date: e.date, text: `مصروفات: ${esc(e.type)} - ${esc(e.desc||'')} — ${(e.amount||0).toLocaleString('ar-EG')} ج.م` }));
+    collectionsData.forEach(c => items.push({ date: c.date, text: `تحصيل: ${esc(c.from||'')} — ${(c.amount||0).toLocaleString('ar-EG')} ج.م` }));
+    vodafoneData.forEach(v => items.push({ date: v.date, text: `فودافون كاش: ${esc(v.type)} - ${esc(v.phone||'')} — ${(v.amount||0).toLocaleString('ar-EG')} ج.م` }));
+    easypayData.forEach(e => items.push({ date: e.date, text: `Easy Pay: ${esc(e.type)} - ${esc(e.account||'')} — ${(e.amount||0).toLocaleString('ar-EG')} ج.م` }));
+    items.sort((a, b) => {
+        const da = a.date ? new Date(a.date).getTime() : 0;
+        const db = b.date ? new Date(b.date).getTime() : 0;
+        return db - da;
+    });
+    const el = document.getElementById('recentActivity');
+    if (!items.length) {
+        el.innerHTML = '<p style="color:var(--text-sub);text-align:center;padding:20px;">لا توجد عمليات بعد</p>';
+    } else {
+        el.innerHTML = items.slice(0, 10).map(i => `<div style="padding:10px 0;border-bottom:1px solid var(--border);font-size:0.85rem;"><span style="color:var(--text-sub);font-size:0.75rem;">${esc(i.date)}</span><br>${i.text}</div>`).join('');
     }
 }
 
 // ===== INVENTORY =====
 function renderInventory() {
-    const products = getProducts();
-    const grid = document.getElementById('inventoryGrid');
-    grid.innerHTML = products.map(p => `
+    document.getElementById('inventoryGrid').innerHTML = productsData.map(p => `
         <div class="product-card">
             <div class="product-name">${esc(p.name)}</div>
             <div class="product-price">${p.price} ج.م</div>
-            <div class="product-stock">الرصيد: <strong class="${p.stock < 5 ? 'stock-low' : 'stock-ok'}">${p.stock}</strong></div>
+            <div class="product-stock">الرصيد: <strong class="${(p.stock||0) < 5 ? 'stock-low' : 'stock-ok'}">${p.stock||0}</strong></div>
             <div style="font-size:0.75rem;color:var(--text-sub);margin-top:2px;">${esc(p.category)}</div>
-            <button onclick="openStockEdit(${p.id})" style="margin-top:8px;padding:5px 12px;background:var(--gold);color:#fff;border:none;border-radius:6px;font-size:0.78rem;font-weight:600;cursor:pointer;font-family:inherit;"><i class="fas fa-edit"></i> تعديل الرصيد</button>
+            <button onclick="openStockEdit('${p._fbId}','${esc(p.name).replace(/'/g,"\\'")}',${p.stock||0})" style="margin-top:8px;padding:5px 12px;background:var(--gold);color:#fff;border:none;border-radius:6px;font-size:0.78rem;font-weight:600;cursor:pointer;font-family:inherit;"><i class="fas fa-edit"></i> تعديل الرصيد</button>
         </div>
     `).join('');
 }
 
-function openStockEdit(id) {
-    const p = getProducts().find(x => x.id === id);
-    if (!p) return;
-    document.getElementById('editStockProductId').value = p.id;
-    document.getElementById('editStockProductName').value = p.name;
-    document.getElementById('editStockCurrent').value = p.stock;
-    document.getElementById('editStockNew').value = p.stock;
+async function openStockEdit(fbId, name, stock) {
+    document.getElementById('editStockProductId').value = fbId;
+    document.getElementById('editStockProductName').value = name;
+    document.getElementById('editStockCurrent').value = stock;
+    document.getElementById('editStockNew').value = stock;
     document.getElementById('stockEditModal').classList.add('active');
 }
 
-function saveStockEdit() {
-    const id = parseInt(document.getElementById('editStockProductId').value);
+async function saveStockEdit() {
+    const fbId = document.getElementById('editStockProductId').value;
     const newStock = parseInt(document.getElementById('editStockNew').value);
     const reason = document.getElementById('editStockReason').value;
     const notes = document.getElementById('editStockNotes').value.trim();
     if (isNaN(newStock) || newStock < 0) { showWhAlert('error', 'أدخل رصيد صحيح'); return; }
-    const products = getProducts();
-    const p = products.find(x => x.id === id);
+    const p = productsData.find(x => x._fbId === fbId);
     if (!p) return;
-    const oldStock = p.stock;
-    p.stock = newStock;
-    saveProducts(products);
-
-    // Log the adjustment
-    const records = getStockIn();
-    records.unshift({ date: today(), productId: id, productName: p.name, qty: newStock - oldStock, notes: `تعديل (${reason}): ${oldStock} → ${newStock} ${notes?'- '+notes:''}` });
-    saveStockIn(records);
-
+    const oldStock = p.stock || 0;
+    await updateProductStock(fbId, newStock);
+    await fbAddDoc(WH_STOCKIN, { productId: fbId, productName: p.name, qty: newStock - oldStock, notes: `تعديل (${reason}): ${oldStock} → ${newStock} ${notes?'- '+notes:''}`, date: today() });
     document.getElementById('stockEditModal').classList.remove('active');
-    renderInventory(); renderProducts(); updateDashboard();
     showWhAlert('success', `تم تعديل رصيد ${p.name}: ${oldStock} → ${newStock}`);
 }
 
 // ===== PRODUCTS =====
 function renderProducts() {
-    const products = getProducts();
-    const tbody = document.getElementById('productsTable');
-    tbody.innerHTML = products.map(p => `
+    document.getElementById('productsTable').innerHTML = productsData.map(p => `
         <tr>
             <td><strong>${esc(p.name)}</strong></td>
             <td><span class="wh-badge wh-badge-info">${esc(p.category)}</span></td>
             <td>${p.price} ج.م</td>
-            <td><strong class="${p.stock < 5 ? 'stock-low' : ''}">${p.stock}</strong></td>
-            <td>
-                <button class="wh-btn wh-btn-secondary" style="padding:5px 10px;font-size:0.78rem;" onclick="deleteProduct(${p.id})"><i class="fas fa-trash"></i></button>
-            </td>
+            <td><strong class="${(p.stock||0) < 5 ? 'stock-low' : ''}">${p.stock||0}</strong></td>
+            <td><button class="wh-btn wh-btn-secondary" style="padding:5px 10px;font-size:0.78rem;" onclick="delProduct('${p._fbId}')"><i class="fas fa-trash"></i></button></td>
         </tr>
     `).join('');
     populateProductSelects();
 }
 
-function addProduct() {
+async function addProduct() {
     const name = document.getElementById('newProductName').value.trim();
     const price = parseFloat(document.getElementById('newProductPrice').value) || 0;
     const category = document.getElementById('newProductCategory').value;
     const stock = parseInt(document.getElementById('newProductStock').value) || 0;
     if (!name) { showWhAlert('error', 'أدخل اسم المنتج'); return; }
-    const products = getProducts();
-    const newId = products.length ? Math.max(...products.map(p => p.id)) + 1 : 1;
-    products.push({ id: newId, name, category, price, stock });
-    saveProducts(products);
+    await saveProduct({ name, category, price, stock });
     document.getElementById('newProductName').value = '';
     document.getElementById('newProductPrice').value = '';
     document.getElementById('newProductStock').value = '0';
-    renderProducts(); updateDashboard(); renderInventory();
     showWhAlert('success', 'تم إضافة المنتج بنجاح');
 }
 
-function deleteProduct(id) {
+async function delProduct(id) {
     if (!confirm('هل أنت متأكد من حذف هذا المنتج؟')) return;
-    saveProducts(getProducts().filter(p => p.id !== id));
-    renderProducts(); updateDashboard(); renderInventory();
+    await deleteProductDoc(id);
     showWhAlert('success', 'تم حذف المنتج');
 }
 
 function populateProductSelects() {
-    const products = getProducts();
-    const opts = products.map(p => `<option value="${p.id}">${esc(p.name)} (رصيد: ${p.stock})</option>`).join('');
+    const opts = productsData.map(p => `<option value="${p._fbId}">${esc(p.name)} (رصيد: ${p.stock||0})</option>`).join('');
     ['stockinProduct', 'stockoutProduct', 'purchaseProduct'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.innerHTML = '<option value="">اختر المنتج</option>' + opts;
@@ -689,298 +801,310 @@ function populateProductSelects() {
 }
 
 // ===== STOCK IN =====
-function stockIn() {
-    const productId = parseInt(document.getElementById('stockinProduct').value);
+async function stockIn() {
+    const productId = document.getElementById('stockinProduct').value;
     const qty = parseInt(document.getElementById('stockinQty').value) || 0;
     const notes = document.getElementById('stockinNotes').value.trim();
     if (!productId || qty < 1) { showWhAlert('error', 'اختر المنتج وحدد الكمية'); return; }
-    const products = getProducts();
-    const p = products.find(x => x.id === productId);
+    const p = productsData.find(x => x._fbId === productId);
     if (!p) return;
-    p.stock += qty;
-    saveProducts(products);
-    const records = getStockIn();
-    records.unshift({ date: today(), productId, productName: p.name, qty, notes });
-    saveStockIn(records);
+    await updateProductStock(productId, (p.stock||0) + qty);
+    await fbAddDoc(WH_STOCKIN, { productId, productName: p.name, qty, notes, date: today() });
     document.getElementById('stockinQty').value = '1';
     document.getElementById('stockinNotes').value = '';
-    renderStockIn(); renderProducts(); updateDashboard(); renderInventory();
     showWhAlert('success', `تم إدخال ${qty} من ${p.name}`);
 }
 
 function renderStockIn() {
-    const records = getStockIn();
-    document.getElementById('stockinTable').innerHTML = records.slice(0, 30).map(r => `
-        <tr><td>${r.date}</td><td>${esc(r.productName)}</td><td>${r.qty}</td><td>${esc(r.notes||'-')}</td></tr>
+    document.getElementById('stockinTable').innerHTML = stockinData.slice(0, 30).map(r => `
+        <tr><td>${r.date||'-'}</td><td>${esc(r.productName)}</td><td>${r.qty}</td><td>${esc(r.notes||'-')}</td><td><button onclick="deleteRecord('${WH_STOCKIN}','${r._fbId}','سجل الإدخال')" style="background:#fee2e2;color:#b91c1c;border:none;border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:0.8rem;"><i class="fas fa-trash"></i></button></td></tr>
     `).join('');
 }
 
 // ===== STOCK OUT =====
-function stockOut() {
-    const productId = parseInt(document.getElementById('stockoutProduct').value);
+async function stockOut() {
+    const productId = document.getElementById('stockoutProduct').value;
     const qty = parseInt(document.getElementById('stockoutQty').value) || 0;
     const reason = document.getElementById('stockoutReason').value;
     const notes = document.getElementById('stockoutNotes').value.trim();
     if (!productId || qty < 1) { showWhAlert('error', 'اختر المنتج وحدد الكمية'); return; }
-    const products = getProducts();
-    const p = products.find(x => x.id === productId);
+    const p = productsData.find(x => x._fbId === productId);
     if (!p) return;
-    if (p.stock < qty) { showWhAlert('error', `الرصيد غير كافي (${p.stock} متاح)`); return; }
-    p.stock -= qty;
-    saveProducts(products);
-    const records = getStockOut();
-    records.unshift({ date: today(), productId, productName: p.name, qty, reason, notes });
-    saveStockOut(records);
+    if ((p.stock||0) < qty) { showWhAlert('error', `الرصيد غير كافي (${p.stock} متاح)`); return; }
+    await updateProductStock(productId, (p.stock||0) - qty);
+    await fbAddDoc(WH_STOCKOUT, { productId, productName: p.name, qty, reason, notes, date: today() });
     document.getElementById('stockoutQty').value = '1';
     document.getElementById('stockoutNotes').value = '';
-    renderStockOut(); renderProducts(); updateDashboard(); renderInventory();
     showWhAlert('success', `تم سحب ${qty} من ${p.name}`);
 }
 
 function renderStockOut() {
-    const records = getStockOut();
-    document.getElementById('stockoutTable').innerHTML = records.slice(0, 30).map(r => `
-        <tr><td>${r.date}</td><td>${esc(r.productName)}</td><td>${r.qty}</td><td><span class="wh-badge wh-badge-warning">${esc(r.reason)}</span></td><td>${esc(r.notes||'-')}</td></tr>
+    document.getElementById('stockoutTable').innerHTML = stockoutData.slice(0, 30).map(r => `
+        <tr><td>${r.date||'-'}</td><td>${esc(r.productName)}</td><td>${r.qty}</td><td><span class="wh-badge wh-badge-warning">${esc(r.reason)}</span></td><td>${esc(r.notes||'-')}</td><td><button onclick="deleteRecord('${WH_STOCKOUT}','${r._fbId}','سجل السحب')" style="background:#fee2e2;color:#b91c1c;border:none;border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:0.8rem;"><i class="fas fa-trash"></i></button></td></tr>
     `).join('');
 }
 
 // ===== CART =====
 let purchaseCart = [];
 
-function addToCart() {
-    const productId = parseInt(document.getElementById('purchaseProduct').value);
+async function addToCart() {
+    const productId = document.getElementById('purchaseProduct').value;
     const qty = parseInt(document.getElementById('purchaseQty').value) || 0;
     const price = parseFloat(document.getElementById('purchasePrice').value) || 0;
     if (!productId || qty < 1) { showWhAlert('error', 'اختر المنتج وحدد الكمية'); return; }
     if (price < 0) { showWhAlert('error', 'أدخل سعر صحيح'); return; }
-    const products = getProducts();
-    const p = products.find(x => x.id === productId);
+    const p = productsData.find(x => x._fbId === productId);
     if (!p) return;
     const existing = purchaseCart.find(c => c.productId === productId);
-    if (existing) {
-        existing.qty += qty;
-        existing.price = price;
-    } else {
-        purchaseCart.push({ productId, productName: p.name, qty, price });
-    }
+    if (existing) { existing.qty += qty; existing.price = price; }
+    else { purchaseCart.push({ productId, productName: p.name, qty, price }); }
     renderCart();
     document.getElementById('purchaseQty').value = '1';
     document.getElementById('purchasePrice').value = p.price || '';
 }
 
-function removeFromCart(index) {
-    purchaseCart.splice(index, 1);
-    renderCart();
-}
+function removeFromCart(index) { purchaseCart.splice(index, 1); renderCart(); }
 
 function renderCart() {
     const cartEl = document.getElementById('cartItems');
     const emptyEl = document.getElementById('cartEmpty');
     const totalEl = document.getElementById('cartTotal');
-    if (!purchaseCart.length) {
-        cartEl.style.display = 'none';
-        emptyEl.style.display = 'block';
-        totalEl.style.display = 'none';
-        return;
-    }
-    emptyEl.style.display = 'none';
-    cartEl.style.display = 'block';
-    totalEl.style.display = 'flex';
+    if (!purchaseCart.length) { cartEl.style.display = 'none'; emptyEl.style.display = 'block'; totalEl.style.display = 'none'; return; }
+    emptyEl.style.display = 'none'; cartEl.style.display = 'block'; totalEl.style.display = 'flex';
     let total = 0;
     cartEl.innerHTML = purchaseCart.map((item, i) => {
-        const lineTotal = item.qty * item.price;
-        total += lineTotal;
+        const lineTotal = item.qty * item.price; total += lineTotal;
         return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#fff;border:1px solid var(--border);border-radius:var(--r-xs);margin-bottom:8px;">
             <div style="flex:1;"><strong style="font-size:0.9rem;">${esc(item.productName)}</strong><br><span style="font-size:0.78rem;color:var(--text-sub);">${item.qty} × ${item.price} ج.م</span></div>
-            <div style="display:flex;align-items:center;gap:12px;">
-                <strong style="color:var(--gold-dark);">${lineTotal.toLocaleString('ar-EG')} ج.م</strong>
-                <button onclick="removeFromCart(${i})" style="background:#fee2e2;color:#b91c1c;border:none;border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:0.8rem;"><i class="fas fa-times"></i></button>
-            </div>
-        </div>`;
+            <div style="display:flex;align-items:center;gap:12px;"><strong style="color:var(--gold-dark);">${lineTotal.toLocaleString('ar-EG')} ج.م</strong>
+            <button onclick="removeFromCart(${i})" style="background:#fee2e2;color:#b91c1c;border:none;border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:0.8rem;"><i class="fas fa-times"></i></button></div></div>`;
     }).join('');
     document.getElementById('cartTotalAmount').textContent = total.toLocaleString('ar-EG') + ' ج.م';
 }
 
-function clearCart() {
-    purchaseCart = [];
-    renderCart();
-}
+function clearCart() { purchaseCart = []; renderCart(); }
 
-function savePurchase() {
+async function savePurchase() {
     if (!purchaseCart.length) { showWhAlert('error', 'السلة فاضية'); return; }
     const supplier = document.getElementById('purchaseSupplier').value.trim();
     if (!supplier) { showWhAlert('error', 'أدخل اسم المورد'); return; }
     const payMethod = document.getElementById('purchasePayMethod').value;
-    const products = getProducts();
     const invoiceNo = 'INV-' + Date.now().toString(36).toUpperCase();
-
-    // Add stock for each item
-    purchaseCart.forEach(item => {
-        const p = products.find(x => x.id === item.productId);
-        if (p) p.stock += item.qty;
-    });
-    saveProducts(products);
-
-    // Save purchase record
-    const records = getPurchases();
-    const invoice = {
-        date: today(),
-        invoiceNo,
-        supplier,
-        payMethod,
-        items: [...purchaseCart],
-        total: purchaseCart.reduce((s, i) => s + (i.qty * i.price), 0)
-    };
-    records.unshift(invoice);
-    savePurchases(records);
-
-    // Reset
-    purchaseCart = [];
-    renderCart();
+    for (const item of purchaseCart) {
+        const p = productsData.find(x => x._fbId === item.productId);
+        if (p) await updateProductStock(item.productId, (p.stock||0) + item.qty);
+    }
+    await fbAddDoc(WH_PURCHASES, { date: today(), invoiceNo, supplier, payMethod, items: [...purchaseCart], total: purchaseCart.reduce((s, i) => s + (i.qty * i.price), 0) });
+    purchaseCart = []; renderCart();
     document.getElementById('purchaseSupplier').value = '';
-    renderPurchases(); renderProducts(); updateDashboard(); renderInventory();
     showWhAlert('success', `تم حفظ الفاتورة ${invoiceNo}`);
 }
 
 function renderPurchases() {
-    const records = getPurchases();
-    document.getElementById('purchasesTable').innerHTML = records.slice(0, 30).map((r, idx) => {
+    document.getElementById('purchasesTable').innerHTML = purchasesData.slice(0, 30).map((r, idx) => {
         const itemsText = r.items ? r.items.map(i => i.productName + ' ×' + i.qty).join(', ') : '-';
-        return `<tr>
-            <td>${r.date}</td>
-            <td><code style="font-weight:700;color:var(--info);font-size:0.8rem;">${esc(r.invoiceNo||'-')}</code></td>
-            <td>${esc(r.supplier)}</td>
-            <td style="max-width:200px;font-size:0.82rem;">${esc(itemsText)}</td>
-            <td><strong>${(r.total||0).toLocaleString('ar-EG')} ج.م</strong></td>
-            <td><span class="wh-badge wh-badge-info">${esc(r.payMethod)}</span></td>
-            <td><button class="wh-btn wh-btn-info" style="padding:5px 10px;font-size:0.78rem;" onclick="showReceipt(${idx})"><i class="fas fa-receipt"></i> إيصال</button></td>
-        </tr>`;
+        return `<tr><td>${r.date||'-'}</td><td><code style="font-weight:700;color:var(--info);font-size:0.8rem;">${esc(r.invoiceNo||'-')}</code></td><td>${esc(r.supplier)}</td><td style="max-width:200px;font-size:0.82rem;">${esc(itemsText)}</td><td><strong>${(r.total||0).toLocaleString('ar-EG')} ج.م</strong></td><td><span class="wh-badge wh-badge-info">${esc(r.payMethod)}</span></td><td style="display:flex;gap:6px;"><button class="wh-btn wh-btn-info" style="padding:5px 10px;font-size:0.78rem;" onclick="showReceipt(${idx})"><i class="fas fa-receipt"></i> إيصال</button><button onclick="deleteRecord('${WH_PURCHASES}','${r._fbId}','فاتورة ${esc(r.invoiceNo||'')}')" style="background:#fee2e2;color:#b91c1c;border:none;border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:0.8rem;"><i class="fas fa-trash"></i></button></td></tr>`;
     }).join('');
 }
 
 // ===== RECEIPT =====
 function showReceipt(index) {
-    const records = getPurchases();
-    const r = records[index];
-    if (!r) return;
+    const r = purchasesData[index]; if (!r) return;
     const items = r.items || [];
-    let itemsHtml = items.map((item, i) => `
-        <tr>
-            <td style="padding:8px;border-bottom:1px dashed #ddd;text-align:center;">${i+1}</td>
-            <td style="padding:8px;border-bottom:1px dashed #ddd;">${esc(item.productName)}</td>
-            <td style="padding:8px;border-bottom:1px dashed #ddd;text-align:center;">${item.qty}</td>
-            <td style="padding:8px;border-bottom:1px dashed #ddd;text-align:center;">${item.price} ج.م</td>
-            <td style="padding:8px;border-bottom:1px dashed #ddd;text-align:center;font-weight:700;">${(item.qty * item.price).toLocaleString('ar-EG')} ج.م</td>
-        </tr>
-    `).join('');
+    const totalInWords = numberToArabicWords(r.total || 0);
+    let itemsHtml = items.map((item, i) => `<tr>
+        <td style="padding:10px 8px;border-bottom:1px solid #e5e7eb;text-align:center;font-weight:600;color:#6b7280;">${i+1}</td>
+        <td style="padding:10px 8px;border-bottom:1px solid #e5e7eb;font-weight:600;">${esc(item.productName)}</td>
+        <td style="padding:10px 8px;border-bottom:1px solid #e5e7eb;text-align:center;font-weight:700;color:#111827;">${item.qty}</td>
+        <td style="padding:10px 8px;border-bottom:1px solid #e5e7eb;text-align:center;color:#6b7280;">${item.price.toLocaleString('ar-EG')} ج.م</td>
+        <td style="padding:10px 8px;border-bottom:1px solid #e5e7eb;text-align:center;font-weight:800;color:#c8a951;">${(item.qty * item.price).toLocaleString('ar-EG')} ج.م</td>
+    </tr>`).join('');
 
-    document.getElementById('receiptContent').innerHTML = `
-        <div id="printableReceipt" style="direction:rtl;text-align:center;padding:20px;">
-            <div style="border-bottom:3px double #333;padding-bottom:12px;margin-bottom:16px;">
-                <h2 style="margin:0;font-size:1.3rem;color:#111;">ميلانو OTC</h2>
-                <p style="margin:2px 0;font-size:0.75rem;color:#666;">مركز تتبع الطلبات</p>
-                <p style="margin:2px 0;font-size:0.75rem;color:#666;">tel: 01029293339</p>
+    document.getElementById('receiptContent').innerHTML = `<div id="printableReceipt">
+        <!-- Header -->
+        <div class="receipt-header">
+            <div class="receipt-logo">
+                <img src="../assets/logo.png" alt="ميلانو OTC" onerror="this.style.display='none'">
             </div>
-            <div style="text-align:right;margin-bottom:12px;font-size:0.85rem;">
-                <div><strong>رقم الفاتورة:</strong> <span style="color:#3b82f6;">${esc(r.invoiceNo)}</span></div>
-                <div><strong>التاريخ:</strong> ${r.date}</div>
-                <div><strong>المورد:</strong> ${esc(r.supplier)}</div>
-                <div><strong>طريقة الدفع:</strong> ${esc(r.payMethod)}</div>
+            <h1 class="receipt-title">فاتورة مشتريات</h1>
+            <div class="receipt-company">ميلانو OTC — مركز تتبع الطلبات</div>
+        </div>
+
+        <!-- Invoice Info Bar -->
+        <div class="receipt-info-bar">
+            <div class="receipt-info-item">
+                <span class="receipt-info-label">رقم الفاتورة</span>
+                <span class="receipt-info-value receipt-invoice-no">${esc(r.invoiceNo)}</span>
             </div>
-            <table style="width:100%;border-collapse:collapse;font-size:0.85rem;margin-bottom:14px;">
-                <thead>
-                    <tr style="background:#f5f5f5;">
-                        <th style="padding:8px;border-bottom:2px solid #333;">#</th>
-                        <th style="padding:8px;border-bottom:2px solid #333;text-align:right;">المنتج</th>
-                        <th style="padding:8px;border-bottom:2px solid #333;">الكمية</th>
-                        <th style="padding:8px;border-bottom:2px solid #333;">السعر</th>
-                        <th style="padding:8px;border-bottom:2px solid #333;">الإجمالي</th>
-                    </tr>
-                </thead>
-                <tbody>${itemsHtml}</tbody>
-                <tfoot>
-                    <tr style="background:#f5f5f5;">
-                        <td colspan="4" style="padding:10px;font-weight:700;border-top:2px solid #333;text-align:left;">الإجمالي الكلي</td>
-                        <td style="padding:10px;font-weight:900;font-size:1.1rem;border-top:2px solid #333;text-align:center;">${(r.total||0).toLocaleString('ar-EG')} ج.م</td>
-                    </tr>
-                </tfoot>
-            </table>
-            <div style="border-top:2px dashed #ccc;padding-top:12px;margin-top:12px;font-size:0.75rem;color:#999;">
-                <p>شكراً لتعاملكم مع ميلانو OTC</p>
-                <p>tel: 01029293339 | milanof16.com</p>
+            <div class="receipt-info-item">
+                <span class="receipt-info-label">التاريخ</span>
+                <span class="receipt-info-value">${r.date||'-'}</span>
+            </div>
+            <div class="receipt-info-item">
+                <span class="receipt-info-label">المورد</span>
+                <span class="receipt-info-value">${esc(r.supplier)}</span>
+            </div>
+            <div class="receipt-info-item">
+                <span class="receipt-info-label">طريقة الدفع</span>
+                <span class="receipt-info-value receipt-pay-badge">${esc(r.payMethod)}</span>
             </div>
         </div>
-    `;
+
+        <!-- Items Table -->
+        <table class="receipt-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th style="text-align:right;">المنتج</th>
+                    <th>الكمية</th>
+                    <th>سعر الوحدة</th>
+                    <th>الإجمالي</th>
+                </tr>
+            </thead>
+            <tbody>${itemsHtml}</tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4" class="receipt-total-label">الإجمالي الكلي</td>
+                    <td class="receipt-total-value">${(r.total||0).toLocaleString('ar-EG')} ج.م</td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <!-- Amount in Words -->
+        <div class="receipt-amount-words">
+            <i class="fas fa-file-invoice-dollar"></i>
+            المبلغ بالحروف: ${totalInWords}
+        </div>
+
+        <!-- Footer -->
+        <div class="receipt-footer">
+            <div class="receipt-footer-line"></div>
+            <div class="receipt-thanks">شكراً لتعاملكم مع ميلانو OTC</div>
+            <div class="receipt-contact">
+                <span><i class="fas fa-phone"></i> 01029293339</span>
+                <span><i class="fas fa-globe"></i> milanof16.com</span>
+                <span><i class="fas fa-map-marker-alt"></i> مصر</span>
+            </div>
+            <div class="receipt-barcode">||||| ${esc(r.invoiceNo)} |||||</div>
+        </div>
+    </div>`;
     document.getElementById('receiptModal').classList.add('active');
+}
+
+function numberToArabicWords(num) {
+    if (num === 0) return 'صفر جنيه مصري';
+    const ones = ['','واحد','اثنان','ثلاثة','أربعة','خمسة','ستة','سبعة','ثمانية','تسعة','عشرة','أحدى عشر','اثنا عشر','ثلاثة عشر','أربعة عشر','خمسة عشر','ستة عشر','سبعة عشر','ثمانية عشر','تسعة عشر'];
+    const tens = ['','عشرة','عشرون','ثلاثون','أربعون','خمسون','ستون','سبعون','ثمانون','تسعون'];
+    const hundreds = ['','مئة','مئتان','ثلاثمئة','أربعمئة','خمسمئة','ستمئة','سبعمئة','ثمانمئة','تسعمئة'];
+    const thousands = ['','ألف','ألفان'];
+    let result = '';
+    if (num >= 1000) { result += thousands[Math.floor(num / 1000)] + ' '; num %= 1000; }
+    if (num >= 100) { result += hundreds[Math.floor(num / 100)] + ' '; num %= 100; }
+    if (num >= 20) { result += tens[Math.floor(num / 10)]; if (num % 10) result += ' و' + ones[num % 10]; }
+    else if (num > 0) { result += ones[num]; }
+    return result.trim() + ' جنيه مصري';
 }
 
 function printReceipt() {
     const content = document.getElementById('printableReceipt').innerHTML;
-    const win = window.open('', '_blank', 'width=400,height=600');
-    win.document.write(`
-        <html><head><title>إيصال مشتريات</title>
-        <style>
-            body{font-family:'Cairo',Arial,sans-serif;margin:0;padding:10px;direction:rtl;}
-            table{width:100%;border-collapse:collapse;}
-            @media print{body{padding:0;}}
-        </style>
-        <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
-        </head><body>${content}</body></html>
-    `);
+    const win = window.open('', '_blank', 'width=480,height=700');
+    win.document.write(`<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>إيصال مشتريات — ميلانو OTC</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Cairo', Arial, sans-serif; direction: rtl; background: #fff; color: #111827; padding: 24px; }
+        
+        .receipt-header { text-align: center; border-bottom: 3px double #c8a951; padding-bottom: 16px; margin-bottom: 20px; }
+        .receipt-logo img { height: 50px; margin-bottom: 8px; }
+        .receipt-title { font-size: 1.5rem; font-weight: 900; color: #111827; margin: 4px 0; letter-spacing: 1px; }
+        .receipt-company { font-size: 0.8rem; color: #6b7280; }
+
+        .receipt-info-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px; margin-bottom: 20px; }
+        .receipt-info-item { display: flex; flex-direction: column; gap: 2px; }
+        .receipt-info-label { font-size: 0.7rem; color: #9ca3af; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .receipt-info-value { font-size: 0.9rem; font-weight: 700; color: #111827; }
+        .receipt-invoice-no { color: #3b82f6; font-family: monospace; font-size: 1rem; }
+        .receipt-pay-badge { display: inline-block; background: #dbeafe; color: #1d4ed8; padding: 2px 10px; border-radius: 20px; font-size: 0.8rem; width: fit-content; }
+
+        .receipt-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 0.85rem; }
+        .receipt-table thead { background: #111827; color: #fff; }
+        .receipt-table th { padding: 10px 8px; font-weight: 700; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .receipt-table tbody tr { border-bottom: 1px solid #e5e7eb; }
+        .receipt-table tbody tr:nth-child(even) { background: #f9fafb; }
+        .receipt-table tbody tr:hover { background: #f3f4f6; }
+        .receipt-table td { padding: 10px 8px; }
+        .receipt-table tfoot td { background: #f9fafb; font-weight: 800; }
+        .receipt-total-label { text-align: left; font-size: 0.95rem; border-top: 2px solid #111827; }
+        .receipt-total-value { text-align: center; font-size: 1.2rem; font-weight: 900; color: #c8a951; border-top: 2px solid #111827; min-width: 120px; }
+
+        .receipt-amount-words { background: #fef3c7; border: 1px solid #fbbf24; border-radius: 8px; padding: 10px 14px; margin-bottom: 20px; font-size: 0.82rem; font-weight: 600; color: #92400e; text-align: center; }
+        .receipt-amount-words i { margin-left: 6px; }
+
+        .receipt-footer { text-align: center; margin-top: 24px; }
+        .receipt-footer-line { height: 2px; background: linear-gradient(90deg, transparent, #c8a951, transparent); margin-bottom: 16px; }
+        .receipt-thanks { font-size: 0.9rem; font-weight: 700; color: #111827; margin-bottom: 8px; }
+        .receipt-contact { display: flex; justify-content: center; gap: 20px; font-size: 0.75rem; color: #6b7280; margin-bottom: 10px; }
+        .receipt-contact i { margin-left: 4px; color: #c8a951; }
+        .receipt-barcode { font-family: 'Libre Barcode 128', monospace; font-size: 1.8rem; color: #111827; letter-spacing: 2px; margin-top: 8px; }
+
+        @media print {
+            body { padding: 12px; }
+            .receipt-table tbody tr:hover { background: transparent; }
+        }
+    </style>
+</head>
+<body>${content}</body>
+</html>`);
     win.document.close();
-    setTimeout(() => { win.print(); win.close(); }, 800);
+    setTimeout(() => { win.print(); }, 600);
 }
 
 // ===== EXPENSES =====
-function addExpense() {
+async function addExpense() {
     const type = document.getElementById('expenseType').value;
     const amount = parseFloat(document.getElementById('expenseAmount').value) || 0;
     const desc = document.getElementById('expenseDesc').value.trim();
     const date = document.getElementById('expenseDate').value || today();
     if (!desc || amount < 1) { showWhAlert('error', 'أدخل البيان والمبلغ'); return; }
-    const records = getExpenses();
-    records.unshift({ date, type, desc, amount });
-    saveExpenses(records);
+    await fbAddDoc(WH_EXPENSES, { type, amount, desc, date });
     document.getElementById('expenseAmount').value = '';
     document.getElementById('expenseDesc').value = '';
-    renderExpenses(); updateDashboard();
     showWhAlert('success', `تم إضافة مصروف: ${amount} ج.م`);
 }
 
 function renderExpenses() {
-    const records = getExpenses();
-    document.getElementById('expensesTable').innerHTML = records.slice(0, 30).map(r => `
-        <tr><td>${r.date}</td><td><span class="wh-badge wh-badge-danger">${esc(r.type)}</span></td><td>${esc(r.desc)}</td><td><strong>${r.amount.toLocaleString('ar-EG')} ج.م</strong></td></tr>
+    document.getElementById('expensesTable').innerHTML = expensesData.slice(0, 30).map(r => `
+        <tr><td>${r.date||'-'}</td><td><span class="wh-badge wh-badge-danger">${esc(r.type)}</span></td><td>${esc(r.desc)}</td><td><strong>${(r.amount||0).toLocaleString('ar-EG')} ج.م</strong></td><td><button onclick="deleteRecord('${WH_EXPENSES}','${r._fbId}','مصروف ${esc(r.desc||'')}')" style="background:#fee2e2;color:#b91c1c;border:none;border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:0.8rem;"><i class="fas fa-trash"></i></button></td></tr>
     `).join('');
 }
 
 // ===== COLLECTIONS =====
-function addCollection() {
+async function addCollection() {
     const from = document.getElementById('collectionFrom').value.trim();
     const amount = parseFloat(document.getElementById('collectionAmount').value) || 0;
     const method = document.getElementById('collectionMethod').value;
     const date = document.getElementById('collectionDate').value || today();
     const notes = document.getElementById('collectionNotes').value.trim();
     if (!from || amount < 1) { showWhAlert('error', 'أدخل الاسم والمبلغ'); return; }
-    const records = getCollections();
-    records.unshift({ date, from, amount, method, notes });
-    saveCollections(records);
+    await fbAddDoc(WH_COLLECTIONS, { from, amount, method, date, notes });
     document.getElementById('collectionFrom').value = '';
     document.getElementById('collectionAmount').value = '';
     document.getElementById('collectionNotes').value = '';
-    renderCollections(); updateDashboard();
     showWhAlert('success', `تم تسجيل تحصيل: ${amount} ج.م`);
 }
 
 function renderCollections() {
-    const records = getCollections();
-    document.getElementById('collectionsTable').innerHTML = records.slice(0, 30).map(r => `
-        <tr><td>${r.date}</td><td>${esc(r.from)}</td><td><strong>${r.amount.toLocaleString('ar-EG')} ج.م</strong></td><td><span class="wh-badge wh-badge-success">${esc(r.method)}</span></td><td>${esc(r.notes||'-')}</td></tr>
+    document.getElementById('collectionsTable').innerHTML = collectionsData.slice(0, 30).map(r => `
+        <tr><td>${r.date||'-'}</td><td>${esc(r.from)}</td><td><strong>${(r.amount||0).toLocaleString('ar-EG')} ج.م</strong></td><td><span class="wh-badge wh-badge-success">${esc(r.method)}</span></td><td>${esc(r.notes||'-')}</td><td><button onclick="deleteRecord('${WH_COLLECTIONS}','${r._fbId}','تحصيل ${esc(r.from||'')}')" style="background:#fee2e2;color:#b91c1c;border:none;border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:0.8rem;"><i class="fas fa-trash"></i></button></td></tr>
     `).join('');
 }
 
 // ===== VODAFONE =====
-function addVodafone() {
+async function addVodafone() {
     const type = document.getElementById('vodType').value;
     const amount = parseFloat(document.getElementById('vodAmount').value) || 0;
     const phone = document.getElementById('vodPhone').value.trim();
@@ -988,29 +1112,22 @@ function addVodafone() {
     const date = document.getElementById('vodDate').value || today();
     const notes = document.getElementById('vodNotes').value.trim();
     if (amount < 1) { showWhAlert('error', 'أدخل المبلغ'); return; }
-    const records = getVodafone();
-    records.unshift({ date, type, amount, phone, counterparty, notes });
-    saveVodafone(records);
+    await fbAddDoc(WH_VODAFONE, { type, amount, phone, counterparty, date, notes });
     document.getElementById('vodAmount').value = '';
     document.getElementById('vodPhone').value = '';
     document.getElementById('vodCounterparty').value = '';
     document.getElementById('vodNotes').value = '';
-    renderVodafone(); updateDashboard();
     showWhAlert('success', `تم تسجيل عملية فودافون: ${type} ${amount} ج.م`);
 }
 
 function renderVodafone() {
-    const records = getVodafone();
-    document.getElementById('vodafoneTable').innerHTML = records.slice(0, 30).map(r => `
-        <tr><td>${r.date}</td><td><span class="wh-badge ${r.type==='إيداع'?'wh-badge-success':'wh-badge-danger'}">${esc(r.type)}</span></td><td><strong>${r.amount.toLocaleString('ar-EG')} ج.م</strong></td><td dir="ltr">${esc(r.phone||'-')}</td><td>${esc(r.counterparty||'-')}</td><td>${esc(r.notes||'-')}</td></tr>
+    document.getElementById('vodafoneTable').innerHTML = vodafoneData.slice(0, 30).map(r => `
+        <tr><td>${r.date||'-'}</td><td><span class="wh-badge ${r.type==='إيداع'?'wh-badge-success':'wh-badge-danger'}">${esc(r.type)}</span></td><td><strong>${(r.amount||0).toLocaleString('ar-EG')} ج.م</strong></td><td dir="ltr">${esc(r.phone||'-')}</td><td>${esc(r.counterparty||'-')}</td><td>${esc(r.notes||'-')}</td><td><button onclick="deleteRecord('${WH_VODAFONE}','${r._fbId}','عملية فودافون')" style="background:#fee2e2;color:#b91c1c;border:none;border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:0.8rem;"><i class="fas fa-trash"></i></button></td></tr>
     `).join('');
 }
 
 // ===== EASY PAY =====
-function getEasyPay() { return JSON.parse(localStorage.getItem('wh_easypay') || '[]'); }
-function saveEasyPay(d) { localStorage.setItem('wh_easypay', JSON.stringify(d)); }
-
-function addEasyPay() {
+async function addEasyPay() {
     const type = document.getElementById('epType').value;
     const amount = parseFloat(document.getElementById('epAmount').value) || 0;
     const account = document.getElementById('epAccount').value.trim();
@@ -1018,21 +1135,17 @@ function addEasyPay() {
     const date = document.getElementById('epDate').value || today();
     const notes = document.getElementById('epNotes').value.trim();
     if (amount < 1) { showWhAlert('error', 'أدخل المبلغ'); return; }
-    const records = getEasyPay();
-    records.unshift({ date, type, amount, account, counterparty, notes });
-    saveEasyPay(records);
+    await fbAddDoc(WH_EASY_PAY, { type, amount, account, counterparty, date, notes });
     document.getElementById('epAmount').value = '';
     document.getElementById('epAccount').value = '';
     document.getElementById('epCounterparty').value = '';
     document.getElementById('epNotes').value = '';
-    renderEasyPay(); updateDashboard();
     showWhAlert('success', `تم تسجيل عملية Easy Pay: ${type} ${amount} ج.م`);
 }
 
 function renderEasyPay() {
-    const records = getEasyPay();
-    document.getElementById('easypayTable').innerHTML = records.slice(0, 30).map(r => `
-        <tr><td>${r.date}</td><td><span class="wh-badge ${r.type==='إيداع'?'wh-badge-success':'wh-badge-danger'}">${esc(r.type)}</span></td><td><strong>${r.amount.toLocaleString('ar-EG')} ج.م</strong></td><td dir="ltr">${esc(r.account||'-')}</td><td>${esc(r.counterparty||'-')}</td><td>${esc(r.notes||'-')}</td></tr>
+    document.getElementById('easypayTable').innerHTML = easypayData.slice(0, 30).map(r => `
+        <tr><td>${r.date||'-'}</td><td><span class="wh-badge ${r.type==='إيداع'?'wh-badge-success':'wh-badge-danger'}">${esc(r.type)}</span></td><td><strong>${(r.amount||0).toLocaleString('ar-EG')} ج.م</strong></td><td dir="ltr">${esc(r.account||'-')}</td><td>${esc(r.counterparty||'-')}</td><td>${esc(r.notes||'-')}</td><td><button onclick="deleteRecord('${WH_EASY_PAY}','${r._fbId}','عملية Easy Pay')" style="background:#fee2e2;color:#b91c1c;border:none;border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:0.8rem;"><i class="fas fa-trash"></i></button></td></tr>
     `).join('');
 }
 
@@ -1045,26 +1158,162 @@ function showWhAlert(type, msg) {
     setTimeout(() => el.style.display = 'none', 3500);
 }
 
-// ===== INIT =====
+// ===== DELETE RECORD =====
+async function deleteRecord(collection, id, label) {
+    if (!confirm(`هل أنت متأكد من حذف "${label}"؟`)) return;
+    await fbDeleteDoc(collection, id);
+    showWhAlert('success', `تم حذف ${label}`);
+}
+
+// ===== RESET ALL STOCK =====
+async function resetAllStock() {
+    if (!confirm('هل أنت متأكد؟ سيتم مسح رصيد كل المنتجات وتصيره 0')) return;
+    for (const p of productsData) {
+        await fbUpdateDoc(WH_PRODUCTS, p._fbId, { stock: 0 });
+    }
+    showWhAlert('success', 'تم مسح رصيد كل المنتجات بنجاح');
+}
+
+// ===== INIT - REALTIME LISTENERS =====
 document.addEventListener('DOMContentLoaded', function() {
-    // Set today's date
-    const d = today();
-    ['expenseDate','collectionDate','vodDate'].forEach(id => {
+    ['expenseDate','collectionDate','vodDate','epDate'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = new Date().toISOString().split('T')[0];
     });
 
-    renderProducts();
-    renderInventory();
-    renderStockIn();
-    renderStockOut();
-    renderPurchases();
-    renderExpenses();
-    renderCollections();
-    renderVodafone();
-    renderEasyPay();
-    updateDashboard();
+    // Products listener - seed defaults if empty
+    fbListen(WH_PRODUCTS, async (data) => {
+        if (!data.length) {
+            for (const p of DEFAULT_PRODUCTS) { await fbAddDoc(WH_PRODUCTS, p); }
+            return;
+        }
+        productsData = data;
+        renderProducts(); renderInventory(); updateDashboard(); populateProductSelects();
+    });
+
+    fbListen(WH_STOCKIN, (data) => { stockinData = data; renderStockIn(); });
+    fbListen(WH_STOCKOUT, (data) => { stockoutData = data; renderStockOut(); });
+    fbListen(WH_PURCHASES, (data) => { purchasesData = data; renderPurchases(); updateDashboard(); });
+    fbListen(WH_EXPENSES, (data) => { expensesData = data; renderExpenses(); updateDashboard(); });
+    fbListen(WH_COLLECTIONS, (data) => { collectionsData = data; renderCollections(); updateDashboard(); });
+    fbListen(WH_VODAFONE, (data) => { vodafoneData = data; renderVodafone(); updateDashboard(); });
+    fbListen(WH_EASY_PAY, (data) => { easypayData = data; renderEasyPay(); updateDashboard(); });
 });
+
+// ===== REPORTS =====
+function generateReport() {
+    const fromDate = document.getElementById('reportDateFrom').value;
+    const toDate = document.getElementById('reportDateTo').value;
+
+    function inRange(dateStr) {
+        if (!dateStr) return true;
+        const d = new Date(dateStr);
+        if (fromDate && d < new Date(fromDate)) return false;
+        if (toDate && d > new Date(toDate)) return false;
+        return true;
+    }
+
+    const fPurchases = purchasesData.filter(p => inRange(p.date));
+    const fExpenses = expensesData.filter(e => inRange(e.date));
+    const fCollections = collectionsData.filter(c => inRange(c.date));
+    const fVodafone = vodafoneData.filter(v => inRange(v.date));
+    const fEasyPay = easypayData.filter(e => inRange(e.date));
+
+    const totalPurchases = fPurchases.reduce((s, p) => s + (p.total || 0), 0);
+    const totalExpenses = fExpenses.reduce((s, e) => s + (e.amount || 0), 0);
+    const totalCollections = fCollections.reduce((s, c) => s + (c.amount || 0), 0);
+    const totalVodafoneIn = fVodafone.filter(v => v.type === 'إيداع').reduce((s, v) => s + (v.amount || 0), 0);
+    const totalVodafoneOut = fVodafone.filter(v => v.type === 'سحب').reduce((s, v) => s + (v.amount || 0), 0);
+    const totalEasyPayIn = fEasyPay.filter(e => e.type === 'إيداع').reduce((s, e) => s + (e.amount || 0), 0);
+    const totalEasyPayOut = fEasyPay.filter(e => e.type === 'سحب').reduce((s, e) => s + (e.amount || 0), 0);
+    const netProfit = totalCollections + totalVodafoneIn + totalEasyPayIn - totalExpenses - totalPurchases - totalVodafoneOut - totalEasyPayOut;
+
+    document.getElementById('rptTotalPurchases').textContent = totalPurchases.toFixed(2);
+    document.getElementById('rptTotalExpenses').textContent = totalExpenses.toFixed(2);
+    document.getElementById('rptTotalCollections').textContent = totalCollections.toFixed(2);
+    document.getElementById('rptNetProfit').textContent = netProfit.toFixed(2);
+    document.getElementById('rptNetProfit').style.color = netProfit >= 0 ? 'var(--success)' : 'var(--danger)';
+    document.getElementById('reportStats').style.display = 'grid';
+
+    renderReportTable('rptPurchasesBody', 'rptPurchasesEmpty', 'rptPurchasesCount', fPurchases, p =>
+        `<tr><td>${esc(p.date || '—')}</td><td>${esc(p.invoiceNo || '—')}</td><td>${esc(p.supplier || '—')}</td><td>${esc((p.items || []).map(i => i.name + '×' + i.qty).join('، ') || '—')}</td><td style="font-weight:700;">${(p.total || 0).toFixed(2)}</td><td>${esc(p.payMethod || '—')}</td></tr>`
+    );
+
+    renderReportTable('rptExpensesBody', 'rptExpensesEmpty', 'rptExpensesCount', fExpenses, e =>
+        `<tr><td>${esc(e.date || '—')}</td><td>${esc(e.type || '—')}</td><td>${esc(e.desc || '—')}</td><td style="font-weight:700;color:var(--danger);">${(e.amount || 0).toFixed(2)}</td></tr>`
+    );
+
+    renderReportTable('rptCollectionsBody', 'rptCollectionsEmpty', 'rptCollectionsCount', fCollections, c =>
+        `<tr><td>${esc(c.date || '—')}</td><td>${esc(c.from || '—')}</td><td style="font-weight:700;color:var(--success);">${(c.amount || 0).toFixed(2)}</td><td>${esc(c.method || '—')}</td><td>${esc(c.notes || '—')}</td></tr>`
+    );
+
+    renderReportTable('rptVodafoneBody', 'rptVodafoneEmpty', 'rptVodafoneCount', fVodafone, v =>
+        `<tr><td>${esc(v.date || '—')}</td><td>${esc(v.type || '—')}</td><td style="font-weight:700;">${(v.amount || 0).toFixed(2)}</td><td>${esc(v.phone || '—')}</td></tr>`
+    );
+
+    renderReportTable('rptEasyPayBody', 'rptEasyPayEmpty', 'rptEasyPayCount', fEasyPay, e =>
+        `<tr><td>${esc(e.date || '—')}</td><td>${esc(e.type || '—')}</td><td style="font-weight:700;">${(e.amount || 0).toFixed(2)}</td><td>${esc(e.account || '—')}</td></tr>`
+    );
+}
+
+function renderReportTable(bodyId, emptyId, countId, data, rowFn) {
+    const tbody = document.getElementById(bodyId);
+    const empty = document.getElementById(emptyId);
+    const badge = document.getElementById(countId);
+    tbody.innerHTML = data.length ? data.map(rowFn).join('') : '';
+    empty.style.display = data.length ? 'none' : 'block';
+    if (badge) badge.textContent = data.length;
+}
+
+function resetReport() {
+    document.getElementById('reportDateFrom').value = '';
+    document.getElementById('reportDateTo').value = '';
+    document.getElementById('reportStats').style.display = 'none';
+    ['rptPurchasesBody','rptExpensesBody','rptCollectionsBody','rptVodafoneBody','rptEasyPayBody'].forEach(id => {
+        document.getElementById(id).innerHTML = '';
+    });
+    ['rptPurchasesEmpty','rptExpensesEmpty','rptCollectionsEmpty','rptVodafoneEmpty','rptEasyPayEmpty'].forEach(id => {
+        document.getElementById(id).style.display = 'block';
+    });
+    ['rptPurchasesCount','rptExpensesCount','rptCollectionsCount','rptVodafoneCount','rptEasyPayCount'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = '0';
+    });
+}
+
+function printReport() {
+    const printWindow = window.open('', '_blank');
+    const stats = document.getElementById('reportStats').style.display !== 'none';
+    printWindow.document.write(`
+        <html><head><title>تقرير شامل</title>
+        <style>body{font-family:'Cairo',sans-serif;direction:rtl;padding:20px;color:#333;}
+        h1{color:#c9a84c;text-align:center;margin-bottom:8px;}h2{color:#1e293b;font-size:1rem;border-bottom:2px solid #c9a84c;padding-bottom:6px;margin-top:24px;}
+        table{width:100%;border-collapse:collapse;margin:10px 0;}th{background:#1e293b;color:#fff;padding:8px;text-align:right;}
+        td{padding:8px;border-bottom:1px solid #e5e7eb;text-align:right;}.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0;}
+        .summary div{text-align:center;padding:12px;background:#f9fafb;border-radius:8px;border:1px solid #e5e7eb;}
+        .summary strong{display:block;font-size:1.3rem;color:#c9a84c;}@media print{body{padding:0;}}</style></head><body>
+        <h1>Milano OTC — التقرير الشامل</h1>
+        <p style="text-align:center;color:#888;">${new Date().toLocaleDateString('ar-EG')} — ${new Date().toLocaleTimeString('ar-EG')}</p>
+    `);
+    if (stats) {
+        printWindow.document.write(`<div class="summary">
+            <div><strong>${document.getElementById('rptTotalPurchases').textContent}</strong>المشتريات</div>
+            <div><strong>${document.getElementById('rptTotalExpenses').textContent}</strong>المصروفات</div>
+            <div><strong>${document.getElementById('rptTotalCollections').textContent}</strong>التحصيل</div>
+            <div><strong>${document.getElementById('rptNetProfit').textContent}</strong>صافي الربح</div>
+        </div>`);
+    }
+    ['purchases','expenses','collections','vodafone','easypay'].forEach(name => {
+        const tbody = document.getElementById('rpt' + name.charAt(0).toUpperCase() + name.slice(1) + 'Body');
+        if (tbody && tbody.innerHTML.trim()) {
+            printWindow.document.write(`<h2>${tbody.closest('.wh-card').querySelector('h3').textContent}</h2>`);
+            printWindow.document.write(tbody.closest('table').outerHTML);
+        }
+    });
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+    printWindow.print();
+}
 </script>
 </body>
 </html>

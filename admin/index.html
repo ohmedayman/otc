@@ -52,6 +52,7 @@
     </header>
 
     <main class="main-content" style="padding-top:36px;">
+        <div id="connectionStatus" style="padding:8px 16px;border-radius:8px;font-size:0.8rem;font-weight:600;margin-bottom:16px;text-align:center;background:#e5e7eb;color:#6b7280;"><i class="fas fa-circle" style="font-size:8px;margin-left:4px;"></i> جاري الاتصال بقاعدة البيانات...</div>
         <!-- Stats -->
         <div id="statsGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;">
             <div class="feature-card" style="padding:22px 14px;">
@@ -192,11 +193,15 @@
     .login-back:hover{color:var(--gold)}
 </style>
 
-<script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="../js/firebase.js?v=2"></script>
+    <script>
 // ===== FIXED ADMIN CREDENTIALS =====
 const ADMIN_USER = 'otc';
 const ADMIN_PASS = 'otc123';
 const SESSION_KEY = 'milanoAdminSession';
+const ORDERS_COL = 'milanoOrders';
 
 function getSession() { return sessionStorage.getItem(SESSION_KEY); }
 function setSession(user) { sessionStorage.setItem(SESSION_KEY, user); }
@@ -226,12 +231,38 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
 });
 
 // ===== SHOW DASHBOARD =====
-function showDashboard() {
+async function showDashboard() {
     document.getElementById('authGate').style.display = 'none';
     document.getElementById('dashboardView').style.display = 'block';
     document.getElementById('adminNameDisplay').textContent = ADMIN_USER;
-    loadOrders();
-    updateStats();
+    connectOrders();
+}
+
+function connectOrders(retryCount) {
+    retryCount = retryCount || 0;
+    initFirebase().then(database => {
+        console.log('[Admin] onSnapshot listening: milanoOrders');
+        database.collection(ORDERS_COL).onSnapshot(snap => {
+            ordersData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            ordersData.sort((a, b) => {
+                const ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
+                const tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
+                return tb - ta;
+            });
+            console.log('[Admin] onSnapshot received:', ordersData.length, 'orders');
+            renderOrders(ordersData);
+            updateStats();
+            updateConnectionStatus('connected');
+        }, err => {
+            console.error('[Admin] onSnapshot ERROR:', err.code, err.message);
+            updateConnectionStatus('error');
+            if (retryCount < 5) setTimeout(() => connectOrders(retryCount + 1), 3000);
+        });
+    }).catch(err => {
+        console.error('[Admin] init FAILED:', err.message || err);
+        updateConnectionStatus('error');
+        if (retryCount < 5) setTimeout(() => connectOrders(retryCount + 1), 3000);
+    });
 }
 
 // ===== LOGOUT =====
@@ -248,10 +279,12 @@ document.getElementById('exportExcelBtn')?.addEventListener('click', function(e)
 });
 
 // ===== M16 NUMBER GENERATION =====
-function generateM16() {
-    const orders = getOrders();
+async function generateM16() {
+    const database = await initFirebase();
+    const snap = await database.collection(ORDERS_COL).get();
     let maxNum = 0;
-    orders.forEach(o => {
+    snap.docs.forEach(d => {
+        const o = d.data();
         if (o.m16Number && o.m16Number.startsWith('M16')) {
             const n = parseInt(o.m16Number.replace('M16', ''));
             if (n > maxNum) maxNum = n;
@@ -261,9 +294,13 @@ function generateM16() {
 }
 
 // ===== DASHBOARD FUNCTIONS =====
-function loadOrders() { renderOrders(getOrders()); }
-const getOrders = () => JSON.parse(localStorage.getItem('milanoOrders') || '[]');
-const saveOrders = o => localStorage.setItem('milanoOrders', JSON.stringify(o));
+let ordersData = [];
+
+function loadOrders() { renderOrders(ordersData); }
+function getOrders() { return ordersData; }
+async function saveOrder(data) { return await fbAdd(ORDERS_COL, data); }
+async function updateOrder(id, data) { await fbUpdate(ORDERS_COL, id, data); }
+async function deleteOrderDoc(id) { await fbDelete(ORDERS_COL, id); }
 
 function renderOrders(orders) {
     const tbody = document.getElementById('ordersTableBody');
@@ -283,17 +320,17 @@ function renderOrders(orders) {
             <td><span class="status-badge ${o.status}">${statusText(o.status)}</span></td>
             <td><div class="btn-group">
                 <button class="btn btn-view" onclick="openWhatsApp('${esc(o.customerPhone)}','${esc(o.m16Number)}','${esc(o.status)}','${esc(o.customerName)}','${o.value||0}','${esc(o.deliveryCompany||'-')}')" title="واتساب"><i class="fab fa-whatsapp"></i></button>
-                <button class="btn btn-edit" onclick="editOrder(${o.id})" title="تعديل"><i class="fas fa-edit"></i></button>
-                <button class="btn btn-delete" onclick="delOrder(${o.id})" title="حذف"><i class="fas fa-trash"></i></button>
+                <button class="btn btn-edit" onclick="editOrder('${o.id}')" title="تعديل"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-delete" onclick="delOrder('${o.id}')" title="حذف"><i class="fas fa-trash"></i></button>
             </div></td>`;
         tbody.appendChild(tr);
     });
 }
 
-function handleAddOrder(e) {
+async function handleAddOrder(e) {
     e.preventDefault();
     const data = {
-        m16Number: generateM16(),
+        m16Number: await generateM16(),
         customerName: document.getElementById('customerName').value.trim(),
         customerPhone: document.getElementById('customerPhone').value.trim(),
         deliveryCompany: document.getElementById('deliveryCompany').value,
@@ -304,36 +341,34 @@ function handleAddOrder(e) {
         value: document.getElementById('orderValue').value || 0
     };
     if (data.realTrackingNumber.length < 10) { showAlert('error','السيريل الحقيقي يجب أن يكون 10 أحرف على الأقل'); return; }
-    const orders = getOrders();
-    data.id = Date.now(); data.createdAt = new Date().toLocaleString('ar-EG');
-    orders.push(data); saveOrders(orders);
-    document.getElementById('orderForm').reset(); loadOrders(); updateStats();
+    console.log('[Admin] Saving order:', data);
+    const docId = await saveOrder(data);
+    console.log('[Admin] Order saved with ID:', docId);
+    document.getElementById('orderForm').reset();
     showAlert('success','تم إضافة الطلب بنجاح — رقم التتبع: ' + data.m16Number);
 }
 
-function handleEditOrder(e) {
+async function handleEditOrder(e) {
     e.preventDefault();
-    const id = parseInt(document.getElementById('editOrderId').value);
-    const orders = getOrders();
-    const i = orders.findIndex(o => o.id === id);
-    if (i !== -1) {
-        orders[i] = { ...orders[i],
-            customerName: document.getElementById('editCustomerName').value.trim(),
-            customerPhone: document.getElementById('editCustomerPhone').value.trim(),
-            deliveryCompany: document.getElementById('editDeliveryCompany').value,
-            realTrackingNumber: document.getElementById('editRealTrackingNumber').value.trim().toUpperCase(),
-            status: document.getElementById('editOrderStatus').value,
-            address: document.getElementById('editOrderAddress').value.trim(),
-            notes: document.getElementById('editOrderNotes').value.trim(),
-            value: document.getElementById('editOrderValue').value || 0
-        };
-        saveOrders(orders); closeModal(); loadOrders(); updateStats();
-        showAlert('success','تم تعديل الطلب بنجاح');
-    }
+    const id = document.getElementById('editOrderId').value;
+    const data = {
+        customerName: document.getElementById('editCustomerName').value.trim(),
+        customerPhone: document.getElementById('editCustomerPhone').value.trim(),
+        deliveryCompany: document.getElementById('editDeliveryCompany').value,
+        realTrackingNumber: document.getElementById('editRealTrackingNumber').value.trim().toUpperCase(),
+        status: document.getElementById('editOrderStatus').value,
+        address: document.getElementById('editOrderAddress').value.trim(),
+        notes: document.getElementById('editOrderNotes').value.trim(),
+        value: document.getElementById('editOrderValue').value || 0
+    };
+    await updateOrder(id, data);
+    closeModal();
+    showAlert('success','تم تعديل الطلب بنجاح');
 }
 
-function editOrder(id) {
-    const o = getOrders().find(x => x.id === id);
+async function editOrder(id) {
+    const orders = await getOrders();
+    const o = orders.find(x => x.id === id);
     if (!o) return;
     document.getElementById('editOrderId').value = o.id;
     document.getElementById('editM16Number').value = o.m16Number || '';
@@ -348,24 +383,24 @@ function editOrder(id) {
     document.getElementById('editModal').classList.add('active');
 }
 
-function delOrder(id) {
+async function delOrder(id) {
     if (!confirm('هل أنت متأكد من حذف هذا الطلب؟')) return;
-    saveOrders(getOrders().filter(o => o.id !== id));
-    loadOrders(); updateStats(); showAlert('success','تم حذف الطلب بنجاح');
+    await deleteOrderDoc(id);
+    showAlert('success','تم حذف الطلب بنجاح');
 }
 
 function closeModal() { document.getElementById('editModal').classList.remove('active'); }
 
-function filterOrders() {
-    let orders = getOrders();
+async function filterOrders() {
+    let orders = ordersData;
     const s = document.getElementById('searchInput').value.toLowerCase();
-    if (s) orders = orders.filter(o => o.customerName.toLowerCase().includes(s) || o.trackingNumber.toLowerCase().includes(s) || o.customerPhone.includes(s));
+    if (s) orders = orders.filter(o => o.customerName.toLowerCase().includes(s) || (o.m16Number||'').toLowerCase().includes(s) || o.customerPhone.includes(s));
     if (document.getElementById('filterStatus').value) orders = orders.filter(o => o.status === document.getElementById('filterStatus').value);
     renderOrders(orders);
 }
 
-function updateStats() {
-    const orders = getOrders();
+async function updateStats() {
+    const orders = ordersData;
     const total = orders.length;
     const transit = orders.filter(o => o.status === 'in-transit').length;
     const delivered = orders.filter(o => o.status === 'delivered').length;
@@ -405,12 +440,12 @@ https://otc.milanof16.com/?track=${tracking}`;
 }
 
 function exportToExcel() {
-    const orders = getOrders();
+    const orders = ordersData;
     if (!orders.length) { showAlert('warning','لا توجد طلبات للتصدير'); return; }
     const sm = { 'pending':'قيد المعالجة', 'in-transit':'في الطريق', 'delivered':'تم التوصيل', 'exception':'مشكلة في التوصيل' };
-    let csv = '\uFEFF' + 'اسم العميل,الهاتف,رقم التتبع,الحالة,العنوان,ملاحظات,القيمة,التاريخ\n';
+    let csv = '\uFEFF' + 'اسم العميل,الهاتف,رقم التتبع,شركة التوصيل,الحالة,العنوان,ملاحظات,القيمة,التاريخ\n';
     orders.forEach(o => {
-        csv += [o.customerName,o.customerPhone,o.trackingNumber,sm[o.status]||o.status,o.address||'',o.notes||'',o.value||0,o.createdAt||''].map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',') + '\n';
+        csv += [o.customerName,o.customerPhone,o.m16Number,o.deliveryCompany||'',sm[o.status]||o.status,o.address||'',o.notes||'',o.value||0,o.createdAt||''].map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',') + '\n';
     });
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);

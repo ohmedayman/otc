@@ -1,35 +1,3 @@
-// ===== Tracking Data =====
-const trackingData = {
-    'EE123456789EG': {
-        trackingNumber: 'EE123456789EG', status: 'in-transit', statusText: 'في الطريق',
-        lastUpdate: '7 يوليو 2026 - 2:30 م', location: 'مركز توزيع القاهرة', lastEvent: 'تم استلام الشحنة في مركز التوزيع',
-        events: [
-            { date: '7 يوليو 2026 - 2:30 م', status: 'تم استلام الشحنة في مركز التوزيع', location: 'مركز توزيع القاهرة' },
-            { date: '6 يوليو 2026 - 10:15 ص', status: 'وصلت الشحنة إلى مصر', location: 'مطار القاهرة الدولي' },
-            { date: '4 يوليو 2026 - 3:00 م', status: 'غادرت الشحنة بلد المنشأ', location: 'شنغهاي - الصين' },
-            { date: '2 يوليو 2026 - 9:00 ص', status: 'تم استلام الشحنة من المرسل', location: 'مستودع البائع' }
-        ]
-    },
-    'EE987654321EG': {
-        trackingNumber: 'EE987654321EG', status: 'delivered', statusText: 'تم التوصيل',
-        lastUpdate: '5 يوليو 2026 - 4:45 م', location: 'تم التوصيل للمستلم', lastEvent: 'تم التوصيل بنجاح',
-        events: [
-            { date: '5 يوليو 2026 - 4:45 م', status: 'تم التوصيل بنجاح', location: 'العنوان: ١٥ شارع النيل - المعادي' },
-            { date: '5 يوليو 2026 - 9:20 ص', status: 'خرجت الشحنة للتوصيل', location: 'مركز توزيع المعادي' },
-            { date: '4 يوليو 2026 - 2:00 م', status: 'وصلت إلى مركز التوزيع', location: 'مركز توزيع المعادي' },
-            { date: '3 يوليو 2026 - 11:30 ص', status: 'الشحنة في الطريق', location: 'القاهرة' }
-        ]
-    },
-    'EE112233445EG': {
-        trackingNumber: 'EE112233445EG', status: 'pending', statusText: 'قيد المعالجة',
-        lastUpdate: '7 يوليو 2026 - 9:00 ص', location: 'مستودع البائع', lastEvent: 'تم استلام طلب الشحن',
-        events: [
-            { date: '7 يوليو 2026 - 9:00 ص', status: 'تم استلام طلب الشحن', location: 'مستودع البائع' },
-            { date: '6 يوليو 2026 - 3:00 م', status: 'تم تأكيد الطلب', location: 'نظام ميلانو OTC' }
-        ]
-    }
-};
-
 // ===== DOM =====
 const trackingForm = document.getElementById('trackingForm');
 const trackingInput = document.getElementById('trackingNumber');
@@ -55,11 +23,30 @@ if (closeResult) closeResult.addEventListener('click', () => { trackingResult.cl
 if (copyTrackingBtn) copyTrackingBtn.addEventListener('click', () => copyToClipboard(resultTrackingNumber.textContent));
 if (copyAllBtn) copyAllBtn.addEventListener('click', copyAllBulk);
 
-// ===== Get order from localStorage (added by admin) =====
-function getAdminOrder(num) {
-    const orders = JSON.parse(localStorage.getItem('milanoOrders') || '[]');
-    const o = orders.find(x => x.m16Number === num || x.trackingNumber === num);
-    if (!o) return null;
+// ===== Get order from Firebase (added by admin) =====
+async function getAdminOrder(num) {
+    try {
+        const database = await initFirebase();
+        console.log('[Track] Searching for:', num);
+        const snap = await database.collection('milanoOrders').where('m16Number', '==', num).get();
+        console.log('[Track] M16 results:', snap.size);
+        if (snap.empty) {
+            const snap2 = await database.collection('milanoOrders').where('realTrackingNumber', '==', num).get();
+            console.log('[Track] Tracking results:', snap2.size);
+            if (snap2.empty) return null;
+            return buildTrackingData(snap2.docs[0].data());
+        }
+        return buildTrackingData(snap.docs[0].data());
+    } catch(e) {
+        console.error('[Track] Error:', e.code || e.message || e);
+        if (e.code === 'permission-denied') {
+            showError('خطأ في الصلاحيات — تواصل مع الإدارة');
+        }
+        return null;
+    }
+}
+
+function buildTrackingData(o) {
     const statusMap = { 'pending':'قيد المعالجة', 'in-transit':'في الطريق', 'delivered':'تم التوصيل', 'exception':'مشكلة في التوصيل' };
     const statusLoc = { 'pending':'مستودع البائع', 'in-transit':'في الطريق', 'delivered':'تم التوصيل', 'exception':'مركز الخدمة' };
     return {
@@ -84,10 +71,10 @@ async function trackPackage() {
 
     hideAll();
     loadingSpinner.classList.remove('hidden');
-    await new Promise(r => setTimeout(r, 1200));
+    await new Promise(r => setTimeout(r, 800));
 
-    // 1. Check admin localStorage orders only
-    const data = getAdminOrder(num);
+    // Check admin orders from Firebase
+    const data = await getAdminOrder(num);
     if (!data) { showError('رقم التتبع غير موجود — تأكد من صحة الرقم'); return; }
     displayResults(data);
 }
@@ -106,9 +93,9 @@ async function bulkTrack() {
 
     bulkResultsBody.innerHTML = '';
     let foundCount = 0;
-    numbers.forEach(num => {
-        const data = getAdminOrder(num);
-        if (!data) return;
+    for (const num of numbers) {
+        const data = await getAdminOrder(num);
+        if (!data) continue;
         foundCount++;
         const statusColors = { 'pending':'#fdcb6e', 'in-transit':'#0984e3', 'delivered':'#00b894', 'exception':'#e17055' };
         const row = document.createElement('div');
@@ -123,7 +110,7 @@ async function bulkTrack() {
                 <button onclick="copyToClipboard('${num}')" style="background:var(--gold);color:white;border:none;padding:8px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:600;"><i class="fas fa-copy"></i></button>
             </div>`;
         bulkResultsBody.appendChild(row);
-    });
+    }
 
     loadingSpinner.classList.add('hidden');
     bulkResults.classList.remove('hidden');
@@ -172,15 +159,6 @@ function displayResults(data) {
 }
 
 // ===== Helpers =====
-function generateDemoData(num) {
-    const now = new Date();
-    return {
-        trackingNumber: num, status: 'in-transit', statusText: 'في الطريق',
-        lastUpdate: now.toLocaleString('ar-EG'), location: 'مركز توزيع', lastEvent: 'تم استلام الشحنة',
-        events: [{ date: now.toLocaleString('ar-EG'), status: 'تم استلام الشحنة', location: 'مركز التوزيع' }]
-    };
-}
-
 function showError(msg) { hideAll(); errorText.textContent = msg; errorMessage.classList.remove('hidden'); }
 
 function hideAll() {

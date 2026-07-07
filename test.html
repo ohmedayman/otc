@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>اختبار Firebase</title>
+    <style>
+        body { font-family: 'Cairo', sans-serif; direction: rtl; padding: 30px; background: #1e293b; color: #fff; }
+        .log { background: #0f172a; padding: 12px; border-radius: 8px; margin: 8px 0; font-family: monospace; font-size: 0.85rem; white-space: pre-wrap; border-left: 4px solid #c9a84c; }
+        .ok { border-left-color: #10b981; color: #10b981; }
+        .err { border-left-color: #ef4444; color: #ef4444; }
+        h1 { color: #c9a84c; }
+        button { padding: 12px 24px; background: #c9a84c; color: #1e293b; border: none; border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer; margin: 4px; }
+        button:hover { background: #b8922e; }
+        #status { padding: 12px; border-radius: 8px; margin: 16px 0; font-weight: 700; font-size: 1.1rem; }
+    </style>
+</head>
+<body>
+    <h1>اختبار Firebase Realtime Sync</h1>
+    <p>افتح الصفحة دي من <strong>متصفحين مختلفين</strong> على نفس الـ URL واضغط "اكتب اختبار"</p>
+
+    <div id="status" style="background:#334155;">جاري التحقق...</div>
+    <div id="logs"></div>
+
+    <button onclick="testWrite()">اكتب اختبار</button>
+    <button onclick="testRead()">اقرأ البيانات</button>
+    <button onclick="testSnapshot()">اختبر onSnapshot</button>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script>
+const cfg = {
+    apiKey: "AIzaSyCeKmOHzwu5kCE-Z8dPhouelwUuV71MMZI",
+    authDomain: "milano-otc.firebaseapp.com",
+    projectId: "milano-otc",
+    storageBucket: "milano-otc.firebasestorage.app",
+    messagingSenderId: "675063391861",
+    appId: "1:675063391861:web:abdcf59cb57366d830fa3c"
+};
+
+if (!firebase.apps.length) firebase.initializeApp(cfg);
+const db = firebase.firestore();
+
+function log(msg, ok) {
+    const el = document.getElementById('logs');
+    const d = document.createElement('div');
+    d.className = 'log ' + (ok === true ? 'ok' : ok === false ? 'err' : '');
+    d.textContent = new Date().toLocaleTimeString() + ' — ' + msg;
+    el.prepend(d);
+}
+
+function setStatus(msg, color) {
+    const el = document.getElementById('status');
+    el.textContent = msg;
+    el.style.background = color || '#334155';
+}
+
+// Step 1: Check connection
+setStatus('جاري الاتصال بـ Firestore...');
+db.collection('_test').doc('ping').get()
+    .then(() => {
+        setStatus('متصل بـ Firestore ✓', '#065f46');
+        log('Firebase Firestore: متصل ✓', true);
+    })
+    .catch(e => {
+        setStatus('فشل الاتصال: ' + e.message, '#991b1b');
+        log('Firebase Firestore: خطأ — ' + e.message, false);
+    });
+
+// Step 2: Listen for realtime changes
+db.collection('_test').onSnapshot(snap => {
+    log('onSnapshot fired! عدد المستندات: ' + snap.size, true);
+    snap.forEach(doc => {
+        log('  مستند: ' + doc.id + ' = ' + JSON.stringify(doc.data()), true);
+    });
+}, err => {
+    log('onSnapshot ERROR: ' + err.code + ' — ' + err.message, false);
+});
+
+async function testWrite() {
+    try {
+        const doc = {
+            message: 'اختبار من ' + navigator.userAgent.split(' ').pop(),
+            browser: navigator.userAgent,
+            timestamp: new Date().toISOString(),
+            random: Math.random()
+        };
+        await db.collection('_test').add(doc);
+        log('تم الكتابة بنجاح ✓: ' + JSON.stringify(doc), true);
+        setStatus('تم الكتابة ✓ — شوف المتصفح التاني', '#065f46');
+    } catch(e) {
+        log('خطأ في الكتابة: ' + e.message, false);
+        setStatus('خطأ في الكتابة: ' + e.message, '#991b1b');
+    }
+}
+
+async function testRead() {
+    try {
+        const snap = await db.collection('_test').get();
+        log('القراءة: ' + snap.size + ' مستند', true);
+        snap.forEach(doc => {
+            log('  ' + doc.id + ': ' + JSON.stringify(doc.data()), true);
+        });
+    } catch(e) {
+        log('خطأ في القراءة: ' + e.message, false);
+    }
+}
+
+function testSnapshot() {
+    log('onSnapshot شغال — أي كتابة من أي جهاز هتظهر هنا', true);
+    setStatus('onSnapshot شغال — جرّب تكتب من المتصفح التاني', '#065f46');
+}
+    </script>
+</body>
+</html>
