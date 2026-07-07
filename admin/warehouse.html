@@ -1059,9 +1059,16 @@ async function savePurchase() {
     if (!supplier) { showWhAlert('error', 'أدخل اسم المورد'); return; }
     const payMethod = document.getElementById('purchasePayMethod').value;
     const invoiceNo = 'INV-' + Date.now().toString(36).toUpperCase();
+    const stockSnapshot = {};
     for (const item of purchaseCart) {
-        const p = productsData.find(x => x._fbId === item.productId);
-        if (p) await updateProductStock(item.productId, (p.stock||0) + item.qty);
+        if (!stockSnapshot[item.productId]) {
+            const p = productsData.find(x => x._fbId === item.productId);
+            stockSnapshot[item.productId] = p ? (p.stock || 0) : 0;
+        }
+        stockSnapshot[item.productId] += item.qty;
+    }
+    for (const [prodId, newStock] of Object.entries(stockSnapshot)) {
+        await updateProductStock(prodId, newStock);
     }
     await fbAddDoc(WH_PURCHASES, { date: today(), invoiceNo, supplier, payMethod, items: [...purchaseCart], total: purchaseCart.reduce((s, i) => s + (i.qty * i.price), 0) });
     purchaseCart = []; renderCart();
@@ -1150,13 +1157,21 @@ async function saveEditPurchase() {
     const newItems = window._editPurchaseItems || [];
     const newTotal = newItems.reduce((s, item) => s + (item.qty * item.price), 0);
     const oldItems = r.items || [];
+    const stockSnapshot = {};
+    for (const item of [...oldItems, ...newItems]) {
+        if (!stockSnapshot[item.productId]) {
+            const p = productsData.find(x => x._fbId === item.productId);
+            stockSnapshot[item.productId] = p ? (p.stock || 0) : 0;
+        }
+    }
     for (const oldItem of oldItems) {
-        const p = productsData.find(x => x._fbId === oldItem.productId);
-        if (p) await updateProductStock(oldItem.productId, (p.stock||0) - oldItem.qty);
+        stockSnapshot[oldItem.productId] -= oldItem.qty;
     }
     for (const newItem of newItems) {
-        const p = productsData.find(x => x._fbId === newItem.productId);
-        if (p) await updateProductStock(newItem.productId, (p.stock||0) + newItem.qty);
+        stockSnapshot[newItem.productId] += newItem.qty;
+    }
+    for (const [prodId, newStock] of Object.entries(stockSnapshot)) {
+        await updateProductStock(prodId, newStock);
     }
     await fbUpdateDoc(WH_PURCHASES, fbId, { supplier: newSupplier, date: newDate, payMethod: newPayMethod, items: newItems, total: newTotal });
     document.getElementById('purchaseEditModal').classList.remove('active');
