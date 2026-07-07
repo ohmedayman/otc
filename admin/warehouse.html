@@ -281,6 +281,9 @@
                 </div>
                 <div class="wh-form-row">
                     <div class="wh-form-group"><label>التصنيف</label><select id="newProductCategory"><option value="مبيدات صراصير">مبيدات صراصير</option><option value="مبيدات نمل">مبيدات نمل</option><option value="مبيدات بق">مبيدات بق</option><option value="مبيدات ناموس">مبيدات ناموس</option><option value="مبيدات ذباب">مبيدات ذباب</option><option value="حشرات مواشي">حشرات مواشي</option><option value="أخرى">أخرى</option></select></div>
+                    <div class="wh-form-group"><label>وحدة القياس</label><select id="newProductUnit"><option value="قطعة">قطعة</option><option value="كرتون">كرتون</option><option value="علبة">علبة</option><option value="liter">لتر</option><option value="كيلو">كيلو</option></select></div>
+                </div>
+                <div class="wh-form-row">
                     <div class="wh-form-group"><label>الرصيد الأولي</label><input type="number" id="newProductStock" min="0" value="0" dir="ltr"></div>
                 </div>
                 <button class="wh-btn wh-btn-primary" onclick="addProduct()"><i class="fas fa-plus"></i> إضافة منتج</button>
@@ -290,9 +293,26 @@
             <div class="wh-card-header"><h3>قائمة المنتجات</h3></div>
             <div class="wh-card-body">
                 <table class="wh-table">
-                    <thead><tr><th>المنتج</th><th>التصنيف</th><th>السعر</th><th>الرصيد</th><th>إجراءات</th></tr></thead>
+                    <thead><tr><th>المنتج</th><th>التصنيف</th><th>السعر</th><th>الوحدة</th><th>الرصيد</th><th>إجراءات</th></tr></thead>
                     <tbody id="productsTable"></tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="wh-modal" id="productEditModal" onclick="if(event.target===this)this.classList.remove('active')">
+        <div class="wh-modal-content">
+            <h3 style="margin-bottom:16px;"><i class="fas fa-edit" style="color:var(--gold);margin-left:8px;"></i>تعديل المنتج</h3>
+            <input type="hidden" id="editProductId">
+            <div class="wh-form-group"><label>اسم المنتج</label><input type="text" id="editProductName"></div>
+            <div class="wh-form-row">
+                <div class="wh-form-group"><label>السعر (ج.م)</label><input type="number" id="editProductPrice" min="0" step="0.01" dir="ltr"></div>
+                <div class="wh-form-group"><label>وحدة القياس</label><select id="editProductUnit"><option value="قطعة">قطعة</option><option value="كرتون">كرتون</option><option value="علبة">علبة</option><option value="لتر">لتر</option><option value="كيلو">كيلو</option></select></div>
+            </div>
+            <div class="wh-form-group"><label>التصنيف</label><select id="editProductCategory"><option value="مبيدات صراصير">مبيدات صراصير</option><option value="مبيدات نمل">مبيدات نمل</option><option value="مبيدات بق">مبيدات بق</option><option value="مبيدات ناموس">مبيدات ناموس</option><option value="مبيدات ذباب">مبيدات ذباب</option><option value="حشرات مواشي">حشرات مواشي</option><option value="أخرى">أخرى</option></select></div>
+            <div style="display:flex;gap:10px;margin-top:16px;">
+                <button class="wh-btn wh-btn-primary" onclick="saveEditProduct()"><i class="fas fa-save"></i> حفظ</button>
+                <button class="wh-btn wh-btn-secondary" onclick="document.getElementById('productEditModal').classList.remove('active')">إلغاء</button>
             </div>
         </div>
     </div>
@@ -681,23 +701,23 @@ async function fbDeleteDoc(col, id) {
 
 // ===== PRODUCTS =====
 const DEFAULT_PRODUCTS = [
-    { name: 'اف 16 للصراصير 400ملي', category: 'مبيدات صراصير', price: 50, stock: 0 },
-    { name: 'اف 22 للصراصير 400 ملي', category: 'مبيدات صراصير', price: 50, stock: 0 },
-    { name: 'اف 16 جامبو للصراصير 650 ملي', category: 'مبيدات صراصير', price: 70, stock: 0 },
-    { name: 'اف 16 للصراصير 500ملي', category: 'مبيدات صراصير', price: 60, stock: 0 },
-    { name: 'الصاروخ صراصير', category: 'مبيدات صراصير', price: 60, stock: 0 },
-    { name: 'اسد صراصير', category: 'مبيدات صراصير', price: 50, stock: 0 },
-    { name: 'الصاروخ نمل', category: 'مبيدات نمل', price: 60, stock: 0 },
-    { name: 'اف 22 جامبو للنمل 650 ملي', category: 'مبيدات نمل', price: 70, stock: 0 },
-    { name: 'اف22 للنمل 500 ملي', category: 'مبيدات نمل', price: 60, stock: 0 },
-    { name: 'مبيد اسد للنمل', category: 'مبيدات نمل', price: 50, stock: 0 },
-    { name: 'الصاروخ بق', category: 'مبيدات بق', price: 60, stock: 0 },
-    { name: 'مبيد اف 35 للبق - بدون رائحة', category: 'مبيدات بق', price: 70, stock: 0 },
-    { name: 'الصاروخ ناموس', category: 'مبيدات ناموس', price: 60, stock: 0 },
-    { name: 'رينجو للذباب', category: 'مبيدات ذباب', price: 60, stock: 0 },
-    { name: 'سوبر 777 حشرات المواشي 1 لتر', category: 'حشرات مواشي', price: 100, stock: 0 },
-    { name: 'سوبر 777 لحشرات المواشي', category: 'حشرات مواشي', price: 50, stock: 0 },
-    { name: 'نيجي اسبونج', category: 'أخرى', price: 20, stock: 0 }
+    { name: 'اف 16 للصراصير 400ملي', category: 'مبيدات صراصير', price: 50, unit: 'علبة', stock: 0 },
+    { name: 'اف 22 للصراصير 400 ملي', category: 'مبيدات صراصير', price: 50, unit: 'علبة', stock: 0 },
+    { name: 'اف 16 جامبو للصراصير 650 ملي', category: 'مبيدات صراصير', price: 70, unit: 'علبة', stock: 0 },
+    { name: 'اف 16 للصراصير 500ملي', category: 'مبيدات صراصير', price: 60, unit: 'علبة', stock: 0 },
+    { name: 'الصاروخ صراصير', category: 'مبيدات صراصير', price: 60, unit: 'علبة', stock: 0 },
+    { name: 'اسد صراصير', category: 'مبيدات صراصير', price: 50, unit: 'علبة', stock: 0 },
+    { name: 'الصاروخ نمل', category: 'مبيدات نمل', price: 60, unit: 'علبة', stock: 0 },
+    { name: 'اف 22 جامبو للنمل 650 ملي', category: 'مبيدات نمل', price: 70, unit: 'علبة', stock: 0 },
+    { name: 'اف22 للنمل 500 ملي', category: 'مبيدات نمل', price: 60, unit: 'علبة', stock: 0 },
+    { name: 'مبيد اسد للنمل', category: 'مبيدات نمل', price: 50, unit: 'علبة', stock: 0 },
+    { name: 'الصاروخ بق', category: 'مبيدات بق', price: 60, unit: 'علبة', stock: 0 },
+    { name: 'مبيد اف 35 للبق - بدون رائحة', category: 'مبيدات بق', price: 70, unit: 'علبة', stock: 0 },
+    { name: 'الصاروخ ناموس', category: 'مبيدات ناموس', price: 60, unit: 'علبة', stock: 0 },
+    { name: 'رينجو للذباب', category: 'مبيدات ذباب', price: 60, unit: 'علبة', stock: 0 },
+    { name: 'سوبر 777 حشرات المواشي 1 لتر', category: 'حشرات مواشي', price: 100, unit: 'لتر', stock: 0 },
+    { name: 'سوبر 777 لحشرات المواشي', category: 'حشرات مواشي', price: 50, unit: 'لتر', stock: 0 },
+    { name: 'نيجي اسبونج', category: 'أخرى', price: 20, unit: 'قطعة', stock: 0 }
 ];
 
 // ===== REALTIME DATA =====
@@ -772,8 +792,8 @@ function renderInventory() {
     document.getElementById('inventoryGrid').innerHTML = productsData.map(p => `
         <div class="product-card">
             <div class="product-name">${esc(p.name)}</div>
-            <div class="product-price">${p.price} ج.م</div>
-            <div class="product-stock">الرصيد: <strong class="${(p.stock||0) < 5 ? 'stock-low' : 'stock-ok'}">${p.stock||0}</strong></div>
+            <div class="product-price">${Number(p.price||0).toLocaleString('ar-EG')} ج.م / ${esc(p.unit || 'قطعة')}</div>
+            <div class="product-stock">الرصيد: <strong class="${(p.stock||0) < 5 ? 'stock-low' : 'stock-ok'}">${p.stock||0} ${esc(p.unit || 'قطعة')}</strong></div>
             <div style="font-size:0.75rem;color:var(--text-sub);margin-top:2px;">${esc(p.category)}</div>
             <button onclick="openStockEdit('${p._fbId}','${esc(p.name).replace(/'/g,"\\'")}',${p.stock||0})" style="margin-top:8px;padding:5px 12px;background:var(--gold);color:#fff;border:none;border-radius:6px;font-size:0.78rem;font-weight:600;cursor:pointer;font-family:inherit;"><i class="fas fa-edit"></i> تعديل الرصيد</button>
         </div>
@@ -809,9 +829,13 @@ function renderProducts() {
         <tr>
             <td><strong>${esc(p.name)}</strong></td>
             <td><span class="wh-badge wh-badge-info">${esc(p.category)}</span></td>
-            <td>${p.price} ج.م</td>
+            <td>${Number(p.price||0).toLocaleString('ar-EG')} ج.م</td>
+            <td>${esc(p.unit || 'قطعة')}</td>
             <td><strong class="${(p.stock||0) < 5 ? 'stock-low' : ''}">${p.stock||0}</strong></td>
-            <td><button class="wh-btn wh-btn-secondary" style="padding:5px 10px;font-size:0.78rem;" onclick="delProduct('${p._fbId}')"><i class="fas fa-trash"></i></button></td>
+            <td style="display:flex;gap:6px;">
+                <button class="wh-btn wh-btn-primary" style="padding:5px 10px;font-size:0.78rem;" onclick="editProduct('${p._fbId}')"><i class="fas fa-edit"></i></button>
+                <button class="wh-btn wh-btn-secondary" style="padding:5px 10px;font-size:0.78rem;" onclick="delProduct('${p._fbId}')"><i class="fas fa-trash"></i></button>
+            </td>
         </tr>
     `).join('');
     populateProductSelects();
@@ -821,13 +845,37 @@ async function addProduct() {
     const name = document.getElementById('newProductName').value.trim();
     const price = parseFloat(document.getElementById('newProductPrice').value) || 0;
     const category = document.getElementById('newProductCategory').value;
+    const unit = document.getElementById('newProductUnit').value;
     const stock = parseInt(document.getElementById('newProductStock').value) || 0;
     if (!name) { showWhAlert('error', 'أدخل اسم المنتج'); return; }
-    await saveProduct({ name, category, price, stock });
+    await saveProduct({ name, category, price, unit, stock });
     document.getElementById('newProductName').value = '';
     document.getElementById('newProductPrice').value = '';
     document.getElementById('newProductStock').value = '0';
     showWhAlert('success', 'تم إضافة المنتج بنجاح');
+}
+
+function editProduct(fbId) {
+    const p = productsData.find(x => x._fbId === fbId);
+    if (!p) return;
+    document.getElementById('editProductId').value = fbId;
+    document.getElementById('editProductName').value = p.name || '';
+    document.getElementById('editProductPrice').value = p.price || '';
+    document.getElementById('editProductUnit').value = p.unit || 'قطعة';
+    document.getElementById('editProductCategory').value = p.category || 'أخرى';
+    document.getElementById('productEditModal').classList.add('active');
+}
+
+async function saveEditProduct() {
+    const fbId = document.getElementById('editProductId').value;
+    const name = document.getElementById('editProductName').value.trim();
+    const price = parseFloat(document.getElementById('editProductPrice').value) || 0;
+    const unit = document.getElementById('editProductUnit').value;
+    const category = document.getElementById('editProductCategory').value;
+    if (!name) { showWhAlert('error', 'أدخل اسم المنتج'); return; }
+    await fbUpdateDoc(WH_PRODUCTS, fbId, { name, price, unit, category });
+    document.getElementById('productEditModal').classList.remove('active');
+    showWhAlert('success', 'تم تعديل المنتج بنجاح');
 }
 
 async function delProduct(id) {
@@ -841,7 +889,7 @@ function populateProductSelects() {
         const inCart = purchaseCart.filter(c => c.productId === p._fbId).reduce((s, c) => s + c.qty, 0);
         const avail = Math.max(0, (p.stock || 0) - inCart);
         const warn = inCart > 0 ? ' ⚠️' : '';
-        return `<option value="${p._fbId}">${esc(p.name)} (رصيد: ${avail}${warn})</option>`;
+        return `<option value="${p._fbId}">${esc(p.name)} — ${Number(p.price||0).toLocaleString('ar-EG')} ج.م (${avail} ${esc(p.unit || 'قطعة')}${warn})</option>`;
     }).join('');
     ['stockinProduct', 'stockoutProduct', 'purchaseProduct'].forEach(id => {
         const el = document.getElementById(id);
