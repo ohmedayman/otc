@@ -241,7 +241,19 @@
                 <div class="wh-form-group"><label>المورد</label><input type="text" id="editPurchaseSupplier"></div>
             </div>
             <div class="wh-form-group"><label>طريقة الدفع</label><select id="editPurchasePayMethod"><option value="كاش">كاش</option><option value="فودافون كاش">فودافون كاش</option><option value="Easy Pay">Easy Pay</option><option value="تحويل بنكي">تحويل بنكي</option><option value="آجل">آجل</option></select></div>
-            <div class="wh-form-group"><label>المنتجات</label><div id="editPurchaseItems"></div></div>
+            <div class="wh-form-group">
+                <label>المنتجات الحالية</label>
+                <div id="editPurchaseItems"></div>
+            </div>
+            <div class="wh-form-group" style="background:#f0fdf4;border:2px dashed #86efac;border-radius:8px;padding:12px;">
+                <label style="font-weight:700;color:#16a34a;"><i class="fas fa-plus-circle" style="margin-left:6px;"></i>إضافة منتج جديد للفاتورة</label>
+                <div class="wh-form-row" style="margin-top:8px;">
+                    <div class="wh-form-group" style="flex:2;"><select id="editPurchaseAddProduct"><option value="">اختر المنتج</option></select></div>
+                    <div class="wh-form-group" style="flex:1;"><input type="number" id="editPurchaseAddQty" value="1" min="1" placeholder="الكمية"></div>
+                    <div class="wh-form-group" style="flex:1;"><input type="number" id="editPurchaseAddPrice" placeholder="السعر" min="0" step="0.01"></div>
+                </div>
+                <button class="wh-btn wh-btn-primary" onclick="addProductToEditInvoice()" style="margin-top:6px;"><i class="fas fa-plus"></i> إضافة</button>
+            </div>
             <div class="wh-form-group"><label>الإجمالي</label><div id="editPurchaseTotal" style="font-size:1.2rem;font-weight:800;color:var(--gold-dark);">0 ج.م</div></div>
             <div style="display:flex;gap:10px;margin-top:16px;">
                 <button class="wh-btn wh-btn-primary" onclick="saveEditPurchase()"><i class="fas fa-save"></i> حفظ التعديلات</button>
@@ -950,14 +962,60 @@ function editPurchase(idx) {
     document.getElementById('editPurchaseDate').value = r.date || '';
     document.getElementById('editPurchaseSupplier').value = r.supplier || '';
     document.getElementById('editPurchasePayMethod').value = r.payMethod || 'كاش';
-    const itemsHtml = (r.items || []).map((item, i) => `<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;padding:8px;background:#f8fafc;border-radius:6px;border:1px solid var(--border);">
-        <span style="flex:1;font-weight:600;font-size:0.85rem;">${esc(item.productName)}</span>
-        <input type="number" class="edit-pi-qty" data-idx="${i}" value="${item.qty}" min="1" style="width:60px;padding:4px;border:1px solid var(--border);border-radius:4px;text-align:center;">
-        <span style="color:var(--text-sub);font-size:0.8rem;">× ${item.price} ج.م = <strong>${(item.qty * item.price).toLocaleString('ar-EG')} ج.م</strong></span>
-    </div>`).join('');
-    document.getElementById('editPurchaseItems').innerHTML = itemsHtml || '<p style="color:var(--text-sub);">لا توجد منتجات</p>';
-    document.getElementById('editPurchaseTotal').textContent = (r.total || 0).toLocaleString('ar-EG') + ' ج.م';
+    window._editPurchaseItems = JSON.parse(JSON.stringify(r.items || []));
+    renderEditPurchaseItems();
+    const addOpts = productsData.map(p => `<option value="${p._fbId}" data-price="${p.price||0}">${esc(p.name)} — ${p.price||0} ج.م</option>`).join('');
+    document.getElementById('editPurchaseAddProduct').innerHTML = '<option value="">اختر المنتج</option>' + addOpts;
+    document.getElementById('editPurchaseAddQty').value = '1';
+    document.getElementById('editPurchaseAddPrice').value = '';
     document.getElementById('purchaseEditModal').classList.add('active');
+}
+
+function renderEditPurchaseItems() {
+    const items = window._editPurchaseItems || [];
+    const el = document.getElementById('editPurchaseItems');
+    if (!items.length) { el.innerHTML = '<p style="color:var(--text-sub);">لا توجد منتجات — أضف من الأسفل</p>'; document.getElementById('editPurchaseTotal').textContent = '0 ج.م'; return; }
+    el.innerHTML = items.map((item, i) => `<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;padding:8px;background:#f8fafc;border-radius:6px;border:1px solid var(--border);">
+        <span style="flex:1;font-weight:600;font-size:0.85rem;">${esc(item.productName)}</span>
+        <input type="number" class="edit-pi-qty" data-idx="${i}" value="${item.qty}" min="1" onchange="updateEditItemTotal(this)" style="width:60px;padding:4px;border:1px solid var(--border);border-radius:4px;text-align:center;">
+        <span style="font-size:0.8rem;color:var(--text-sub);">× <input type="number" class="edit-pi-price" data-idx="${i}" value="${item.price}" min="0" step="0.01" onchange="updateEditItemTotal(this)" style="width:70px;padding:4px;border:1px solid var(--border);border-radius:4px;text-align:center;"> ج.م</span>
+        <strong class="edit-pi-line" data-idx="${i}" style="min-width:80px;text-align:left;color:var(--gold-dark);">${(item.qty * item.price).toLocaleString('ar-EG')} ج.م</strong>
+        <button onclick="removeEditItem(${i})" style="background:#fee2e2;color:#b91c1c;border:none;border-radius:6px;width:26px;height:26px;cursor:pointer;font-size:0.75rem;"><i class="fas fa-trash"></i></button>
+    </div>`).join('');
+    const total = items.reduce((s, item) => s + (item.qty * item.price), 0);
+    document.getElementById('editPurchaseTotal').textContent = total.toLocaleString('ar-EG') + ' ج.م';
+}
+
+function updateEditItemTotal(el) {
+    const i = parseInt(el.dataset.idx);
+    const items = window._editPurchaseItems;
+    items[i].qty = parseInt(document.querySelectorAll('.edit-pi-qty')[i].value) || 1;
+    items[i].price = parseFloat(document.querySelectorAll('.edit-pi-price')[i].value) || 0;
+    document.querySelectorAll('.edit-pi-line')[i].textContent = (items[i].qty * items[i].price).toLocaleString('ar-EG') + ' ج.م';
+    const total = items.reduce((s, item) => s + (item.qty * item.price), 0);
+    document.getElementById('editPurchaseTotal').textContent = total.toLocaleString('ar-EG') + ' ج.م';
+}
+
+function removeEditItem(idx) {
+    window._editPurchaseItems.splice(idx, 1);
+    renderEditPurchaseItems();
+}
+
+function addProductToEditInvoice() {
+    const productId = document.getElementById('editPurchaseAddProduct').value;
+    const qty = parseInt(document.getElementById('editPurchaseAddQty').value) || 1;
+    const priceInput = document.getElementById('editPurchaseAddPrice').value;
+    if (!productId) { showWhAlert('error', 'اختر منتج'); return; }
+    const p = productsData.find(x => x._fbId === productId);
+    if (!p) return;
+    const price = priceInput ? parseFloat(priceInput) : (p.price || 0);
+    const existing = window._editPurchaseItems.find(c => c.productId === productId);
+    if (existing) { existing.qty += qty; existing.price = price; }
+    else { window._editPurchaseItems.push({ productId, productName: p.name, qty, price }); }
+    renderEditPurchaseItems();
+    document.getElementById('editPurchaseAddProduct').value = '';
+    document.getElementById('editPurchaseAddQty').value = '1';
+    document.getElementById('editPurchaseAddPrice').value = '';
 }
 
 async function saveEditPurchase() {
@@ -967,16 +1025,8 @@ async function saveEditPurchase() {
     const newSupplier = document.getElementById('editPurchaseSupplier').value.trim();
     const newDate = document.getElementById('editPurchaseDate').value;
     const newPayMethod = document.getElementById('editPurchasePayMethod').value;
-    const qtyInputs = document.querySelectorAll('.edit-pi-qty');
-    let newItems = JSON.parse(JSON.stringify(r.items || []));
-    let newTotal = 0;
-    qtyInputs.forEach(inp => {
-        const i = parseInt(inp.dataset.idx);
-        const newQty = parseInt(inp.value) || 1;
-        newItems[i].qty = newQty;
-        newTotal += newQty * newItems[i].price;
-    });
-    const oldTotal = r.total || 0;
+    const newItems = window._editPurchaseItems || [];
+    const newTotal = newItems.reduce((s, item) => s + (item.qty * item.price), 0);
     const oldItems = r.items || [];
     for (const oldItem of oldItems) {
         const p = productsData.find(x => x._fbId === oldItem.productId);
