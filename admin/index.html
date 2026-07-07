@@ -9,103 +9,151 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body>
-<script>if(sessionStorage.getItem('adminLoggedIn')!=='true')window.location.href='login.html';</script>
 
-<!-- Header -->
-<header class="header">
-    <div class="header-inner">
-        <div class="logo">
+<!-- ===== Auth Check ===== -->
+<div id="authGate" style="background:var(--dark);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;">
+    <!-- Login Form -->
+    <div id="loginView" class="login-card" style="display:none;">
+        <div class="login-top">
             <img src="../assets/logo.png" alt="ميلانو OTC">
-            <div class="logo-text"><h1>لوحة التحكم</h1><span>ميلانو OTC</span></div>
+            <h1>لوحة التحكم</h1>
+            <p>مركز تتبع الطلبات ميلانو OTC</p>
         </div>
-        <div class="header-support" style="display:flex;gap:8px;align-items:center;">
-            <a href="../index.html" class="support-btn" style="background:transparent;border:2px solid var(--border);color:var(--text);"><i class="fas fa-home"></i></a>
-            <a href="#" id="exportExcelBtn" class="support-btn" style="background:var(--success);"><i class="fas fa-file-excel"></i><span>تصدير</span></a>
-            <a href="#" id="logoutBtn" class="support-btn" style="background:var(--danger);"><i class="fas fa-sign-out-alt"></i></a>
-        </div>
-    </div>
-</header>
-<script>
-    document.getElementById('logoutBtn')?.addEventListener('click',e=>{e.preventDefault();sessionStorage.removeItem('adminLoggedIn');window.location.href='login.html';});
-    document.getElementById('exportExcelBtn')?.addEventListener('click',e=>{e.preventDefault();exportToExcel();});
-</script>
-
-<main class="main-content" style="padding-top:36px;">
-
-    <!-- Stats -->
-    <div id="statsGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;">
-        <div class="feature-card" style="padding:22px 14px;">
-            <div style="font-size:2rem;font-weight:900;color:var(--gold);" id="statTotal">0</div>
-            <div style="color:var(--text-sub);font-size:0.8rem;margin-top:2px;">إجمالي الطلبات</div>
-            <div style="margin-top:8px;height:4px;background:var(--border);border-radius:4px;overflow:hidden;"><div id="barTotal" style="height:100%;background:var(--gold);border-radius:4px;width:0%;transition:width .6s var(--ease);"></div></div>
-        </div>
-        <div class="feature-card" style="padding:22px 14px;">
-            <div style="font-size:2rem;font-weight:900;color:var(--info);" id="statTransit">0</div>
-            <div style="color:var(--text-sub);font-size:0.8rem;margin-top:2px;">في الطريق</div>
-            <div style="margin-top:8px;height:4px;background:var(--border);border-radius:4px;overflow:hidden;"><div id="barTransit" style="height:100%;background:var(--info);border-radius:4px;width:0%;transition:width .6s var(--ease);"></div></div>
-        </div>
-        <div class="feature-card" style="padding:22px 14px;">
-            <div style="font-size:2rem;font-weight:900;color:var(--success);" id="statDelivered">0</div>
-            <div style="color:var(--text-sub);font-size:0.8rem;margin-top:2px;">تم التوصيل</div>
-            <div style="margin-top:8px;height:4px;background:var(--border);border-radius:4px;overflow:hidden;"><div id="barDelivered" style="height:100%;background:var(--success);border-radius:4px;width:0%;transition:width .6s var(--ease);"></div></div>
-        </div>
-        <div class="feature-card" style="padding:22px 14px;">
-            <div style="font-size:2rem;font-weight:900;color:var(--warning);" id="statPending">0</div>
-            <div style="color:var(--text-sub);font-size:0.8rem;margin-top:2px;">قيد المعالجة</div>
-            <div style="margin-top:8px;height:4px;background:var(--border);border-radius:4px;overflow:hidden;"><div id="barPending" style="height:100%;background:var(--warning);border-radius:4px;width:0%;transition:width .6s var(--ease);"></div></div>
-        </div>
-    </div>
-
-    <!-- Add Order -->
-    <div class="result-container" style="margin-bottom:28px;">
-        <div class="result-header"><h3 style="color:#fff;font-size:1.05rem;"><i class="fas fa-plus-circle" style="margin-left:8px;opacity:0.7;"></i>إضافة طلب جديد</h3></div>
-        <div style="padding:24px 28px;">
-            <div id="alertMessage" class="hidden"></div>
-            <form id="orderForm">
-                <div class="form-row">
-                    <div class="form-group"><label>اسم العميل</label><input type="text" id="customerName" required placeholder="اسم العميل"></div>
-                    <div class="form-group"><label>رقم الهاتف</label><input type="tel" id="customerPhone" required placeholder="01XXXXXXXXX" dir="ltr"></div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group"><label>رقم التتبع</label><input type="text" id="trackingNumber" required placeholder="EE123456789EG" maxlength="13" style="font-family:monospace;letter-spacing:1.5px;direction:ltr;text-align:center;text-transform:uppercase;"></div>
-                    <div class="form-group"><label>حالة الطلب</label><select id="orderStatus" required><option value="pending">قيد المعالجة</option><option value="in-transit">في الطريق</option><option value="delivered">تم التوصيل</option><option value="exception">مشكلة في التوصيل</option></select></div>
-                </div>
-                <div class="form-group"><label>عنوان التوصيل</label><input type="text" id="orderAddress" required placeholder="العنوان بالتفصيل"></div>
-                <div class="form-row">
-                    <div class="form-group"><label>ملاحظات</label><textarea id="orderNotes" rows="2" placeholder="اختياري" style="resize:vertical;"></textarea></div>
-                    <div class="form-group"><label>قيمة الطلب (ج.م)</label><input type="number" id="orderValue" min="0" step="0.01" placeholder="0.00" dir="ltr"></div>
-                </div>
-                <div style="display:flex;gap:10px;margin-top:4px;">
-                    <button type="submit" class="support-btn" style="border:none;padding:11px 26px;font-size:0.9rem;"><i class="fas fa-save"></i> حفظ</button>
-                    <button type="reset" class="support-btn" style="background:var(--text-sub);border:none;padding:11px 26px;font-size:0.9rem;"><i class="fas fa-undo"></i> مسح</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Orders List -->
-    <div class="result-container">
-        <div class="result-header"><h3 style="color:#fff;font-size:1.05rem;"><i class="fas fa-list" style="margin-left:8px;opacity:0.7;"></i>قائمة الطلبات</h3></div>
-        <div style="padding:24px 28px;">
-            <div class="form-row" style="margin-bottom:18px;">
-                <div class="form-group" style="margin-bottom:0;"><input type="text" id="searchInput" placeholder="🔍 بحث بالاسم أو رقم التتبع..."></div>
-                <div class="form-group" style="margin-bottom:0;">
-                    <select id="filterStatus"><option value="">جميع الحالات</option><option value="pending">قيد المعالجة</option><option value="in-transit">في الطريق</option><option value="delivered">تم التوصيل</option><option value="exception">مشكلة في التوصيل</option></select>
-                </div>
+        <div id="loginError" class="login-error"><i class="fas fa-exclamation-circle"></i><span>بيانات الدخول غير صحيحة</span></div>
+        <form id="loginForm">
+            <div class="login-field">
+                <label>اسم المستخدم</label>
+                <div class="field-wrap"><i class="fas fa-user"></i><input type="text" id="loginUsername" required placeholder="أدخل اسم المستخدم"></div>
             </div>
-            <div class="table-container">
-                <table class="data-table">
-                    <thead><tr><th>اسم العميل</th><th>الهاتف</th><th>رقم التتبع</th><th>الحالة</th><th>التاريخ</th><th>إجراءات</th></tr></thead>
-                    <tbody id="ordersTableBody"></tbody>
-                </table>
+            <div class="login-field">
+                <label>كلمة المرور</label>
+                <div class="field-wrap"><i class="fas fa-lock"></i><input type="password" id="loginPassword" required placeholder="أدخل كلمة المرور"></div>
             </div>
-            <div id="noOrders" class="hidden" style="text-align:center;padding:36px;color:var(--text-sub);">
-                <i class="fas fa-inbox" style="font-size:2.5rem;margin-bottom:12px;display:block;color:var(--border);"></i>
-                <p style="font-size:0.9rem;">لا توجد طلبات بعد</p>
+            <button type="submit" class="login-btn"><i class="fas fa-sign-in-alt"></i>تسجيل الدخول</button>
+        </form>
+        <a href="../index.html" class="login-back"><i class="fas fa-arrow-right"></i> العودة للرئيسية</a>
+    </div>
+
+    <!-- Setup Form (first time) -->
+    <div id="setupView" class="login-card" style="display:none;">
+        <div class="login-top">
+            <img src="../assets/logo.png" alt="ميلانو OTC">
+            <h1>إعداد حساب الأدمن</h1>
+            <p>أنشئ بيانات الدخول الخاصة بك</p>
+        </div>
+        <div id="setupError" class="login-error"><i class="fas fa-exclamation-circle"></i><span></span></div>
+        <form id="setupForm">
+            <div class="login-field">
+                <label>اسم المستخدم</label>
+                <div class="field-wrap"><i class="fas fa-user"></i><input type="text" id="setupUsername" required placeholder="اسم المستخدم" minlength="3"></div>
+            </div>
+            <div class="login-field">
+                <label>كلمة المرور</label>
+                <div class="field-wrap"><i class="fas fa-lock"></i><input type="password" id="setupPassword" required placeholder="6 أحرف على الأقل" minlength="6"></div>
+            </div>
+            <div class="login-field">
+                <label>تأكيد كلمة المرور</label>
+                <div class="field-wrap"><i class="fas fa-lock"></i><input type="password" id="setupConfirm" required placeholder="أعد إدخال كلمة المرور"></div>
+            </div>
+            <button type="submit" class="login-btn"><i class="fas fa-user-plus"></i>إنشاء الحساب</button>
+        </form>
+        <a href="../index.html" class="login-back"><i class="fas fa-arrow-right"></i> العودة للرئيسية</a>
+    </div>
+</div>
+
+<!-- ===== Dashboard (hidden until login) ===== -->
+<div id="dashboardView" style="display:none;">
+    <header class="header">
+        <div class="header-inner">
+            <div class="logo">
+                <img src="../assets/logo.png" alt="ميلانو OTC">
+                <div class="logo-text"><h1>لوحة التحكم</h1><span id="adminNameDisplay">المدير</span></div>
+            </div>
+            <div class="header-support" style="display:flex;gap:8px;align-items:center;">
+                <a href="../index.html" class="support-btn" style="background:transparent;border:2px solid var(--border);color:var(--text);"><i class="fas fa-home"></i></a>
+                <a href="#" id="exportExcelBtn" class="support-btn" style="background:var(--success);"><i class="fas fa-file-excel"></i><span>تصدير</span></a>
+                <a href="#" id="changePassBtn" class="support-btn" style="background:var(--info);"><i class="fas fa-key"></i></a>
+                <a href="#" id="logoutBtn" class="support-btn" style="background:var(--danger);"><i class="fas fa-sign-out-alt"></i></a>
             </div>
         </div>
-    </div>
-</main>
+    </header>
+
+    <main class="main-content" style="padding-top:36px;">
+        <!-- Stats -->
+        <div id="statsGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;">
+            <div class="feature-card" style="padding:22px 14px;">
+                <div style="font-size:2rem;font-weight:900;color:var(--gold);" id="statTotal">0</div>
+                <div style="color:var(--text-sub);font-size:0.8rem;margin-top:2px;">إجمالي الطلبات</div>
+                <div style="margin-top:8px;height:4px;background:var(--border);border-radius:4px;overflow:hidden;"><div id="barTotal" style="height:100%;background:var(--gold);border-radius:4px;width:0%;transition:width .6s var(--ease);"></div></div>
+            </div>
+            <div class="feature-card" style="padding:22px 14px;">
+                <div style="font-size:2rem;font-weight:900;color:var(--info);" id="statTransit">0</div>
+                <div style="color:var(--text-sub);font-size:0.8rem;margin-top:2px;">في الطريق</div>
+                <div style="margin-top:8px;height:4px;background:var(--border);border-radius:4px;overflow:hidden;"><div id="barTransit" style="height:100%;background:var(--info);border-radius:4px;width:0%;transition:width .6s var(--ease);"></div></div>
+            </div>
+            <div class="feature-card" style="padding:22px 14px;">
+                <div style="font-size:2rem;font-weight:900;color:var(--success);" id="statDelivered">0</div>
+                <div style="color:var(--text-sub);font-size:0.8rem;margin-top:2px;">تم التوصيل</div>
+                <div style="margin-top:8px;height:4px;background:var(--border);border-radius:4px;overflow:hidden;"><div id="barDelivered" style="height:100%;background:var(--success);border-radius:4px;width:0%;transition:width .6s var(--ease);"></div></div>
+            </div>
+            <div class="feature-card" style="padding:22px 14px;">
+                <div style="font-size:2rem;font-weight:900;color:var(--warning);" id="statPending">0</div>
+                <div style="color:var(--text-sub);font-size:0.8rem;margin-top:2px;">قيد المعالجة</div>
+                <div style="margin-top:8px;height:4px;background:var(--border);border-radius:4px;overflow:hidden;"><div id="barPending" style="height:100%;background:var(--warning);border-radius:4px;width:0%;transition:width .6s var(--ease);"></div></div>
+            </div>
+        </div>
+
+        <!-- Add Order -->
+        <div class="result-container" style="margin-bottom:28px;">
+            <div class="result-header"><h3 style="color:#fff;font-size:1.05rem;"><i class="fas fa-plus-circle" style="margin-left:8px;opacity:0.7;"></i>إضافة طلب جديد</h3></div>
+            <div style="padding:24px 28px;">
+                <div id="alertMessage" class="hidden"></div>
+                <form id="orderForm">
+                    <div class="form-row">
+                        <div class="form-group"><label>اسم العميل</label><input type="text" id="customerName" required placeholder="اسم العميل"></div>
+                        <div class="form-group"><label>رقم الهاتف</label><input type="tel" id="customerPhone" required placeholder="01XXXXXXXXX" dir="ltr"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>رقم التتبع</label><input type="text" id="trackingNumber" required placeholder="EE123456789EG" maxlength="13" style="font-family:monospace;letter-spacing:1.5px;direction:ltr;text-align:center;text-transform:uppercase;"></div>
+                        <div class="form-group"><label>حالة الطلب</label><select id="orderStatus" required><option value="pending">قيد المعالجة</option><option value="in-transit">في الطريق</option><option value="delivered">تم التوصيل</option><option value="exception">مشكلة في التوصيل</option></select></div>
+                    </div>
+                    <div class="form-group"><label>عنوان التوصيل</label><input type="text" id="orderAddress" required placeholder="العنوان بالتفصيل"></div>
+                    <div class="form-row">
+                        <div class="form-group"><label>ملاحظات</label><textarea id="orderNotes" rows="2" placeholder="اختياري" style="resize:vertical;"></textarea></div>
+                        <div class="form-group"><label>قيمة الطلب (ج.م)</label><input type="number" id="orderValue" min="0" step="0.01" placeholder="0.00" dir="ltr"></div>
+                    </div>
+                    <div style="display:flex;gap:10px;margin-top:4px;">
+                        <button type="submit" class="support-btn" style="border:none;padding:11px 26px;font-size:0.9rem;"><i class="fas fa-save"></i> حفظ</button>
+                        <button type="reset" class="support-btn" style="background:var(--text-sub);border:none;padding:11px 26px;font-size:0.9rem;"><i class="fas fa-undo"></i> مسح</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Orders List -->
+        <div class="result-container">
+            <div class="result-header"><h3 style="color:#fff;font-size:1.05rem;"><i class="fas fa-list" style="margin-left:8px;opacity:0.7;"></i>قائمة الطلبات</h3></div>
+            <div style="padding:24px 28px;">
+                <div class="form-row" style="margin-bottom:18px;">
+                    <div class="form-group" style="margin-bottom:0;"><input type="text" id="searchInput" placeholder="🔍 بحث بالاسم أو رقم التتبع..."></div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <select id="filterStatus"><option value="">جميع الحالات</option><option value="pending">قيد المعالجة</option><option value="in-transit">في الطريق</option><option value="delivered">تم التوصيل</option><option value="exception">مشكلة في التوصيل</option></select>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead><tr><th>اسم العميل</th><th>الهاتف</th><th>رقم التتبع</th><th>الحالة</th><th>التاريخ</th><th>إجراءات</th></tr></thead>
+                        <tbody id="ordersTableBody"></tbody>
+                    </table>
+                </div>
+                <div id="noOrders" class="hidden" style="text-align:center;padding:36px;color:var(--text-sub);">
+                    <i class="fas fa-inbox" style="font-size:2.5rem;margin-bottom:12px;display:block;color:var(--border);"></i>
+                    <p style="font-size:0.9rem;">لا توجد طلبات بعد</p>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
 
 <!-- Edit Modal -->
 <div class="modal" id="editModal" onclick="if(event.target===this)closeModal()">
@@ -147,6 +195,353 @@
     </div>
 </div>
 
-<script src="../js/admin.js"></script>
+<!-- Change Password Modal -->
+<div class="modal" id="changePassModal" onclick="if(event.target===this)this.classList.remove('active')">
+    <div class="modal-content">
+        <div class="modal-header"><h3><i class="fas fa-key" style="color:var(--info);margin-left:8px;"></i>تغيير كلمة المرور</h3><button class="modal-close" onclick="document.getElementById('changePassModal').classList.remove('active')"><i class="fas fa-times"></i></button></div>
+        <form id="changePassForm">
+            <div class="login-field"><label>كلمة المرور الحالية</label><div class="field-wrap"><i class="fas fa-lock"></i><input type="password" id="oldPass" required placeholder="أدخل كلمة المرور الحالية"></div></div>
+            <div class="login-field"><label>كلمة المرور الجديدة</label><div class="field-wrap"><i class="fas fa-lock"></i><input type="password" id="newPass" required placeholder="6 أحرف على الأقل" minlength="6"></div></div>
+            <div class="login-field"><label>تأكيد كلمة المرور الجديدة</label><div class="field-wrap"><i class="fas fa-lock"></i><input type="password" id="confirmNewPass" required placeholder="أعد إدخال كلمة المرور"></div></div>
+            <div style="display:flex;gap:10px;">
+                <button type="submit" class="support-btn" style="border:none;padding:11px 26px;font-size:0.9rem;"><i class="fas fa-save"></i> حفظ</button>
+                <button type="button" onclick="document.getElementById('changePassModal').classList.remove('active')" class="support-btn" style="background:var(--text-sub);border:none;padding:11px 26px;font-size:0.9rem;">إلغاء</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .login-card{background:#fff;border-radius:20px;padding:44px 36px 36px;width:100%;max-width:400px;box-shadow:0 25px 80px rgba(0,0,0,0.25);position:relative;overflow:hidden}
+    .login-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--gold),var(--gold-light),var(--gold))}
+    .login-top{text-align:center;margin-bottom:32px}
+    .login-top img{height:52px;margin:0 auto 14px}
+    .login-top h1{font-size:1.3rem;font-weight:800;color:var(--dark)}
+    .login-top p{font-size:0.85rem;color:var(--text-sub);margin-top:2px}
+    .login-field{margin-bottom:18px}
+    .login-field label{display:block;margin-bottom:5px;font-weight:600;color:var(--dark);font-size:0.85rem}
+    .login-field .field-wrap{position:relative}
+    .login-field .field-wrap i{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:#9ca3af;font-size:0.95rem}
+    .login-field input{width:100%;padding:13px 42px 13px 14px;border:2px solid var(--border);border-radius:var(--r-sm);font-size:0.92rem;transition:all .3s var(--ease);background:#fff;color:var(--text)}
+    .login-field input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-glow)}
+    .login-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#fff;border:none;border-radius:var(--r-sm);font-size:1rem;font-weight:700;cursor:pointer;transition:all .3s var(--ease);display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;margin-top:6px}
+    .login-btn:hover{transform:translateY(-2px);box-shadow:var(--shadow-gold)}
+    .login-error{background:#fee2e2;color:#991b1b;padding:11px 14px;border-radius:var(--r-sm);margin-bottom:18px;display:none;align-items:center;gap:8px;font-size:0.88rem;border:1px solid #fecaca;font-weight:500}
+    .login-error.show{display:flex}
+    .login-back{display:block;text-align:center;margin-top:18px;color:#9ca3af;font-size:0.82rem;transition:color .2s}
+    .login-back:hover{color:var(--gold)}
+</style>
+
+<script>
+// ===== AUTH SYSTEM =====
+const USERS_KEY = 'milanoAdminUsers';
+const SESSION_KEY = 'milanoAdminSession';
+
+// Simple hash for password storage
+function hash(str) {
+    let h = 0;
+    for (let i = 0; i < str.length; i++) {
+        h = ((h << 5) - h + str.charCodeAt(i)) | 0;
+    }
+    return 'h_' + Math.abs(h).toString(36);
+}
+
+function getUsers() { return JSON.parse(localStorage.getItem(USERS_KEY) || '[]'); }
+function saveUsers(u) { localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
+function getSession() { return sessionStorage.getItem(SESSION_KEY); }
+function setSession(user) { sessionStorage.setItem(SESSION_KEY, user); }
+function clearSession() { sessionStorage.removeItem(SESSION_KEY); }
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', function() {
+    const users = getUsers();
+    const session = getSession();
+
+    // Already logged in
+    if (session && users.some(u => u.username === session)) {
+        showDashboard(session);
+        return;
+    }
+
+    // No users exist → show setup
+    if (users.length === 0) {
+        document.getElementById('authGate').style.display = 'flex';
+        document.getElementById('setupView').style.display = 'block';
+        document.getElementById('loginView').style.display = 'none';
+    } else {
+        // Users exist → show login
+        document.getElementById('authGate').style.display = 'flex';
+        document.getElementById('loginView').style.display = 'block';
+        document.getElementById('setupView').style.display = 'none';
+    }
+});
+
+// ===== SETUP (First time) =====
+document.getElementById('setupForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const username = document.getElementById('setupUsername').value.trim();
+    const password = document.getElementById('setupPassword').value;
+    const confirm = document.getElementById('setupConfirm').value;
+    const errEl = document.getElementById('setupError');
+
+    if (password !== confirm) {
+        errEl.querySelector('span').textContent = 'كلمتا المرور غير متطابقتين';
+        errEl.classList.add('show');
+        return;
+    }
+
+    if (username.length < 3) {
+        errEl.querySelector('span').textContent = 'اسم المستخدم يجب أن يكون 3 أحرف على الأقل';
+        errEl.classList.add('show');
+        return;
+    }
+
+    // Save user
+    const users = getUsers();
+    users.push({ username: username, password: hash(password), createdAt: new Date().toISOString() });
+    saveUsers(users);
+    setSession(username);
+    showDashboard(username);
+});
+
+// ===== LOGIN =====
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const username = document.getElementById('loginUsername').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const errEl = document.getElementById('loginError');
+    const users = getUsers();
+
+    const user = users.find(u => u.username === username && u.password === hash(password));
+    if (user) {
+        setSession(username);
+        showDashboard(username);
+    } else {
+        errEl.classList.add('show');
+    }
+});
+
+// ===== SHOW DASHBOARD =====
+function showDashboard(username) {
+    document.getElementById('authGate').style.display = 'none';
+    document.getElementById('dashboardView').style.display = 'block';
+    document.getElementById('adminNameDisplay').textContent = username;
+
+    // Init dashboard
+    loadOrders();
+    updateStats();
+}
+
+// ===== LOGOUT =====
+document.getElementById('logoutBtn')?.addEventListener('click', function(e) {
+    e.preventDefault();
+    clearSession();
+    location.reload();
+});
+
+// ===== CHANGE PASSWORD =====
+document.getElementById('changePassBtn')?.addEventListener('click', function(e) {
+    e.preventDefault();
+    document.getElementById('changePassModal').classList.add('active');
+});
+
+document.getElementById('changePassForm')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const oldP = document.getElementById('oldPass').value;
+    const newP = document.getElementById('newPass').value;
+    const confirmP = document.getElementById('confirmNewPass').value;
+    const session = getSession();
+    const users = getUsers();
+    const idx = users.findIndex(u => u.username === session);
+
+    if (idx === -1) return;
+
+    if (users[idx].password !== hash(oldP)) {
+        alert('كلمة المرور الحالية غير صحيحة');
+        return;
+    }
+    if (newP !== confirmP) {
+        alert('كلمتا المرور الجديدتان غير متطابقتين');
+        return;
+    }
+    if (newP.length < 6) {
+        alert('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+        return;
+    }
+
+    users[idx].password = hash(newP);
+    saveUsers(users);
+    document.getElementById('changePassModal').classList.remove('active');
+    document.getElementById('oldPass').value = '';
+    document.getElementById('newPass').value = '';
+    document.getElementById('confirmNewPass').value = '';
+    alert('تم تغيير كلمة المرور بنجاح');
+});
+
+// ===== EXPORT EXCEL =====
+document.getElementById('exportExcelBtn')?.addEventListener('click', function(e) {
+    e.preventDefault();
+    exportToExcel();
+});
+
+// ===== DASHBOARD FUNCTIONS =====
+function loadOrders() { renderOrders(getOrders()); }
+const getOrders = () => JSON.parse(localStorage.getItem('milanoOrders') || '[]');
+const saveOrders = o => localStorage.setItem('milanoOrders', JSON.stringify(o));
+
+function renderOrders(orders) {
+    const tbody = document.getElementById('ordersTableBody');
+    const noOrders = document.getElementById('noOrders');
+    tbody.innerHTML = '';
+    if (!orders.length) { noOrders.classList.remove('hidden'); return; }
+    noOrders.classList.add('hidden');
+    orders.forEach(o => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${esc(o.customerName)}</td>
+            <td>${esc(o.customerPhone)}</td>
+            <td><code style="font-weight:700;letter-spacing:1px;">${esc(o.trackingNumber)}</code></td>
+            <td><span class="status-badge ${o.status}">${statusText(o.status)}</span></td>
+            <td>${o.createdAt||'-'}</td>
+            <td><div class="btn-group">
+                <button class="btn btn-view" onclick="openWhatsApp('${esc(o.customerPhone)}','${esc(o.trackingNumber)}','${esc(o.status)}')" title="واتساب"><i class="fab fa-whatsapp"></i></button>
+                <button class="btn btn-edit" onclick="editOrder(${o.id})" title="تعديل"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-delete" onclick="delOrder(${o.id})" title="حذف"><i class="fas fa-trash"></i></button>
+            </div></td>`;
+        tbody.appendChild(tr);
+    });
+}
+
+function handleAddOrder(e) {
+    e.preventDefault();
+    const data = {
+        customerName: document.getElementById('customerName').value.trim(),
+        customerPhone: document.getElementById('customerPhone').value.trim(),
+        trackingNumber: document.getElementById('trackingNumber').value.trim().toUpperCase(),
+        status: document.getElementById('orderStatus').value,
+        address: document.getElementById('orderAddress').value.trim(),
+        notes: document.getElementById('orderNotes').value.trim(),
+        value: document.getElementById('orderValue').value || 0
+    };
+    if (data.trackingNumber.length < 10) { showAlert('error','رقم التتبع يجب أن يكون 10 أحرف على الأقل'); return; }
+    const orders = getOrders();
+    if (orders.some(o => o.trackingNumber === data.trackingNumber)) { showAlert('error','رقم التتبع مسجل بالفعل'); return; }
+    data.id = Date.now(); data.createdAt = new Date().toLocaleString('ar-EG');
+    orders.push(data); saveOrders(orders);
+    document.getElementById('orderForm').reset(); loadOrders(); updateStats();
+    showAlert('success','تم إضافة الطلب بنجاح');
+}
+
+function handleEditOrder(e) {
+    e.preventDefault();
+    const id = parseInt(document.getElementById('editOrderId').value);
+    const orders = getOrders();
+    const i = orders.findIndex(o => o.id === id);
+    if (i !== -1) {
+        orders[i] = { ...orders[i],
+            customerName: document.getElementById('editCustomerName').value.trim(),
+            customerPhone: document.getElementById('editCustomerPhone').value.trim(),
+            trackingNumber: document.getElementById('editTrackingNumber').value.trim().toUpperCase(),
+            status: document.getElementById('editOrderStatus').value,
+            address: document.getElementById('editOrderAddress').value.trim(),
+            notes: document.getElementById('editOrderNotes').value.trim(),
+            value: document.getElementById('editOrderValue').value || 0
+        };
+        saveOrders(orders); closeModal(); loadOrders(); updateStats();
+        showAlert('success','تم تعديل الطلب بنجاح');
+    }
+}
+
+function editOrder(id) {
+    const o = getOrders().find(x => x.id === id);
+    if (!o) return;
+    document.getElementById('editOrderId').value = o.id;
+    document.getElementById('editCustomerName').value = o.customerName;
+    document.getElementById('editCustomerPhone').value = o.customerPhone;
+    document.getElementById('editTrackingNumber').value = o.trackingNumber;
+    document.getElementById('editOrderStatus').value = o.status;
+    document.getElementById('editOrderAddress').value = o.address;
+    document.getElementById('editOrderNotes').value = o.notes || '';
+    document.getElementById('editOrderValue').value = o.value || '';
+    document.getElementById('editModal').classList.add('active');
+}
+
+function delOrder(id) {
+    if (!confirm('هل أنت متأكد من حذف هذا الطلب؟')) return;
+    saveOrders(getOrders().filter(o => o.id !== id));
+    loadOrders(); updateStats(); showAlert('success','تم حذف الطلب بنجاح');
+}
+
+function closeModal() { document.getElementById('editModal').classList.remove('active'); }
+
+function filterOrders() {
+    let orders = getOrders();
+    const s = document.getElementById('searchInput').value.toLowerCase();
+    if (s) orders = orders.filter(o => o.customerName.toLowerCase().includes(s) || o.trackingNumber.toLowerCase().includes(s) || o.customerPhone.includes(s));
+    if (document.getElementById('filterStatus').value) orders = orders.filter(o => o.status === document.getElementById('filterStatus').value);
+    renderOrders(orders);
+}
+
+function updateStats() {
+    const orders = getOrders();
+    const total = orders.length;
+    const transit = orders.filter(o => o.status === 'in-transit').length;
+    const delivered = orders.filter(o => o.status === 'delivered').length;
+    const pending = orders.filter(o => o.status === 'pending').length;
+    document.getElementById('statTotal').textContent = total;
+    document.getElementById('statTransit').textContent = transit;
+    document.getElementById('statDelivered').textContent = delivered;
+    document.getElementById('statPending').textContent = pending;
+    const pct = n => total ? Math.round((n / total) * 100) : 0;
+    setTimeout(() => {
+        document.getElementById('barTotal').style.width = '100%';
+        document.getElementById('barTransit').style.width = pct(transit) + '%';
+        document.getElementById('barDelivered').style.width = pct(delivered) + '%';
+        document.getElementById('barPending').style.width = pct(pending) + '%';
+    }, 200);
+}
+
+function openWhatsApp(phone, tracking, status) {
+    const sm = { 'pending':'قيد المعالجة', 'in-transit':'في الطريق', 'delivered':'تم التوصيل', 'exception':'مشكلة في التوصيل' };
+    const msg = `مرحباً،\nتتبع طلبك:\nرقم التتبع: ${tracking}\nالحالة: ${sm[status]||status}\n\nتتبع شحنتك:\nhttps://otc.milanof16.com/?track=${tracking}`;
+    document.getElementById('whatsappPhone').value = phone;
+    document.getElementById('whatsappTracking').value = tracking;
+    document.getElementById('whatsappMessage').value = msg;
+    document.getElementById('whatsappSend').href = `https://wa.me/${phone.startsWith('0')?'20'+phone.slice(1):phone}?text=${encodeURIComponent(msg)}`;
+    document.getElementById('whatsappModal').classList.add('active');
+}
+
+function exportToExcel() {
+    const orders = getOrders();
+    if (!orders.length) { showAlert('warning','لا توجد طلبات للتصدير'); return; }
+    const sm = { 'pending':'قيد المعالجة', 'in-transit':'في الطريق', 'delivered':'تم التوصيل', 'exception':'مشكلة في التوصيل' };
+    let csv = '\uFEFF' + 'اسم العميل,الهاتف,رقم التتبع,الحالة,العنوان,ملاحظات,القيمة,التاريخ\n';
+    orders.forEach(o => {
+        csv += [o.customerName,o.customerPhone,o.trackingNumber,sm[o.status]||o.status,o.address||'',o.notes||'',o.value||0,o.createdAt||''].map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',') + '\n';
+    });
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url;
+    a.download = `milano-orders-${new Date().toLocaleDateString('ar-EG')}.csv`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url); showAlert('success','تم التصدير بنجاح');
+}
+
+function statusText(s) { return { 'pending':'قيد المعالجة', 'in-transit':'في الطريق', 'delivered':'تم التوصيل', 'exception':'مشكلة في التوصيل' }[s]||s; }
+function esc(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+function showAlert(type, msg) {
+    const el = document.getElementById('alertMessage');
+    el.className = 'alert alert-' + type;
+    el.innerHTML = `<i class="fas fa-${type==='success'?'check-circle':type==='error'?'exclamation-circle':'info-circle'}"></i><span>${msg}</span>`;
+    el.classList.remove('hidden');
+    setTimeout(() => el.classList.add('hidden'), 4000);
+}
+
+// Event listeners
+document.getElementById('orderForm')?.addEventListener('submit', handleAddOrder);
+document.getElementById('editForm')?.addEventListener('submit', handleEditOrder);
+document.getElementById('searchInput')?.addEventListener('input', filterOrders);
+document.getElementById('filterStatus')?.addEventListener('change', filterOrders);
+</script>
 </body>
 </html>
