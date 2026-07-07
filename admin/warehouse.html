@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مركز التجمع - ميلانو OTC</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root{--gold:#c8a951;--gold-light:#e8d5a3;--gold-dark:#a8884e;--gold-glow:rgba(200,169,81,0.25);--dark:#111827;--dark-2:#1f2937;--dark-3:#374151;--card:#fff;--bg:#f3f4f6;--text:#111827;--text-sub:#6b7280;--border:#e5e7eb;--shadow:0 4px 20px rgba(0,0,0,0.07);--shadow-lg:0 12px 40px rgba(0,0,0,0.12);--shadow-gold:0 8px 30px rgba(200,169,81,0.3);--r:16px;--r-sm:10px;--r-xs:6px;--success:#10b981;--info:#3b82f6;--warning:#f59e0b;--danger:#ef4444;--ease:cubic-bezier(.4,0,.2,1)}
+        body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direction:rtl}
+
+        /* Sidebar */
+        .wh-sidebar{position:fixed;top:0;right:0;width:240px;height:100vh;background:var(--dark);z-index:100;display:flex;flex-direction:column;transition:all .3s var(--ease)}
+        .wh-sidebar-header{padding:20px;border-bottom:1px solid rgba(255,255,255,0.08);text-align:center}
+        .wh-sidebar-header img{height:40px;margin-bottom:8px}
+        .wh-sidebar-header h2{color:#fff;font-size:1rem;font-weight:700}
+        .wh-sidebar-header small{color:rgba(255,255,255,0.4);font-size:0.75rem}
+        .wh-nav{flex:1;padding:12px 0;overflow-y:auto}
+        .wh-nav-item{display:flex;align-items:center;gap:12px;padding:12px 20px;color:rgba(255,255,255,0.6);font-size:0.88rem;font-weight:600;cursor:pointer;transition:all .2s;border-right:3px solid transparent}
+        .wh-nav-item:hover{background:rgba(255,255,255,0.05);color:#fff}
+        .wh-nav-item.active{background:rgba(200,169,81,0.1);color:var(--gold);border-right-color:var(--gold)}
+        .wh-nav-item i{width:20px;text-align:center;font-size:1rem}
+        .wh-nav-section{padding:8px 20px;font-size:0.7rem;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:1px;margin-top:8px}
+
+        /* Main */
+        .wh-main{margin-right:240px;padding:24px 28px 40px;min-height:100vh}
+
+        /* Stats row */
+        .wh-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+        .wh-stat{background:#fff;border-radius:var(--r);padding:20px;text-align:center;box-shadow:var(--shadow);border:1px solid var(--border);transition:all .3s var(--ease)}
+        .wh-stat:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+        .wh-stat-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin:0 auto 10px}
+        .wh-stat-value{font-size:1.6rem;font-weight:900;line-height:1}
+        .wh-stat-label{font-size:0.78rem;color:var(--text-sub);margin-top:4px}
+
+        /* Cards */
+        .wh-card{background:#fff;border-radius:var(--r);box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:20px;overflow:hidden}
+        .wh-card-header{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;background:linear-gradient(135deg,var(--dark),var(--dark-2));color:#fff}
+        .wh-card-header h3{font-size:1rem;font-weight:700;display:flex;align-items:center;gap:8px}
+        .wh-card-body{padding:22px}
+
+        /* Tables */
+        .wh-table{width:100%;border-collapse:collapse}
+        .wh-table th,.wh-table td{padding:12px 14px;text-align:right;border-bottom:1px solid var(--border);font-size:0.88rem}
+        .wh-table th{background:var(--bg);color:var(--text-sub);font-weight:700;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.5px}
+        .wh-table tbody tr:hover{background:#fafbfc}
+
+        /* Forms */
+        .wh-form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+        .wh-form-group{margin-bottom:14px}
+        .wh-form-group label{display:block;margin-bottom:4px;font-weight:600;font-size:0.82rem;color:var(--text)}
+        .wh-form-group input,.wh-form-group select,.wh-form-group textarea{width:100%;padding:10px 12px;border:2px solid var(--border);border-radius:var(--r-sm);font-size:0.88rem;font-family:inherit;transition:all .3s var(--ease);background:#fff}
+        .wh-form-group input:focus,.wh-form-group select:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-glow)}
+
+        /* Buttons */
+        .wh-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border:none;border-radius:var(--r-sm);font-size:0.85rem;font-weight:700;cursor:pointer;transition:all .25s var(--ease);font-family:inherit}
+        .wh-btn:hover{transform:translateY(-1px)}
+        .wh-btn-primary{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#fff}
+        .wh-btn-success{background:var(--success);color:#fff}
+        .wh-btn-danger{background:var(--danger);color:#fff}
+        .wh-btn-info{background:var(--info);color:#fff}
+        .wh-btn-secondary{background:var(--text-sub);color:#fff}
+
+        /* Badge */
+        .wh-badge{display:inline-block;padding:4px 12px;border-radius:50px;font-size:0.75rem;font-weight:700}
+        .wh-badge-success{background:#d1fae5;color:#065f46}
+        .wh-badge-warning{background:#fef3c7;color:#92400e}
+        .wh-badge-danger{background:#fee2e2;color:#991b1b}
+        .wh-badge-info{background:#dbeafe;color:#1e40af}
+
+        /* Tabs */
+        .wh-tabs{display:flex;gap:4px;margin-bottom:20px;background:#fff;padding:6px;border-radius:var(--r-sm);border:1px solid var(--border)}
+        .wh-tab{padding:10px 18px;border:none;background:transparent;border-radius:var(--r-xs);font-size:0.85rem;font-weight:600;cursor:pointer;transition:all .2s;color:var(--text-sub);font-family:inherit}
+        .wh-tab.active{background:var(--gold);color:#fff}
+        .wh-tab:hover:not(.active){background:var(--bg)}
+
+        /* Product grid */
+        .product-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+        .product-card{background:#fff;border-radius:var(--r-sm);padding:16px;border:1px solid var(--border);transition:all .2s}
+        .product-card:hover{border-color:var(--gold-light);box-shadow:var(--shadow)}
+        .product-name{font-weight:700;font-size:0.9rem;margin-bottom:4px}
+        .product-price{color:var(--gold-dark);font-weight:800;font-size:1rem}
+        .product-stock{font-size:0.78rem;color:var(--text-sub);margin-top:4px}
+        .product-stock strong{color:var(--dark)}
+        .stock-low{color:var(--danger)!important}
+        .stock-ok{color:var(--success)!important}
+
+        /* Section page */
+        .wh-section{display:none}
+        .wh-section.active{display:block}
+
+        /* Alert */
+        .wh-alert{padding:12px 16px;border-radius:var(--r-sm);margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:0.88rem;font-weight:500}
+        .wh-alert-success{background:#d1fae5;color:#065f46;border:1px solid #a7f3d0}
+        .wh-alert-error{background:#fee2e2;color:#991b1b;border:1px solid #fecaca}
+
+        /* Modal */
+        .wh-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:2000;opacity:0;visibility:hidden;transition:all .3s var(--ease);backdrop-filter:blur(4px)}
+        .wh-modal.active{opacity:1;visibility:visible}
+        .wh-modal-content{background:#fff;border-radius:var(--r);padding:28px;width:92%;max-width:500px;max-height:85vh;overflow-y:auto;transform:translateY(20px) scale(0.97);transition:all .3s var(--ease)}
+        .wh-modal.active .wh-modal-content{transform:translateY(0) scale(1)}
+
+        /* Responsive */
+        @media(max-width:1024px){.wh-stats{grid-template-columns:repeat(2,1fr)}.product-grid{grid-template-columns:repeat(2,1fr)}}
+        @media(max-width:768px){
+            .wh-sidebar{width:60px}
+            .wh-sidebar-header h2,.wh-sidebar-header small,.wh-nav-item span,.wh-nav-section{display:none}
+            .wh-nav-item{justify-content:center;padding:14px}
+            .wh-nav-item i{font-size:1.2rem}
+            .wh-main{margin-right:60px}
+            .wh-stats{grid-template-columns:1fr 1fr}
+            .wh-form-row{grid-template-columns:1fr}
+            .product-grid{grid-template-columns:1fr}
+        }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="wh-sidebar">
+    <div class="wh-sidebar-header">
+        <img src="../assets/logo.png" alt="ميلانو">
+        <h2>مركز التجمع</h2>
+        <small>إدارة المخزن والبضاعة</small>
+    </div>
+    <nav class="wh-nav">
+        <div class="wh-nav-section">القائمة الرئيسية</div>
+        <div class="wh-nav-item active" data-page="dashboard"><i class="fas fa-chart-pie"></i><span>لوحة التحكم</span></div>
+        <div class="wh-nav-item" data-page="inventory"><i class="fas fa-warehouse"></i><span>المخزن</span></div>
+        <div class="wh-nav-item" data-page="products"><i class="fas fa-boxes"></i><span>المنتجات</span></div>
+
+        <div class="wh-nav-section">العمليات</div>
+        <div class="wh-nav-item" data-page="stockin"><i class="fas fa-arrow-circle-down"></i><span>بضاعة واردة</span></div>
+        <div class="wh-nav-item" data-page="stockout"><i class="fas fa-arrow-circle-up"></i><span>بضاعة صادرة</span></div>
+        <div class="wh-nav-item" data-page="purchases"><i class="fas fa-shopping-cart"></i><span>المشتريات</span></div>
+
+        <div class="wh-nav-section">المالية</div>
+        <div class="wh-nav-item" data-page="expenses"><i class="fas fa-money-bill-wave"></i><span>الانصراف</span></div>
+        <div class="wh-nav-item" data-page="collections"><i class="fas fa-hand-holding-usd"></i><span>التحصيل</span></div>
+        <div class="wh-nav-item" data-page="vodafone"><i class="fas fa-mobile-alt"></i><span>فودافون كاش</span></div>
+
+        <div class="wh-nav-section">روابط</div>
+        <a href="index.html" class="wh-nav-item"><i class="fas fa-arrow-right"></i><span>لوحة التحكم</span></a>
+        <a href="../index.html" class="wh-nav-item"><i class="fas fa-home"></i><span>الرئيسية</span></a>
+    </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="wh-main">
+
+    <!-- Alert -->
+    <div id="whAlert" class="wh-alert" style="display:none;"></div>
+
+    <!-- ===== Dashboard ===== -->
+    <div class="wh-section active" id="page-dashboard">
+        <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:20px;">لوحة التحكم</h2>
+        <div class="wh-stats">
+            <div class="wh-stat">
+                <div class="wh-stat-icon" style="background:#dbeafe;color:var(--info);"><i class="fas fa-boxes"></i></div>
+                <div class="wh-stat-value" id="totalProducts">0</div>
+                <div class="wh-stat-label">إجمالي المنتجات</div>
+            </div>
+            <div class="wh-stat">
+                <div class="wh-stat-icon" style="background:#d1fae5;color:var(--success);"><i class="fas fa-cubes"></i></div>
+                <div class="wh-stat-value" id="totalStock">0</div>
+                <div class="wh-stat-label">إجمالي الرصيد</div>
+            </div>
+            <div class="wh-stat">
+                <div class="wh-stat-icon" style="background:#fef3c7;color:var(--warning);"><i class="fas fa-exclamation-triangle"></i></div>
+                <div class="wh-stat-value" id="lowStock">0</div>
+                <div class="wh-stat-label">مخزون منخفض</div>
+            </div>
+            <div class="wh-stat">
+                <div class="wh-stat-icon" style="background:#ede9fe;color:#7c3aed;"><i class="fas fa-coins"></i></div>
+                <div class="wh-stat-value" id="totalValue">0</div>
+                <div class="wh-stat-label">قيمة المخزن (ج.م)</div>
+            </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <div class="wh-card">
+                <div class="wh-card-header"><h3><i class="fas fa-clock"></i> آخر العمليات</h3></div>
+                <div class="wh-card-body"><div id="recentActivity"><p style="color:var(--text-sub);text-align:center;padding:20px;">لا توجد عمليات بعد</p></div></div>
+            </div>
+            <div class="wh-card">
+                <div class="wh-card-header"><h3><i class="fas fa-chart-bar"></i> ملخص مالي</h3></div>
+                <div class="wh-card-body">
+                    <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);"><span>إجمالي المشتريات</span><strong id="totalPurchases">0 ج.م</strong></div>
+                    <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);"><span>إجمالي الانصراف</span><strong id="totalExpenses">0 ج.م</strong></div>
+                    <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);"><span>إجمالي التحصيل</span><strong id="totalCollections">0 ج.م</strong></div>
+                    <div style="display:flex;justify-content:space-between;padding:10px 0;"><span>فودافون كاش</span><strong id="totalVodafone">0 ج.م</strong></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== المخزن ===== -->
+    <div class="wh-section" id="page-inventory">
+        <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:20px;"><i class="fas fa-warehouse" style="color:var(--gold);margin-left:8px;"></i>المخزن</h2>
+        <div class="wh-card">
+            <div class="wh-card-header"><h3>حالة المخزن</h3></div>
+            <div class="wh-card-body">
+                <div class="product-grid" id="inventoryGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== المنتجات ===== -->
+    <div class="wh-section" id="page-products">
+        <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:20px;"><i class="fas fa-boxes" style="color:var(--gold);margin-left:8px;"></i>المنتجات</h2>
+        <div class="wh-card" style="margin-bottom:16px;">
+            <div class="wh-card-header">
+                <h3>إضافة منتج جديد</h3>
+            </div>
+            <div class="wh-card-body">
+                <div class="wh-form-row">
+                    <div class="wh-form-group"><label>اسم المنتج</label><input type="text" id="newProductName" required placeholder="اسم المنتج"></div>
+                    <div class="wh-form-group"><label>السعر (ج.م)</label><input type="number" id="newProductPrice" min="0" step="0.01" required placeholder="0.00" dir="ltr"></div>
+                </div>
+                <div class="wh-form-row">
+                    <div class="wh-form-group"><label>التصنيف</label><select id="newProductCategory"><option value="مبيدات صراصير">مبيدات صراصير</option><option value="مبيدات نمل">مبيدات نمل</option><option value="مبيدات بق">مبيدات بق</option><option value="مبيدات ناموس">مبيدات ناموس</option><option value="مبيدات ذباب">مبيدات ذباب</option><option value="حشرات مواشي">حشرات مواشي</option><option value="أخرى">أخرى</option></select></div>
+                    <div class="wh-form-group"><label>الرصيد الأولي</label><input type="number" id="newProductStock" min="0" value="0" dir="ltr"></div>
+                </div>
+                <button class="wh-btn wh-btn-primary" onclick="addProduct()"><i class="fas fa-plus"></i> إضافة منتج</button>
+            </div>
+        </div>
+        <div class="wh-card">
+            <div class="wh-card-header"><h3>قائمة المنتجات</h3></div>
+            <div class="wh-card-body">
+                <table class="wh-table">
+                    <thead><tr><th>المنتج</th><th>التصنيف</th><th>السعر</th><th>الرصيد</th><th>إجراءات</th></tr></thead>
+                    <tbody id="productsTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== بضاعة واردة ===== -->
+    <div class="wh-section" id="page-stockin">
+        <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:20px;"><i class="fas fa-arrow-circle-down" style="color:var(--success);margin-left:8px;"></i>بضاعة واردة (إدخال للمخزن)</h2>
+        <div class="wh-card">
+            <div class="wh-card-header"><h3>إدخال بضاعة</h3></div>
+            <div class="wh-card-body">
+                <div class="wh-form-row">
+                    <div class="wh-form-group"><label>المنتج</label><select id="stockinProduct"></select></div>
+                    <div class="wh-form-group"><label>الكمية</label><input type="number" id="stockinQty" min="1" value="1" dir="ltr"></div>
+                </div>
+                <div class="wh-form-row">
+                    <div class="wh-form-group"><label>ملاحظات</label><input type="text" id="stockinNotes" placeholder="اختياري"></div>
+                    <div class="wh-form-group" style="display:flex;align-items:flex-end;"><button class="wh-btn wh-btn-success" onclick="stockIn()"><i class="fas fa-plus-circle"></i> إدخال</button></div>
+                </div>
+            </div>
+        </div>
+        <div class="wh-card">
+            <div class="wh-card-header"><h3>سجل الإدخال</h3></div>
+            <div class="wh-card-body">
+                <table class="wh-table">
+                    <thead><tr><th>التاريخ</th><th>المنتج</th><th>الكمية</th><th>ملاحظات</th></tr></thead>
+                    <tbody id="stockinTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== بضاعة صادرة ===== -->
+    <div class="wh-section" id="page-stockout">
+        <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:20px;"><i class="fas fa-arrow-circle-up" style="color:var(--warning);margin-left:8px;"></i>بضاعة صادرة (سحب من المخزن)</h2>
+        <div class="wh-card">
+            <div class="wh-card-header"><h3>سحب بضاعة</h3></div>
+            <div class="wh-card-body">
+                <div class="wh-form-row">
+                    <div class="wh-form-group"><label>المنتج</label><select id="stockoutProduct"></select></div>
+                    <div class="wh-form-group"><label>الكمية</label><input type="number" id="stockoutQty" min="1" value="1" dir="ltr"></div>
+                </div>
+                <div class="wh-form-row">
+                    <div class="wh-form-group"><label>السبب</label><select id="stockoutReason"><option value="بيع">بيع</option><option value="تالف">تالف</option><option value="عرض">عرض</option><option value="أخرى">أخرى</option></select></div>
+                    <div class="wh-form-group"><label>ملاحظات</label><input type="text" id="stockoutNotes" placeholder="اختياري"></div>
+                </div>
+                <button class="wh-btn wh-btn-warning" style="background:var(--warning);color:#fff;" onclick="stockOut()"><i class="fas fa-minus-circle"></i> سحب</button>
+            </div>
+        </div>
+        <div class="wh-card">
+            <div class="wh-card-header"><h3>سجل السحب</h3></div>
+            <div class="wh-card-body">
+                <table class="wh-table">
+                    <thead><tr><th>التاريخ</th><th>المنتج</th><th>الكمية</th><th>السبب</th><th>ملاحظات</th></tr></thead>
+                    <tbody id="stockoutTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== المشتريات ===== -->
+    <div class="wh-section" id="page-purchases">
+        <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:20px;"><i class="fas fa-shopping-cart" style="color:var(--info);margin-left:8px;"></i>المشتريات</h2>
+        <div class="wh-card">
+            <div class="wh-card-header"><h3>إضافة مشتريات</h3></div>
+            <div class="wh-card-body">
+                <div class="wh-form-row">
+                    <div class="wh-form-group"><label>المورد</label><input type="text" id="purchaseSupplier" required placeholder="اسم المورد"></div>
+                    <div class="wh-form-group"><label>المنتج</label><select id="purchaseProduct"></select></div>
+                </div>
+                <div class="wh-form-row">
+                    <div class="wh-form-group"><label>الكمية</label><input type="number" id="purchaseQty" min="1" value="1" dir="ltr"></div>
+                    <div class="wh-form-group"><label>سعر الوحدة (ج.م)</label><input type="number" id="purchasePrice" min="0" step="0.01" dir="ltr"></div>
+                </div>
+                <div class="wh-form-row">
+                    <div class="wh-form-group"><label>طريقة الدفع</label><select id="purchasePayMethod"><option value="كاش">كاش</option><option value="فودافون كاش">فودافون كاش</option><option value="تحويل بنكي">تحويل بنكي</option><option value="آجل">آجل</option></select></div>
+                    <div class="wh-form-group"><label>ملاحظات</label><input type="text" id="purchaseNotes" placeholder="اختياري"></div>
+                </div>
+                <button class="wh-btn wh-btn-info" onclick="addPurchase()"><i class="fas fa-plus"></i> إضافة مشتريات</button>
+            </div>
+        </div>
+        <div class="wh-card">
+            <div class="wh-card-header"><h3>سجل المشتريات</h3></div>
+            <div class="wh-card-body">
+                <table class="wh-table">
+                    <thead><tr><th>التاريخ</th><th>المورد</th><th>المنتج</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th><th>الدفع</th></tr></thead>
+                    <tbody id="purchasesTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== الانصراف ===== -->
+    <div class="wh-section" id="page-expenses">
+        <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:20px;"><i class="fas fa-money-bill-wave" style="color:var(--danger);margin-left:8px;"></i>الانصراف (المصروفات)</h2>
+        <div class="wh-card">
+            <div class="wh-card-header"><h3>إضافة مصروف</h3></div>
+            <div class="wh-card-body">
+                <div class="wh-form-row">
+                    <div class="wh-form-group"><label>نوع المصروف</label><select id="expenseType"><option value="شحن">شحن</option><option value="أجور">أجور</option><option value="إيجار">إيجار</option><option value=" مواد تغليف">مواد تغليف</option><option value="宣 إعلانات">إعلانات</option><option value="أخرى">أخرى</option></select></div>
+                    <div class="wh-form-group"><label>المبلغ (ج.م)</label><input type="number" id="expenseAmount" min="0" step="0.01" required dir="ltr"></div>
+                </div>
+                <div class="wh-form-row">
+                    <div class="wh-form-group"><label>البيان</label><input type="text" id="expenseDesc" required placeholder="وصف المصروف"></div>
+                    <div class="wh-form-group"><label>التاريخ</label><input type="date" id="expenseDate"></div>
+                </div>
+                <button class="wh-btn wh-btn-danger" onclick="addExpense()"><i class="fas fa-plus"></i> إضافة مصروف</button>
+            </div>
+        </div>
+        <div class="wh-card">
+            <div class="wh-card-header"><h3>سجل المصروفات</h3></div>
+            <div class="wh-card-body">
+                <table class="wh-table">
+                    <thead><tr><th>التاريخ</th><th>النوع</th><th>البيان</th><th>المبلغ</th></tr></thead>
+                    <tbody id="expensesTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== التحصيل ===== -->
+    <div class="wh-section" id="page-collections">
+        <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:20px;"><i class="fas fa-hand-holding-usd" style="color:var(--success);margin-left:8px;"></i>التحصيل</h2>
+        <div class="wh-card">
+            <div class="wh-card-header"><h3>إضافة تحصيل</h3></div>
+            <div class="wh-card-body">
+                <div class="wh-form-row">
+                    <div class="wh-form-group"><label>من (العميل/المورد)</label><input type="text" id="collectionFrom" required placeholder="اسم العميل أو المورد"></div>
+                    <div class="wh-form-group"><label>المبلغ (ج.م)</label><input type="number" id="collectionAmount" min="0" step="0.01" required dir="ltr"></div>
+                </div>
+                <div class="wh-form-row">
+                    <div class="wh-form-group"><label>طريقة التحصيل</label><select id="collectionMethod"><option value="كاش">كاش</option><option value="فودافون كاش">فودافون كاش</option><option value="تحويل بنكي">تحويل بنكي</option><option value="واتساب">واتساب</option></select></div>
+                    <div class="wh-form-group"><label>التاريخ</label><input type="date" id="collectionDate"></div>
+                </div>
+                <div class="wh-form-group"><label>ملاحظات</label><input type="text" id="collectionNotes" placeholder="اختياري"></div>
+                <button class="wh-btn wh-btn-success" onclick="addCollection()"><i class="fas fa-plus"></i> إضافة تحصيل</button>
+            </div>
+        </div>
+        <div class="wh-card">
+            <div class="wh-card-header"><h3>سجل التحصيل</h3></div>
+            <div class="wh-card-body">
+                <table class="wh-table">
+                    <thead><tr><th>التاريخ</th><th>من</th><th>المبلغ</th><th>الطريقة</th><th>ملاحظات</th></tr></thead>
+                    <tbody id="collectionsTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== فودافون كاش ===== -->
+    <div class="wh-section" id="page-vodafone">
+        <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:20px;"><i class="fas fa-mobile-alt" style="color:#e60000;margin-left:8px;"></i>فودافون كاش</h2>
+        <div class="wh-card">
+            <div class="wh-card-header"><h3>إضافة عملية فودافون</h3></div>
+            <div class="wh-card-body">
+                <div class="wh-form-row">
+                    <div class="wh-form-group"><label>نوع العملية</label><select id="vodType"><option value="إيداع">إيداع</option><option value="سحب">سحب</option></select></div>
+                    <div class="wh-form-group"><label>المبلغ (ج.م)</label><input type="number" id="vodAmount" min="0" step="0.01" required dir="ltr"></div>
+                </div>
+                <div class="wh-form-row">
+                    <div class="wh-form-group"><label>رقم الموبايل</label><input type="tel" id="vodPhone" placeholder="01XXXXXXXXX" dir="ltr"></div>
+                    <div class="wh-form-group"><label>الطرف الآخر</label><input type="text" id="vodCounterparty" placeholder="اسم الطرف"></div>
+                </div>
+                <div class="wh-form-row">
+                    <div class="wh-form-group"><label>التاريخ</label><input type="date" id="vodDate"></div>
+                    <div class="wh-form-group"><label>ملاحظات</label><input type="text" id="vodNotes" placeholder="اختياري"></div>
+                </div>
+                <button class="wh-btn wh-btn-danger" style="background:#e60000;" onclick="addVodafone()"><i class="fas fa-plus"></i> إضافة عملية</button>
+            </div>
+        </div>
+        <div class="wh-card">
+            <div class="wh-card-header"><h3>سجل فودافون كاش</h3></div>
+            <div class="wh-card-body">
+                <table class="wh-table">
+                    <thead><tr><th>التاريخ</th><th>النوع</th><th>المبلغ</th><th>الموبايل</th><th>الطرف</th><th>ملاحظات</th></tr></thead>
+                    <tbody id="vodafoneTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<script>
+// ===== PRODUCTS DATA =====
+const DEFAULT_PRODUCTS = [
+    { id: 1, name: 'اف 16 للصراصير 400ملي', category: 'مبيدات صراصير', price: 50, stock: 0 },
+    { id: 2, name: 'اف 22 للصراصير 400 ملي', category: 'مبيدات صراصير', price: 50, stock: 0 },
+    { id: 3, name: 'اف 16 جامبو للصراصير 650 ملي', category: 'مبيدات صراصير', price: 70, stock: 0 },
+    { id: 4, name: 'اف 16 للصراصير 500ملي', category: 'مبيدات صراصير', price: 60, stock: 0 },
+    { id: 5, name: 'الصاروخ صراصير', category: 'مبيدات صراصير', price: 60, stock: 0 },
+    { id: 6, name: 'اسد صراصير', category: 'مبيدات صراصير', price: 50, stock: 0 },
+    { id: 7, name: 'الصاروخ نمل', category: 'مبيدات نمل', price: 60, stock: 0 },
+    { id: 8, name: 'اف 22 جامبو للنمل 650 ملي', category: 'مبيدات نمل', price: 70, stock: 0 },
+    { id: 9, name: 'اف22 للنمل 500 ملي', category: 'مبيدات نمل', price: 60, stock: 0 },
+    { id: 10, name: 'مبيد اسد للنمل', category: 'مبيدات نمل', price: 50, stock: 0 },
+    { id: 11, name: 'الصاروخ بق', category: 'مبيدات بق', price: 60, stock: 0 },
+    { id: 12, name: 'مبيد اف 35 للبق - بدون رائحة', category: 'مبيدات بق', price: 70, stock: 0 },
+    { id: 13, name: 'الصاروخ ناموس', category: 'مبيدات ناموس', price: 60, stock: 0 },
+    { id: 14, name: 'رينجو للذباب', category: 'مبيدات ذباب', price: 60, stock: 0 },
+    { id: 15, name: 'سوبر 777 حشرات المواشي 1 لتر', category: 'حشرات مواشي', price: 100, stock: 0 },
+    { id: 16, name: 'سوبر 777 لحشرات المواشي', category: 'حشرات مواشي', price: 50, stock: 0 },
+    { id: 17, name: 'نيجي اسبونج', category: 'أخرى', price: 20, stock: 0 }
+];
+
+// ===== STORAGE =====
+function getProducts() { return JSON.parse(localStorage.getItem('wh_products') || 'null') || DEFAULT_PRODUCTS; }
+function saveProducts(p) { localStorage.setItem('wh_products', JSON.stringify(p)); }
+function getStockIn() { return JSON.parse(localStorage.getItem('wh_stockin') || '[]'); }
+function saveStockIn(d) { localStorage.setItem('wh_stockin', JSON.stringify(d)); }
+function getStockOut() { return JSON.parse(localStorage.getItem('wh_stockout') || '[]'); }
+function saveStockOut(d) { localStorage.setItem('wh_stockout', JSON.stringify(d)); }
+function getPurchases() { return JSON.parse(localStorage.getItem('wh_purchases') || '[]'); }
+function savePurchases(d) { localStorage.setItem('wh_purchases', JSON.stringify(d)); }
+function getExpenses() { return JSON.parse(localStorage.getItem('wh_expenses') || '[]'); }
+function saveExpenses(d) { localStorage.setItem('wh_expenses', JSON.stringify(d)); }
+function getCollections() { return JSON.parse(localStorage.getItem('wh_collections') || '[]'); }
+function saveCollections(d) { localStorage.setItem('wh_collections', JSON.stringify(d)); }
+function getVodafone() { return JSON.parse(localStorage.getItem('wh_vodafone') || '[]'); }
+function saveVodafone(d) { localStorage.setItem('wh_vodafone', JSON.stringify(d)); }
+const today = () => new Date().toLocaleDateString('ar-EG');
+const esc = t => { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; };
+
+// ===== NAVIGATION =====
+document.querySelectorAll('.wh-nav-item[data-page]').forEach(item => {
+    item.addEventListener('click', function() {
+        document.querySelectorAll('.wh-nav-item').forEach(n => n.classList.remove('active'));
+        this.classList.add('active');
+        document.querySelectorAll('.wh-section').forEach(s => s.classList.remove('active'));
+        document.getElementById('page-' + this.dataset.page).classList.add('active');
+    });
+});
+
+// ===== DASHBOARD =====
+function updateDashboard() {
+    const products = getProducts();
+    const totalStock = products.reduce((s, p) => s + p.stock, 0);
+    const totalValue = products.reduce((s, p) => s + (p.price * p.stock), 0);
+    const lowStock = products.filter(p => p.stock < 5).length;
+
+    document.getElementById('totalProducts').textContent = products.length;
+    document.getElementById('totalStock').textContent = totalStock;
+    document.getElementById('lowStock').textContent = lowStock;
+    document.getElementById('totalValue').textContent = totalValue.toLocaleString('ar-EG');
+
+    // Financial summary
+    const purchases = getPurchases();
+    const expenses = getExpenses();
+    const collections = getCollections();
+    const vodafone = getVodafone();
+    const totP = purchases.reduce((s, p) => s + (p.qty * p.price), 0);
+    const totE = expenses.reduce((s, e) => s + e.amount, 0);
+    const totC = collections.reduce((s, c) => s + c.amount, 0);
+    const totV = vodafone.reduce((s, v) => s + v.amount, 0);
+    document.getElementById('totalPurchases').textContent = totP.toLocaleString('ar-EG') + ' ج.م';
+    document.getElementById('totalExpenses').textContent = totE.toLocaleString('ar-EG') + ' ج.م';
+    document.getElementById('totalCollections').textContent = totC.toLocaleString('ar-EG') + ' ج.م';
+    document.getElementById('totalVodafone').textContent = totV.toLocaleString('ar-EG') + ' ج.م';
+
+    // Recent activity
+    const allOps = [
+        ...purchases.map(p => ({ date: p.date, text: `مشتريات: ${p.supplier} - ${p.productName}`, type: 'purchase' })),
+        ...expenses.map(e => ({ date: e.date, text: `مصروف: ${e.type} - ${e.amount} ج.م`, type: 'expense' })),
+        ...collections.map(c => ({ date: c.date, text: `تحصيل: ${c.from} - ${c.amount} ج.م`, type: 'collection' }))
+    ].sort((a, b) => 0).slice(0, 8);
+
+    const actEl = document.getElementById('recentActivity');
+    if (allOps.length) {
+        actEl.innerHTML = allOps.map(a => `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:0.85rem;"><span>${esc(a.text)}</span><span style="color:var(--text-sub);font-size:0.78rem;">${a.date}</span></div>`).join('');
+    }
+}
+
+// ===== INVENTORY =====
+function renderInventory() {
+    const products = getProducts();
+    const grid = document.getElementById('inventoryGrid');
+    grid.innerHTML = products.map(p => `
+        <div class="product-card">
+            <div class="product-name">${esc(p.name)}</div>
+            <div class="product-price">${p.price} ج.م</div>
+            <div class="product-stock">الرصيد: <strong class="${p.stock < 5 ? 'stock-low' : 'stock-ok'}">${p.stock}</strong></div>
+            <div style="font-size:0.75rem;color:var(--text-sub);margin-top:2px;">${esc(p.category)}</div>
+        </div>
+    `).join('');
+}
+
+// ===== PRODUCTS =====
+function renderProducts() {
+    const products = getProducts();
+    const tbody = document.getElementById('productsTable');
+    tbody.innerHTML = products.map(p => `
+        <tr>
+            <td><strong>${esc(p.name)}</strong></td>
+            <td><span class="wh-badge wh-badge-info">${esc(p.category)}</span></td>
+            <td>${p.price} ج.م</td>
+            <td><strong class="${p.stock < 5 ? 'stock-low' : ''}">${p.stock}</strong></td>
+            <td>
+                <button class="wh-btn wh-btn-secondary" style="padding:5px 10px;font-size:0.78rem;" onclick="deleteProduct(${p.id})"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>
+    `).join('');
+    populateProductSelects();
+}
+
+function addProduct() {
+    const name = document.getElementById('newProductName').value.trim();
+    const price = parseFloat(document.getElementById('newProductPrice').value) || 0;
+    const category = document.getElementById('newProductCategory').value;
+    const stock = parseInt(document.getElementById('newProductStock').value) || 0;
+    if (!name) { showWhAlert('error', 'أدخل اسم المنتج'); return; }
+    const products = getProducts();
+    const newId = products.length ? Math.max(...products.map(p => p.id)) + 1 : 1;
+    products.push({ id: newId, name, category, price, stock });
+    saveProducts(products);
+    document.getElementById('newProductName').value = '';
+    document.getElementById('newProductPrice').value = '';
+    document.getElementById('newProductStock').value = '0';
+    renderProducts(); updateDashboard(); renderInventory();
+    showWhAlert('success', 'تم إضافة المنتج بنجاح');
+}
+
+function deleteProduct(id) {
+    if (!confirm('هل أنت متأكد من حذف هذا المنتج؟')) return;
+    saveProducts(getProducts().filter(p => p.id !== id));
+    renderProducts(); updateDashboard(); renderInventory();
+    showWhAlert('success', 'تم حذف المنتج');
+}
+
+function populateProductSelects() {
+    const products = getProducts();
+    const opts = products.map(p => `<option value="${p.id}">${esc(p.name)} (رصيد: ${p.stock})</option>`).join('');
+    ['stockinProduct', 'stockoutProduct', 'purchaseProduct'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = '<option value="">اختر المنتج</option>' + opts;
+    });
+}
+
+// ===== STOCK IN =====
+function stockIn() {
+    const productId = parseInt(document.getElementById('stockinProduct').value);
+    const qty = parseInt(document.getElementById('stockinQty').value) || 0;
+    const notes = document.getElementById('stockinNotes').value.trim();
+    if (!productId || qty < 1) { showWhAlert('error', 'اختر المنتج وحدد الكمية'); return; }
+    const products = getProducts();
+    const p = products.find(x => x.id === productId);
+    if (!p) return;
+    p.stock += qty;
+    saveProducts(products);
+    const records = getStockIn();
+    records.unshift({ date: today(), productId, productName: p.name, qty, notes });
+    saveStockIn(records);
+    document.getElementById('stockinQty').value = '1';
+    document.getElementById('stockinNotes').value = '';
+    renderStockIn(); renderProducts(); updateDashboard(); renderInventory();
+    showWhAlert('success', `تم إدخال ${qty} من ${p.name}`);
+}
+
+function renderStockIn() {
+    const records = getStockIn();
+    document.getElementById('stockinTable').innerHTML = records.slice(0, 30).map(r => `
+        <tr><td>${r.date}</td><td>${esc(r.productName)}</td><td>${r.qty}</td><td>${esc(r.notes||'-')}</td></tr>
+    `).join('');
+}
+
+// ===== STOCK OUT =====
+function stockOut() {
+    const productId = parseInt(document.getElementById('stockoutProduct').value);
+    const qty = parseInt(document.getElementById('stockoutQty').value) || 0;
+    const reason = document.getElementById('stockoutReason').value;
+    const notes = document.getElementById('stockoutNotes').value.trim();
+    if (!productId || qty < 1) { showWhAlert('error', 'اختر المنتج وحدد الكمية'); return; }
+    const products = getProducts();
+    const p = products.find(x => x.id === productId);
+    if (!p) return;
+    if (p.stock < qty) { showWhAlert('error', `الرصيد غير كافي (${p.stock} متاح)`); return; }
+    p.stock -= qty;
+    saveProducts(products);
+    const records = getStockOut();
+    records.unshift({ date: today(), productId, productName: p.name, qty, reason, notes });
+    saveStockOut(records);
+    document.getElementById('stockoutQty').value = '1';
+    document.getElementById('stockoutNotes').value = '';
+    renderStockOut(); renderProducts(); updateDashboard(); renderInventory();
+    showWhAlert('success', `تم سحب ${qty} من ${p.name}`);
+}
+
+function renderStockOut() {
+    const records = getStockOut();
+    document.getElementById('stockoutTable').innerHTML = records.slice(0, 30).map(r => `
+        <tr><td>${r.date}</td><td>${esc(r.productName)}</td><td>${r.qty}</td><td><span class="wh-badge wh-badge-warning">${esc(r.reason)}</span></td><td>${esc(r.notes||'-')}</td></tr>
+    `).join('');
+}
+
+// ===== PURCHASES =====
+function addPurchase() {
+    const supplier = document.getElementById('purchaseSupplier').value.trim();
+    const productId = parseInt(document.getElementById('purchaseProduct').value);
+    const qty = parseInt(document.getElementById('purchaseQty').value) || 0;
+    const price = parseFloat(document.getElementById('purchasePrice').value) || 0;
+    const payMethod = document.getElementById('purchasePayMethod').value;
+    const notes = document.getElementById('purchaseNotes').value.trim();
+    if (!supplier || !productId || qty < 1) { showWhAlert('error', 'أدخل المورد والمنتج والكمية'); return; }
+    const products = getProducts();
+    const p = products.find(x => x.id === productId);
+    if (!p) return;
+
+    // Add to stock
+    p.stock += qty;
+    saveProducts(products);
+
+    // Save purchase record
+    const records = getPurchases();
+    records.unshift({ date: today(), supplier, productId, productName: p.name, qty, price, payMethod, notes });
+    savePurchases(records);
+
+    document.getElementById('purchaseSupplier').value = '';
+    document.getElementById('purchaseQty').value = '1';
+    document.getElementById('purchasePrice').value = '';
+    document.getElementById('purchaseNotes').value = '';
+    renderPurchases(); renderProducts(); updateDashboard(); renderInventory();
+    showWhAlert('success', `تم إضافة مشتريات: ${p.name} × ${qty}`);
+}
+
+function renderPurchases() {
+    const records = getPurchases();
+    document.getElementById('purchasesTable').innerHTML = records.slice(0, 30).map(r => `
+        <tr><td>${r.date}</td><td>${esc(r.supplier)}</td><td>${esc(r.productName)}</td><td>${r.qty}</td><td>${r.price} ج.م</td><td><strong>${(r.qty*r.price).toLocaleString('ar-EG')} ج.م</strong></td><td><span class="wh-badge wh-badge-info">${esc(r.payMethod)}</span></td></tr>
+    `).join('');
+}
+
+// ===== EXPENSES =====
+function addExpense() {
+    const type = document.getElementById('expenseType').value;
+    const amount = parseFloat(document.getElementById('expenseAmount').value) || 0;
+    const desc = document.getElementById('expenseDesc').value.trim();
+    const date = document.getElementById('expenseDate').value || today();
+    if (!desc || amount < 1) { showWhAlert('error', 'أدخل البيان والمبلغ'); return; }
+    const records = getExpenses();
+    records.unshift({ date, type, desc, amount });
+    saveExpenses(records);
+    document.getElementById('expenseAmount').value = '';
+    document.getElementById('expenseDesc').value = '';
+    renderExpenses(); updateDashboard();
+    showWhAlert('success', `تم إضافة مصروف: ${amount} ج.م`);
+}
+
+function renderExpenses() {
+    const records = getExpenses();
+    document.getElementById('expensesTable').innerHTML = records.slice(0, 30).map(r => `
+        <tr><td>${r.date}</td><td><span class="wh-badge wh-badge-danger">${esc(r.type)}</span></td><td>${esc(r.desc)}</td><td><strong>${r.amount.toLocaleString('ar-EG')} ج.م</strong></td></tr>
+    `).join('');
+}
+
+// ===== COLLECTIONS =====
+function addCollection() {
+    const from = document.getElementById('collectionFrom').value.trim();
+    const amount = parseFloat(document.getElementById('collectionAmount').value) || 0;
+    const method = document.getElementById('collectionMethod').value;
+    const date = document.getElementById('collectionDate').value || today();
+    const notes = document.getElementById('collectionNotes').value.trim();
+    if (!from || amount < 1) { showWhAlert('error', 'أدخل الاسم والمبلغ'); return; }
+    const records = getCollections();
+    records.unshift({ date, from, amount, method, notes });
+    saveCollections(records);
+    document.getElementById('collectionFrom').value = '';
+    document.getElementById('collectionAmount').value = '';
+    document.getElementById('collectionNotes').value = '';
+    renderCollections(); updateDashboard();
+    showWhAlert('success', `تم تسجيل تحصيل: ${amount} ج.م`);
+}
+
+function renderCollections() {
+    const records = getCollections();
+    document.getElementById('collectionsTable').innerHTML = records.slice(0, 30).map(r => `
+        <tr><td>${r.date}</td><td>${esc(r.from)}</td><td><strong>${r.amount.toLocaleString('ar-EG')} ج.م</strong></td><td><span class="wh-badge wh-badge-success">${esc(r.method)}</span></td><td>${esc(r.notes||'-')}</td></tr>
+    `).join('');
+}
+
+// ===== VODAFONE =====
+function addVodafone() {
+    const type = document.getElementById('vodType').value;
+    const amount = parseFloat(document.getElementById('vodAmount').value) || 0;
+    const phone = document.getElementById('vodPhone').value.trim();
+    const counterparty = document.getElementById('vodCounterparty').value.trim();
+    const date = document.getElementById('vodDate').value || today();
+    const notes = document.getElementById('vodNotes').value.trim();
+    if (amount < 1) { showWhAlert('error', 'أدخل المبلغ'); return; }
+    const records = getVodafone();
+    records.unshift({ date, type, amount, phone, counterparty, notes });
+    saveVodafone(records);
+    document.getElementById('vodAmount').value = '';
+    document.getElementById('vodPhone').value = '';
+    document.getElementById('vodCounterparty').value = '';
+    document.getElementById('vodNotes').value = '';
+    renderVodafone(); updateDashboard();
+    showWhAlert('success', `تم تسجيل عملية فودافون: ${type} ${amount} ج.م`);
+}
+
+function renderVodafone() {
+    const records = getVodafone();
+    document.getElementById('vodafoneTable').innerHTML = records.slice(0, 30).map(r => `
+        <tr><td>${r.date}</td><td><span class="wh-badge ${r.type==='إيداع'?'wh-badge-success':'wh-badge-danger'}">${esc(r.type)}</span></td><td><strong>${r.amount.toLocaleString('ar-EG')} ج.م</strong></td><td dir="ltr">${esc(r.phone||'-')}</td><td>${esc(r.counterparty||'-')}</td><td>${esc(r.notes||'-')}</td></tr>
+    `).join('');
+}
+
+// ===== ALERT =====
+function showWhAlert(type, msg) {
+    const el = document.getElementById('whAlert');
+    el.className = 'wh-alert wh-alert-' + type;
+    el.innerHTML = `<i class="fas fa-${type==='success'?'check-circle':'exclamation-circle'}"></i><span>${msg}</span>`;
+    el.style.display = 'flex';
+    setTimeout(() => el.style.display = 'none', 3500);
+}
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', function() {
+    // Set today's date
+    const d = today();
+    ['expenseDate','collectionDate','vodDate'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = new Date().toISOString().split('T')[0];
+    });
+
+    renderProducts();
+    renderInventory();
+    renderStockIn();
+    renderStockOut();
+    renderPurchases();
+    renderExpenses();
+    renderCollections();
+    renderVodafone();
+    updateDashboard();
+});
+</script>
+</body>
+</html>
