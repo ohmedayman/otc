@@ -290,7 +290,9 @@
             </div>
         </div>
         <div class="wh-card">
-            <div class="wh-card-header"><h3>قائمة المنتجات</h3></div>
+            <div class="wh-card-header"><h3>قائمة المنتجات</h3>
+                <button class="wh-btn wh-btn-secondary" style="margin-right:auto;font-size:0.78rem;" onclick="resetProductsToDefault()"><i class="fas fa-undo"></i> إعادة تعيين المنتجات للأصل</button>
+            </div>
             <div class="wh-card-body">
                 <table class="wh-table">
                     <thead><tr><th>المنتج</th><th>التصنيف</th><th>السعر</th><th>الوحدة</th><th>الرصيد</th><th>إجراءات</th></tr></thead>
@@ -853,6 +855,17 @@ async function addProduct() {
     document.getElementById('newProductPrice').value = '';
     document.getElementById('newProductStock').value = '0';
     showWhAlert('success', 'تم إضافة المنتج بنجاح');
+}
+
+async function resetProductsToDefault() {
+    if (!confirm('هل أنت متأكد؟ هتمسح كل المنتجات الحالية وترجع الـ 17 منتج أصلي بأصلهم.')) return;
+    for (const p of productsData) {
+        if (p._fbId) await fbDeleteDoc(WH_PRODUCTS, p._fbId);
+    }
+    for (const p of DEFAULT_PRODUCTS) {
+        await fbAddDoc(WH_PRODUCTS, p);
+    }
+    showWhAlert('success', 'تم إعادة تعيين المنتجات بنجاح');
 }
 
 function editProduct(fbId) {
