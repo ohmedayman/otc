@@ -58,12 +58,12 @@ if (copyAllBtn) copyAllBtn.addEventListener('click', copyAllBulk);
 // ===== Get order from localStorage (added by admin) =====
 function getAdminOrder(num) {
     const orders = JSON.parse(localStorage.getItem('milanoOrders') || '[]');
-    const o = orders.find(x => x.trackingNumber === num);
+    const o = orders.find(x => x.m16Number === num || x.trackingNumber === num);
     if (!o) return null;
     const statusMap = { 'pending':'قيد المعالجة', 'in-transit':'في الطريق', 'delivered':'تم التوصيل', 'exception':'مشكلة في التوصيل' };
     const statusLoc = { 'pending':'مستودع البائع', 'in-transit':'في الطريق', 'delivered':'تم التوصيل', 'exception':'مركز الخدمة' };
     return {
-        trackingNumber: o.trackingNumber,
+        trackingNumber: o.m16Number || o.trackingNumber,
         status: o.status,
         statusText: statusMap[o.status] || o.status,
         lastUpdate: o.createdAt || '-',
@@ -80,7 +80,7 @@ function getAdminOrder(num) {
 async function trackPackage() {
     const num = trackingInput.value.trim().toUpperCase();
     if (!num) { showError('الرجاء إدخال رقم التتبع'); shakeInput(); return; }
-    if (num.length < 10) { showError('رقم التتبع يجب أن يكون على الأقل 10 أحرف'); shakeInput(); return; }
+    if (num.length < 6) { showError('رقم التتبع يجب أن يكون على الأقل 6 أحرف'); shakeInput(); return; }
 
     hideAll();
     loadingSpinner.classList.remove('hidden');
@@ -96,7 +96,7 @@ async function bulkTrack() {
     const input = document.getElementById('bulkInput').value.trim();
     if (!input) { showToast('أدخل أرقام التتبع', 'error'); return; }
 
-    const numbers = input.split('\n').map(n => n.trim().toUpperCase()).filter(n => n.length >= 10);
+    const numbers = input.split('\n').map(n => n.trim().toUpperCase()).filter(n => n.length >= 6);
     if (numbers.length === 0) { showToast('لا توجد أرقام صالحة', 'error'); return; }
 
     hideAll();
