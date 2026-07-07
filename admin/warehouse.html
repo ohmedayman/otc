@@ -206,6 +206,25 @@
         </div>
     </div>
 
+    <!-- Stock Edit Modal -->
+    <div class="wh-modal" id="stockEditModal" onclick="if(event.target===this)this.classList.remove('active')">
+        <div class="wh-modal-content">
+            <h3 style="margin-bottom:16px;"><i class="fas fa-edit" style="color:var(--gold);margin-left:8px;"></i>تعديل الرصيد</h3>
+            <input type="hidden" id="editStockProductId">
+            <div class="wh-form-group"><label>المنتج</label><input type="text" id="editStockProductName" readonly style="background:var(--bg);"></div>
+            <div class="wh-form-row">
+                <div class="wh-form-group"><label>الرصيد الحالي</label><input type="number" id="editStockCurrent" readonly dir="ltr" style="background:var(--bg);font-weight:700;"></div>
+                <div class="wh-form-group"><label>الرصيد الجديد</label><input type="number" id="editStockNew" min="0" dir="ltr" autofocus></div>
+            </div>
+            <div class="wh-form-group"><label>سبب التعديل</label><select id="editStockReason"><option value="جرد">جرد</option><option value="تالف">تالف</option><option value="مرتجع">مرتجع</option><option value="تصحيح">تصحيح</option><option value="أخرى">أخرى</option></select></div>
+            <div class="wh-form-group"><label>ملاحظات</label><input type="text" id="editStockNotes" placeholder="اختياري"></div>
+            <div style="display:flex;gap:10px;margin-top:16px;">
+                <button class="wh-btn wh-btn-primary" onclick="saveStockEdit()"><i class="fas fa-save"></i> حفظ</button>
+                <button class="wh-btn wh-btn-secondary" onclick="document.getElementById('stockEditModal').classList.remove('active')">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ===== المنتجات ===== -->
     <div class="wh-section" id="page-products">
         <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:20px;"><i class="fas fa-boxes" style="color:var(--gold);margin-left:8px;"></i>المنتجات</h2>
@@ -306,7 +325,7 @@
                     <div class="wh-form-group"><label>سعر الوحدة (ج.م)</label><input type="number" id="purchasePrice" min="0" step="0.01" dir="ltr"></div>
                 </div>
                 <div class="wh-form-row">
-                    <div class="wh-form-group"><label>طريقة الدفع</label><select id="purchasePayMethod"><option value="كاش">كاش</option><option value="فودافون كاش">فودافون كاش</option><option value="تحويل بنكي">تحويل بنكي</option><option value="آجل">آجل</option></select></div>
+                    <div class="wh-form-group"><label>طريقة الدفع</label><select id="purchasePayMethod"><option value="كاش">كاش</option><option value="فودافون كاش">فودافون كاش</option><option value="Easy Pay">Easy Pay</option><option value="تحويل بنكي">تحويل بنكي</option><option value="آجل">آجل</option></select></div>
                     <div class="wh-form-group"><label>ملاحظات</label><input type="text" id="purchaseNotes" placeholder="اختياري"></div>
                 </div>
                 <button class="wh-btn wh-btn-info" onclick="addPurchase()"><i class="fas fa-plus"></i> إضافة مشتريات</button>
@@ -362,7 +381,7 @@
                     <div class="wh-form-group"><label>المبلغ (ج.م)</label><input type="number" id="collectionAmount" min="0" step="0.01" required dir="ltr"></div>
                 </div>
                 <div class="wh-form-row">
-                    <div class="wh-form-group"><label>طريقة التحصيل</label><select id="collectionMethod"><option value="كاش">كاش</option><option value="فودافون كاش">فودافون كاش</option><option value="تحويل بنكي">تحويل بنكي</option><option value="واتساب">واتساب</option></select></div>
+                    <div class="wh-form-group"><label>طريقة التحصيل</label><select id="collectionMethod"><option value="كاش">كاش</option><option value="فودافون كاش">فودافون كاش</option><option value="Easy Pay">Easy Pay</option><option value="تحويل بنكي">تحويل بنكي</option><option value="واتساب">واتساب</option></select></div>
                     <div class="wh-form-group"><label>التاريخ</label><input type="date" id="collectionDate"></div>
                 </div>
                 <div class="wh-form-group"><label>ملاحظات</label><input type="text" id="collectionNotes" placeholder="اختياري"></div>
@@ -513,8 +532,42 @@ function renderInventory() {
             <div class="product-price">${p.price} ج.م</div>
             <div class="product-stock">الرصيد: <strong class="${p.stock < 5 ? 'stock-low' : 'stock-ok'}">${p.stock}</strong></div>
             <div style="font-size:0.75rem;color:var(--text-sub);margin-top:2px;">${esc(p.category)}</div>
+            <button onclick="openStockEdit(${p.id})" style="margin-top:8px;padding:5px 12px;background:var(--gold);color:#fff;border:none;border-radius:6px;font-size:0.78rem;font-weight:600;cursor:pointer;font-family:inherit;"><i class="fas fa-edit"></i> تعديل الرصيد</button>
         </div>
     `).join('');
+}
+
+function openStockEdit(id) {
+    const p = getProducts().find(x => x.id === id);
+    if (!p) return;
+    document.getElementById('editStockProductId').value = p.id;
+    document.getElementById('editStockProductName').value = p.name;
+    document.getElementById('editStockCurrent').value = p.stock;
+    document.getElementById('editStockNew').value = p.stock;
+    document.getElementById('stockEditModal').classList.add('active');
+}
+
+function saveStockEdit() {
+    const id = parseInt(document.getElementById('editStockProductId').value);
+    const newStock = parseInt(document.getElementById('editStockNew').value);
+    const reason = document.getElementById('editStockReason').value;
+    const notes = document.getElementById('editStockNotes').value.trim();
+    if (isNaN(newStock) || newStock < 0) { showWhAlert('error', 'أدخل رصيد صحيح'); return; }
+    const products = getProducts();
+    const p = products.find(x => x.id === id);
+    if (!p) return;
+    const oldStock = p.stock;
+    p.stock = newStock;
+    saveProducts(products);
+
+    // Log the adjustment
+    const records = getStockIn();
+    records.unshift({ date: today(), productId: id, productName: p.name, qty: newStock - oldStock, notes: `تعديل (${reason}): ${oldStock} → ${newStock} ${notes?'- '+notes:''}` });
+    saveStockIn(records);
+
+    document.getElementById('stockEditModal').classList.remove('active');
+    renderInventory(); renderProducts(); updateDashboard();
+    showWhAlert('success', `تم تعديل رصيد ${p.name}: ${oldStock} → ${newStock}`);
 }
 
 // ===== PRODUCTS =====
