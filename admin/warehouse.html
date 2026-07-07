@@ -140,6 +140,7 @@
         <div class="wh-nav-item" data-page="expenses"><i class="fas fa-money-bill-wave"></i><span>الانصراف</span></div>
         <div class="wh-nav-item" data-page="collections"><i class="fas fa-hand-holding-usd"></i><span>التحصيل</span></div>
         <div class="wh-nav-item" data-page="vodafone"><i class="fas fa-mobile-alt"></i><span>فودافون كاش</span></div>
+        <div class="wh-nav-item" data-page="easypay"><i class="fas fa-credit-card"></i><span>Easy Pay</span></div>
 
         <div class="wh-nav-section">روابط</div>
         <a href="index.html" class="wh-nav-item"><i class="fas fa-arrow-right"></i><span>لوحة التحكم</span></a>
@@ -426,6 +427,38 @@
                 <table class="wh-table">
                     <thead><tr><th>التاريخ</th><th>النوع</th><th>المبلغ</th><th>الموبايل</th><th>الطرف</th><th>ملاحظات</th></tr></thead>
                     <tbody id="vodafoneTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Easy Pay ===== -->
+    <div class="wh-section" id="page-easypay">
+        <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:20px;"><i class="fas fa-credit-card" style="color:#00b4d8;margin-left:8px;"></i>Easy Pay</h2>
+        <div class="wh-card">
+            <div class="wh-card-header"><h3>إضافة عملية Easy Pay</h3></div>
+            <div class="wh-card-body">
+                <div class="wh-form-row">
+                    <div class="wh-form-group"><label>نوع العملية</label><select id="epType"><option value="إيداع">إيداع</option><option value="سحب">سحب</option></select></div>
+                    <div class="wh-form-group"><label>المبلغ (ج.م)</label><input type="number" id="epAmount" min="0" step="0.01" required dir="ltr"></div>
+                </div>
+                <div class="wh-form-row">
+                    <div class="wh-form-group"><label>رقم الحساب</label><input type="tel" id="epAccount" placeholder="رقم حساب Easy Pay" dir="ltr"></div>
+                    <div class="wh-form-group"><label>الطرف الآخر</label><input type="text" id="epCounterparty" placeholder="اسم الطرف"></div>
+                </div>
+                <div class="wh-form-row">
+                    <div class="wh-form-group"><label>التاريخ</label><input type="date" id="epDate"></div>
+                    <div class="wh-form-group"><label>ملاحظات</label><input type="text" id="epNotes" placeholder="اختياري"></div>
+                </div>
+                <button class="wh-btn" style="background:#00b4d8;color:#fff;" onclick="addEasyPay()"><i class="fas fa-plus"></i> إضافة عملية</button>
+            </div>
+        </div>
+        <div class="wh-card">
+            <div class="wh-card-header"><h3>سجل Easy Pay</h3></div>
+            <div class="wh-card-body">
+                <table class="wh-table">
+                    <thead><tr><th>التاريخ</th><th>النوع</th><th>المبلغ</th><th>الحساب</th><th>الطرف</th><th>ملاحظات</th></tr></thead>
+                    <tbody id="easypayTable"></tbody>
                 </table>
             </div>
         </div>
@@ -789,6 +822,36 @@ function renderVodafone() {
     `).join('');
 }
 
+// ===== EASY PAY =====
+function getEasyPay() { return JSON.parse(localStorage.getItem('wh_easypay') || '[]'); }
+function saveEasyPay(d) { localStorage.setItem('wh_easypay', JSON.stringify(d)); }
+
+function addEasyPay() {
+    const type = document.getElementById('epType').value;
+    const amount = parseFloat(document.getElementById('epAmount').value) || 0;
+    const account = document.getElementById('epAccount').value.trim();
+    const counterparty = document.getElementById('epCounterparty').value.trim();
+    const date = document.getElementById('epDate').value || today();
+    const notes = document.getElementById('epNotes').value.trim();
+    if (amount < 1) { showWhAlert('error', 'أدخل المبلغ'); return; }
+    const records = getEasyPay();
+    records.unshift({ date, type, amount, account, counterparty, notes });
+    saveEasyPay(records);
+    document.getElementById('epAmount').value = '';
+    document.getElementById('epAccount').value = '';
+    document.getElementById('epCounterparty').value = '';
+    document.getElementById('epNotes').value = '';
+    renderEasyPay(); updateDashboard();
+    showWhAlert('success', `تم تسجيل عملية Easy Pay: ${type} ${amount} ج.م`);
+}
+
+function renderEasyPay() {
+    const records = getEasyPay();
+    document.getElementById('easypayTable').innerHTML = records.slice(0, 30).map(r => `
+        <tr><td>${r.date}</td><td><span class="wh-badge ${r.type==='إيداع'?'wh-badge-success':'wh-badge-danger'}">${esc(r.type)}</span></td><td><strong>${r.amount.toLocaleString('ar-EG')} ج.م</strong></td><td dir="ltr">${esc(r.account||'-')}</td><td>${esc(r.counterparty||'-')}</td><td>${esc(r.notes||'-')}</td></tr>
+    `).join('');
+}
+
 // ===== ALERT =====
 function showWhAlert(type, msg) {
     const el = document.getElementById('whAlert');
@@ -815,6 +878,7 @@ document.addEventListener('DOMContentLoaded', function() {
     renderExpenses();
     renderCollections();
     renderVodafone();
+    renderEasyPay();
     updateDashboard();
 });
 </script>
