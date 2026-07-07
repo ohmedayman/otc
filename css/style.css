@@ -168,6 +168,14 @@ input,select,textarea{font-family:inherit}
 .step-content p{color:var(--text-sub);font-size:0.82rem}
 .step-connector{color:var(--gold);font-size:1.2rem;margin-top:40px;opacity:0.5}
 
+/* ===== Partners ===== */
+.partners{padding:50px 0 20px}
+.partners-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.partner-card{background:#fff;border-radius:var(--r);padding:28px 20px;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm);border:1px solid var(--border);transition:all .3s var(--ease);min-height:110px}
+.partner-card:hover{transform:translateY(-4px);box-shadow:var(--shadow);border-color:var(--gold-light)}
+.partner-card img{max-height:56px;max-width:140px;object-fit:contain;filter:grayscale(30%);transition:all .3s var(--ease);opacity:0.85}
+.partner-card:hover img{filter:grayscale(0);opacity:1}
+
 /* ===== FAQ ===== */
 .faq{padding:50px 0}
 .faq-list{max-width:680px;margin:0 auto}
@@ -276,7 +284,7 @@ input,select,textarea{font-family:inherit}
 /* =========================================
    RESPONSIVE
    ========================================= */
-@media(max-width:1024px){.features-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:1024px){.features-grid{grid-template-columns:repeat(2,1fr)}.partners-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:768px){
     .hero{padding:50px 20px 70px;min-height:auto}
     .hero h1{font-size:2rem}
@@ -293,6 +301,9 @@ input,select,textarea{font-family:inherit}
     .result-timeline{padding:18px}
     .features{padding:40px 0 20px}
     .features-grid{grid-template-columns:1fr}
+    .partners-grid{grid-template-columns:1fr 1fr}
+    .partner-card{padding:20px 16px;min-height:90px}
+    .partner-card img{max-height:44px}
     .section-header h2{font-size:1.4rem}
     .steps-row{flex-direction:column;gap:8px;align-items:center}
     .step-connector{transform:rotate(90deg);margin:0}
@@ -308,4 +319,7 @@ input,select,textarea{font-family:inherit}
     .hero h1{font-size:1.6rem}
     .result-number{font-size:1.1rem}
     #statsGrid{grid-template-columns:1fr 1fr!important}
+    .partners-grid{grid-template-columns:1fr 1fr}
+    .partner-card{padding:16px 12px;min-height:80px}
+    .partner-card img{max-height:38px}
 }

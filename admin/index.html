@@ -77,7 +77,7 @@
 
         <!-- Add Order -->
         <div class="result-container" style="margin-bottom:28px;">
-            <div class="result-header"><h3 style="color:#fff;font-size:1.05rem;"><i class="fas fa-plus-circle" style="margin-left:8px;opacity:0.7;"></i>إضافة طلب جديد</h3></div>
+            <div class="result-header"><h3 style="color:#fff;font-size:1.05rem;"><i class="fas fa-plus-circle" style="margin-left:8px;opacity:0.7;"></i>إضافة طلب جديد</h3><span style="color:var(--gold-light);font-size:0.8rem;">رقم التتبع M16 يُولّد تلقائياً</span></div>
             <div style="padding:24px 28px;">
                 <div id="alertMessage" class="hidden"></div>
                 <form id="orderForm">
@@ -86,13 +86,13 @@
                         <div class="form-group"><label>رقم الهاتف</label><input type="tel" id="customerPhone" required placeholder="01XXXXXXXXX" dir="ltr"></div>
                     </div>
                     <div class="form-row">
-                        <div class="form-group"><label>رقم التتبع</label><input type="text" id="trackingNumber" required placeholder="EE123456789EG" maxlength="13" style="font-family:monospace;letter-spacing:1.5px;direction:ltr;text-align:center;text-transform:uppercase;"></div>
+                        <div class="form-group"><label>السيريل الحقيقي (البريد المصري)</label><input type="text" id="realTrackingNumber" required placeholder="EE123456789EG" maxlength="13" style="font-family:monospace;letter-spacing:1.5px;direction:ltr;text-align:center;text-transform:uppercase;"></div>
                         <div class="form-group"><label>حالة الطلب</label><select id="orderStatus" required><option value="pending">قيد المعالجة</option><option value="in-transit">في الطريق</option><option value="delivered">تم التوصيل</option><option value="exception">مشكلة في التوصيل</option></select></div>
                     </div>
                     <div class="form-group"><label>عنوان التوصيل</label><input type="text" id="orderAddress" required placeholder="العنوان بالتفصيل"></div>
                     <div class="form-row">
                         <div class="form-group"><label>ملاحظات</label><textarea id="orderNotes" rows="2" placeholder="اختياري" style="resize:vertical;"></textarea></div>
-                        <div class="form-group"><label>قيمة الطلب (ج.م)</label><input type="number" id="orderValue" min="0" step="0.01" placeholder="0.00" dir="ltr"></div>
+                        <div class="form-group"><label>قيمة الطلب (ج.م) — تظهر للأدمن فقط</label><input type="number" id="orderValue" min="0" step="0.01" placeholder="0.00" dir="ltr"></div>
                     </div>
                     <div style="display:flex;gap:10px;margin-top:4px;">
                         <button type="submit" class="support-btn" style="border:none;padding:11px 26px;font-size:0.9rem;"><i class="fas fa-save"></i> حفظ</button>
@@ -114,7 +114,7 @@
                 </div>
                 <div class="table-container">
                     <table class="data-table">
-                        <thead><tr><th>اسم العميل</th><th>الهاتف</th><th>رقم التتبع</th><th>الحالة</th><th>التاريخ</th><th>إجراءات</th></tr></thead>
+                        <thead><tr><th>اسم العميل</th><th>الهاتف</th><th>رقم M16</th><th>السيريل الحقيقي</th><th>القيمة</th><th>الحالة</th><th>إجراءات</th></tr></thead>
                         <tbody id="ordersTableBody"></tbody>
                     </table>
                 </div>
@@ -133,12 +133,13 @@
         <div class="modal-header"><h3>تعديل الطلب</h3><button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button></div>
         <form id="editForm">
             <input type="hidden" id="editOrderId">
+            <div class="form-group"><label>رقم M16 (تلقائي)</label><input type="text" id="editM16Number" readonly style="background:var(--bg);font-family:monospace;font-weight:700;"></div>
             <div class="form-row">
                 <div class="form-group"><label>اسم العميل</label><input type="text" id="editCustomerName" required></div>
                 <div class="form-group"><label>رقم الهاتف</label><input type="tel" id="editCustomerPhone" required dir="ltr"></div>
             </div>
             <div class="form-row">
-                <div class="form-group"><label>رقم التتبع</label><input type="text" id="editTrackingNumber" required maxlength="13" style="font-family:monospace;letter-spacing:1.5px;direction:ltr;text-align:center;text-transform:uppercase;"></div>
+                <div class="form-group"><label>السيريل الحقيقي</label><input type="text" id="editRealTrackingNumber" required maxlength="13" style="font-family:monospace;letter-spacing:1.5px;direction:ltr;text-align:center;text-transform:uppercase;"></div>
                 <div class="form-group"><label>الحالة</label><select id="editOrderStatus" required><option value="pending">قيد المعالجة</option><option value="in-transit">في الطريق</option><option value="delivered">تم التوصيل</option><option value="exception">مشكلة في التوصيل</option></select></div>
             </div>
             <div class="form-group"><label>العنوان</label><input type="text" id="editOrderAddress" required></div>
@@ -243,6 +244,19 @@ document.getElementById('exportExcelBtn')?.addEventListener('click', function(e)
     exportToExcel();
 });
 
+// ===== M16 NUMBER GENERATION =====
+function generateM16() {
+    const orders = getOrders();
+    let maxNum = 0;
+    orders.forEach(o => {
+        if (o.m16Number && o.m16Number.startsWith('M16')) {
+            const n = parseInt(o.m16Number.replace('M16', ''));
+            if (n > maxNum) maxNum = n;
+        }
+    });
+    return 'M16' + String(maxNum + 1).padStart(4, '0');
+}
+
 // ===== DASHBOARD FUNCTIONS =====
 function loadOrders() { renderOrders(getOrders()); }
 const getOrders = () => JSON.parse(localStorage.getItem('milanoOrders') || '[]');
@@ -259,11 +273,12 @@ function renderOrders(orders) {
         tr.innerHTML = `
             <td>${esc(o.customerName)}</td>
             <td>${esc(o.customerPhone)}</td>
-            <td><code style="font-weight:700;letter-spacing:1px;">${esc(o.trackingNumber)}</code></td>
+            <td><code style="font-weight:800;color:var(--gold);letter-spacing:1px;">${esc(o.m16Number||'-')}</code></td>
+            <td><code style="font-size:0.78rem;color:var(--text-sub);">${esc(o.realTrackingNumber||'-')}</code></td>
+            <td><strong>${o.value ? o.value + ' ج.م' : '-'}</strong></td>
             <td><span class="status-badge ${o.status}">${statusText(o.status)}</span></td>
-            <td>${o.createdAt||'-'}</td>
             <td><div class="btn-group">
-                <button class="btn btn-view" onclick="openWhatsApp('${esc(o.customerPhone)}','${esc(o.trackingNumber)}','${esc(o.status)}')" title="واتساب"><i class="fab fa-whatsapp"></i></button>
+                <button class="btn btn-view" onclick="openWhatsApp('${esc(o.customerPhone)}','${esc(o.m16Number)}','${esc(o.status)}')" title="واتساب"><i class="fab fa-whatsapp"></i></button>
                 <button class="btn btn-edit" onclick="editOrder(${o.id})" title="تعديل"><i class="fas fa-edit"></i></button>
                 <button class="btn btn-delete" onclick="delOrder(${o.id})" title="حذف"><i class="fas fa-trash"></i></button>
             </div></td>`;
@@ -274,21 +289,21 @@ function renderOrders(orders) {
 function handleAddOrder(e) {
     e.preventDefault();
     const data = {
+        m16Number: generateM16(),
         customerName: document.getElementById('customerName').value.trim(),
         customerPhone: document.getElementById('customerPhone').value.trim(),
-        trackingNumber: document.getElementById('trackingNumber').value.trim().toUpperCase(),
+        realTrackingNumber: document.getElementById('realTrackingNumber').value.trim().toUpperCase(),
         status: document.getElementById('orderStatus').value,
         address: document.getElementById('orderAddress').value.trim(),
         notes: document.getElementById('orderNotes').value.trim(),
         value: document.getElementById('orderValue').value || 0
     };
-    if (data.trackingNumber.length < 10) { showAlert('error','رقم التتبع يجب أن يكون 10 أحرف على الأقل'); return; }
+    if (data.realTrackingNumber.length < 10) { showAlert('error','السيريل الحقيقي يجب أن يكون 10 أحرف على الأقل'); return; }
     const orders = getOrders();
-    if (orders.some(o => o.trackingNumber === data.trackingNumber)) { showAlert('error','رقم التتبع مسجل بالفعل'); return; }
     data.id = Date.now(); data.createdAt = new Date().toLocaleString('ar-EG');
     orders.push(data); saveOrders(orders);
     document.getElementById('orderForm').reset(); loadOrders(); updateStats();
-    showAlert('success','تم إضافة الطلب بنجاح');
+    showAlert('success','تم إضافة الطلب بنجاح — رقم التتبع: ' + data.m16Number);
 }
 
 function handleEditOrder(e) {
@@ -300,7 +315,7 @@ function handleEditOrder(e) {
         orders[i] = { ...orders[i],
             customerName: document.getElementById('editCustomerName').value.trim(),
             customerPhone: document.getElementById('editCustomerPhone').value.trim(),
-            trackingNumber: document.getElementById('editTrackingNumber').value.trim().toUpperCase(),
+            realTrackingNumber: document.getElementById('editRealTrackingNumber').value.trim().toUpperCase(),
             status: document.getElementById('editOrderStatus').value,
             address: document.getElementById('editOrderAddress').value.trim(),
             notes: document.getElementById('editOrderNotes').value.trim(),
@@ -315,9 +330,10 @@ function editOrder(id) {
     const o = getOrders().find(x => x.id === id);
     if (!o) return;
     document.getElementById('editOrderId').value = o.id;
+    document.getElementById('editM16Number').value = o.m16Number || '';
     document.getElementById('editCustomerName').value = o.customerName;
     document.getElementById('editCustomerPhone').value = o.customerPhone;
-    document.getElementById('editTrackingNumber').value = o.trackingNumber;
+    document.getElementById('editRealTrackingNumber').value = o.realTrackingNumber || '';
     document.getElementById('editOrderStatus').value = o.status;
     document.getElementById('editOrderAddress').value = o.address;
     document.getElementById('editOrderNotes').value = o.notes || '';
