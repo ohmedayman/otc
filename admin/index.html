@@ -10,10 +10,9 @@
 </head>
 <body>
 
-<!-- ===== Auth Check ===== -->
+<!-- ===== Auth Gate ===== -->
 <div id="authGate" style="background:var(--dark);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;">
-    <!-- Login Form -->
-    <div id="loginView" class="login-card" style="display:none;">
+    <div class="login-card">
         <div class="login-top">
             <img src="../assets/logo.png" alt="ميلانو OTC">
             <h1>لوحة التحكم</h1>
@@ -33,32 +32,6 @@
         </form>
         <a href="../index.html" class="login-back"><i class="fas fa-arrow-right"></i> العودة للرئيسية</a>
     </div>
-
-    <!-- Setup Form (first time) -->
-    <div id="setupView" class="login-card" style="display:none;">
-        <div class="login-top">
-            <img src="../assets/logo.png" alt="ميلانو OTC">
-            <h1>إعداد حساب الأدمن</h1>
-            <p>أنشئ بيانات الدخول الخاصة بك</p>
-        </div>
-        <div id="setupError" class="login-error"><i class="fas fa-exclamation-circle"></i><span></span></div>
-        <form id="setupForm">
-            <div class="login-field">
-                <label>اسم المستخدم</label>
-                <div class="field-wrap"><i class="fas fa-user"></i><input type="text" id="setupUsername" required placeholder="اسم المستخدم" minlength="3"></div>
-            </div>
-            <div class="login-field">
-                <label>كلمة المرور</label>
-                <div class="field-wrap"><i class="fas fa-lock"></i><input type="password" id="setupPassword" required placeholder="6 أحرف على الأقل" minlength="6"></div>
-            </div>
-            <div class="login-field">
-                <label>تأكيد كلمة المرور</label>
-                <div class="field-wrap"><i class="fas fa-lock"></i><input type="password" id="setupConfirm" required placeholder="أعد إدخال كلمة المرور"></div>
-            </div>
-            <button type="submit" class="login-btn"><i class="fas fa-user-plus"></i>إنشاء الحساب</button>
-        </form>
-        <a href="../index.html" class="login-back"><i class="fas fa-arrow-right"></i> العودة للرئيسية</a>
-    </div>
 </div>
 
 <!-- ===== Dashboard (hidden until login) ===== -->
@@ -72,7 +45,6 @@
             <div class="header-support" style="display:flex;gap:8px;align-items:center;">
                 <a href="../index.html" class="support-btn" style="background:transparent;border:2px solid var(--border);color:var(--text);"><i class="fas fa-home"></i></a>
                 <a href="#" id="exportExcelBtn" class="support-btn" style="background:var(--success);"><i class="fas fa-file-excel"></i><span>تصدير</span></a>
-                <a href="#" id="changePassBtn" class="support-btn" style="background:var(--info);"><i class="fas fa-key"></i></a>
                 <a href="#" id="logoutBtn" class="support-btn" style="background:var(--danger);"><i class="fas fa-sign-out-alt"></i></a>
             </div>
         </div>
@@ -195,22 +167,6 @@
     </div>
 </div>
 
-<!-- Change Password Modal -->
-<div class="modal" id="changePassModal" onclick="if(event.target===this)this.classList.remove('active')">
-    <div class="modal-content">
-        <div class="modal-header"><h3><i class="fas fa-key" style="color:var(--info);margin-left:8px;"></i>تغيير كلمة المرور</h3><button class="modal-close" onclick="document.getElementById('changePassModal').classList.remove('active')"><i class="fas fa-times"></i></button></div>
-        <form id="changePassForm">
-            <div class="login-field"><label>كلمة المرور الحالية</label><div class="field-wrap"><i class="fas fa-lock"></i><input type="password" id="oldPass" required placeholder="أدخل كلمة المرور الحالية"></div></div>
-            <div class="login-field"><label>كلمة المرور الجديدة</label><div class="field-wrap"><i class="fas fa-lock"></i><input type="password" id="newPass" required placeholder="6 أحرف على الأقل" minlength="6"></div></div>
-            <div class="login-field"><label>تأكيد كلمة المرور الجديدة</label><div class="field-wrap"><i class="fas fa-lock"></i><input type="password" id="confirmNewPass" required placeholder="أعد إدخال كلمة المرور"></div></div>
-            <div style="display:flex;gap:10px;">
-                <button type="submit" class="support-btn" style="border:none;padding:11px 26px;font-size:0.9rem;"><i class="fas fa-save"></i> حفظ</button>
-                <button type="button" onclick="document.getElementById('changePassModal').classList.remove('active')" class="support-btn" style="background:var(--text-sub);border:none;padding:11px 26px;font-size:0.9rem;">إلغاء</button>
-            </div>
-        </form>
-    </div>
-</div>
-
 <style>
     .login-card{background:#fff;border-radius:20px;padding:44px 36px 36px;width:100%;max-width:400px;box-shadow:0 25px 80px rgba(0,0,0,0.25);position:relative;overflow:hidden}
     .login-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--gold),var(--gold-light),var(--gold))}
@@ -233,101 +189,43 @@
 </style>
 
 <script>
-// ===== AUTH SYSTEM =====
-const USERS_KEY = 'milanoAdminUsers';
+// ===== FIXED ADMIN CREDENTIALS =====
+const ADMIN_USER = 'otc';
+const ADMIN_PASS = 'otc123';
 const SESSION_KEY = 'milanoAdminSession';
 
-// Simple hash for password storage
-function hash(str) {
-    let h = 0;
-    for (let i = 0; i < str.length; i++) {
-        h = ((h << 5) - h + str.charCodeAt(i)) | 0;
-    }
-    return 'h_' + Math.abs(h).toString(36);
-}
-
-function getUsers() { return JSON.parse(localStorage.getItem(USERS_KEY) || '[]'); }
-function saveUsers(u) { localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
 function getSession() { return sessionStorage.getItem(SESSION_KEY); }
 function setSession(user) { sessionStorage.setItem(SESSION_KEY, user); }
 function clearSession() { sessionStorage.removeItem(SESSION_KEY); }
 
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', function() {
-    const users = getUsers();
-    const session = getSession();
-
-    // Already logged in
-    if (session && users.some(u => u.username === session)) {
-        showDashboard(session);
+    if (getSession() === ADMIN_USER) {
+        showDashboard();
         return;
     }
-
-    // No users exist → show setup
-    if (users.length === 0) {
-        document.getElementById('authGate').style.display = 'flex';
-        document.getElementById('setupView').style.display = 'block';
-        document.getElementById('loginView').style.display = 'none';
-    } else {
-        // Users exist → show login
-        document.getElementById('authGate').style.display = 'flex';
-        document.getElementById('loginView').style.display = 'block';
-        document.getElementById('setupView').style.display = 'none';
-    }
-});
-
-// ===== SETUP (First time) =====
-document.getElementById('setupForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const username = document.getElementById('setupUsername').value.trim();
-    const password = document.getElementById('setupPassword').value;
-    const confirm = document.getElementById('setupConfirm').value;
-    const errEl = document.getElementById('setupError');
-
-    if (password !== confirm) {
-        errEl.querySelector('span').textContent = 'كلمتا المرور غير متطابقتين';
-        errEl.classList.add('show');
-        return;
-    }
-
-    if (username.length < 3) {
-        errEl.querySelector('span').textContent = 'اسم المستخدم يجب أن يكون 3 أحرف على الأقل';
-        errEl.classList.add('show');
-        return;
-    }
-
-    // Save user
-    const users = getUsers();
-    users.push({ username: username, password: hash(password), createdAt: new Date().toISOString() });
-    saveUsers(users);
-    setSession(username);
-    showDashboard(username);
+    document.getElementById('authGate').style.display = 'flex';
 });
 
 // ===== LOGIN =====
 document.getElementById('loginForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    const username = document.getElementById('loginUsername').value.trim();
-    const password = document.getElementById('loginPassword').value;
+    const u = document.getElementById('loginUsername').value.trim();
+    const p = document.getElementById('loginPassword').value;
     const errEl = document.getElementById('loginError');
-    const users = getUsers();
-
-    const user = users.find(u => u.username === username && u.password === hash(password));
-    if (user) {
-        setSession(username);
-        showDashboard(username);
+    if (u === ADMIN_USER && p === ADMIN_PASS) {
+        setSession(u);
+        showDashboard();
     } else {
         errEl.classList.add('show');
     }
 });
 
 // ===== SHOW DASHBOARD =====
-function showDashboard(username) {
+function showDashboard() {
     document.getElementById('authGate').style.display = 'none';
     document.getElementById('dashboardView').style.display = 'block';
-    document.getElementById('adminNameDisplay').textContent = username;
-
-    // Init dashboard
+    document.getElementById('adminNameDisplay').textContent = ADMIN_USER;
     loadOrders();
     updateStats();
 }
@@ -337,45 +235,6 @@ document.getElementById('logoutBtn')?.addEventListener('click', function(e) {
     e.preventDefault();
     clearSession();
     location.reload();
-});
-
-// ===== CHANGE PASSWORD =====
-document.getElementById('changePassBtn')?.addEventListener('click', function(e) {
-    e.preventDefault();
-    document.getElementById('changePassModal').classList.add('active');
-});
-
-document.getElementById('changePassForm')?.addEventListener('submit', function(e) {
-    e.preventDefault();
-    const oldP = document.getElementById('oldPass').value;
-    const newP = document.getElementById('newPass').value;
-    const confirmP = document.getElementById('confirmNewPass').value;
-    const session = getSession();
-    const users = getUsers();
-    const idx = users.findIndex(u => u.username === session);
-
-    if (idx === -1) return;
-
-    if (users[idx].password !== hash(oldP)) {
-        alert('كلمة المرور الحالية غير صحيحة');
-        return;
-    }
-    if (newP !== confirmP) {
-        alert('كلمتا المرور الجديدتان غير متطابقتين');
-        return;
-    }
-    if (newP.length < 6) {
-        alert('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
-        return;
-    }
-
-    users[idx].password = hash(newP);
-    saveUsers(users);
-    document.getElementById('changePassModal').classList.remove('active');
-    document.getElementById('oldPass').value = '';
-    document.getElementById('newPass').value = '';
-    document.getElementById('confirmNewPass').value = '';
-    alert('تم تغيير كلمة المرور بنجاح');
 });
 
 // ===== EXPORT EXCEL =====
