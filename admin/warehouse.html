@@ -726,17 +726,17 @@ document.querySelectorAll('.wh-nav-item[data-page]').forEach(item => {
 // ===== DASHBOARD =====
 function updateDashboard() {
     const products = productsData;
-    const totalStock = products.reduce((s, p) => s + (p.stock||0), 0);
-    const totalValue = products.reduce((s, p) => s + (p.price * (p.stock||0)), 0);
-    const lowStock = products.filter(p => (p.stock||0) < 5).length;
+    const totalStock = products.reduce((s, p) => s + Number(p.stock||0), 0);
+    const totalValue = products.reduce((s, p) => s + (Number(p.price||0) * Number(p.stock||0)), 0);
+    const lowStock = products.filter(p => Number(p.stock||0) < 5).length;
     document.getElementById('totalProducts').textContent = products.length;
     document.getElementById('totalStock').textContent = totalStock;
     document.getElementById('lowStock').textContent = lowStock;
     document.getElementById('totalValue').textContent = totalValue.toLocaleString('ar-EG');
-    document.getElementById('totalPurchases').textContent = purchasesData.reduce((s, p) => s + (p.total||0), 0).toLocaleString('ar-EG') + ' ج.م';
-    document.getElementById('totalExpenses').textContent = expensesData.reduce((s, e) => s + (e.amount||0), 0).toLocaleString('ar-EG') + ' ج.م';
-    document.getElementById('totalCollections').textContent = collectionsData.reduce((s, c) => s + (c.amount||0), 0).toLocaleString('ar-EG') + ' ج.م';
-    document.getElementById('totalVodafone').textContent = (vodafoneData.reduce((s, v) => s + (v.amount||0), 0) + easypayData.reduce((s, v) => s + (v.amount||0), 0)).toLocaleString('ar-EG') + ' ج.م';
+    document.getElementById('totalPurchases').textContent = purchasesData.reduce((s, p) => s + Number(p.total||0), 0).toLocaleString('ar-EG') + ' ج.م';
+    document.getElementById('totalExpenses').textContent = expensesData.reduce((s, e) => s + Number(e.amount||0), 0).toLocaleString('ar-EG') + ' ج.م';
+    document.getElementById('totalCollections').textContent = collectionsData.reduce((s, c) => s + Number(c.amount||0), 0).toLocaleString('ar-EG') + ' ج.م';
+    document.getElementById('totalVodafone').textContent = (vodafoneData.reduce((s, v) => s + Number(v.amount||0), 0) + easypayData.reduce((s, v) => s + Number(v.amount||0), 0)).toLocaleString('ar-EG') + ' ج.م';
     renderRecentActivity();
 }
 
@@ -1353,13 +1353,13 @@ function generateReport() {
     const fVodafone = vodafoneData.filter(v => inRange(v.date));
     const fEasyPay = easypayData.filter(e => inRange(e.date));
 
-    const totalPurchases = fPurchases.reduce((s, p) => s + (p.total || 0), 0);
-    const totalExpenses = fExpenses.reduce((s, e) => s + (e.amount || 0), 0);
-    const totalCollections = fCollections.reduce((s, c) => s + (c.amount || 0), 0);
-    const totalVodafoneIn = fVodafone.filter(v => v.type === 'إيداع').reduce((s, v) => s + (v.amount || 0), 0);
-    const totalVodafoneOut = fVodafone.filter(v => v.type === 'سحب').reduce((s, v) => s + (v.amount || 0), 0);
-    const totalEasyPayIn = fEasyPay.filter(e => e.type === 'إيداع').reduce((s, e) => s + (e.amount || 0), 0);
-    const totalEasyPayOut = fEasyPay.filter(e => e.type === 'سحب').reduce((s, e) => s + (e.amount || 0), 0);
+    const totalPurchases = fPurchases.reduce((s, p) => s + Number(p.total || 0), 0);
+    const totalExpenses = fExpenses.reduce((s, e) => s + Number(e.amount || 0), 0);
+    const totalCollections = fCollections.reduce((s, c) => s + Number(c.amount || 0), 0);
+    const totalVodafoneIn = fVodafone.filter(v => v.type === 'إيداع').reduce((s, v) => s + Number(v.amount || 0), 0);
+    const totalVodafoneOut = fVodafone.filter(v => v.type === 'سحب').reduce((s, v) => s + Number(v.amount || 0), 0);
+    const totalEasyPayIn = fEasyPay.filter(e => e.type === 'إيداع').reduce((s, e) => s + Number(e.amount || 0), 0);
+    const totalEasyPayOut = fEasyPay.filter(e => e.type === 'سحب').reduce((s, e) => s + Number(e.amount || 0), 0);
     const netProfit = totalCollections + totalVodafoneIn + totalEasyPayIn - totalExpenses - totalPurchases - totalVodafoneOut - totalEasyPayOut;
 
     document.getElementById('rptTotalPurchases').textContent = totalPurchases.toFixed(2);
