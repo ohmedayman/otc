@@ -8,195 +8,62 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        body {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Cairo', sans-serif;
-            padding: 20px;
-        }
-        .login-container {
-            background: white;
-            border-radius: 20px;
-            padding: 48px 40px 40px;
-            width: 100%;
-            max-width: 420px;
-            box-shadow: 0 25px 80px rgba(0,0,0,0.3);
-            position: relative;
-            overflow: hidden;
-        }
-        .login-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #c9a96e, #e8d5a3, #c9a96e);
-        }
-        .login-header {
-            text-align: center;
-            margin-bottom: 36px;
-        }
-        .login-header img {
-            height: 56px;
-            margin-bottom: 16px;
-        }
-        .login-header h1 {
-            color: #1a1a2e;
-            font-size: 1.4rem;
-            font-weight: 800;
-            margin-bottom: 4px;
-        }
-        .login-header p {
-            color: #636e72;
-            font-size: 0.9rem;
-        }
-        .login-form .form-group {
-            margin-bottom: 20px;
-        }
-        .login-form label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #1a1a2e;
-            font-size: 0.9rem;
-        }
-        .login-form .input-wrap {
-            position: relative;
-        }
-        .login-form .input-wrap i {
-            position: absolute;
-            right: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #b2bec3;
-            font-size: 1rem;
-        }
-        .login-form .input-wrap input {
-            width: 100%;
-            padding: 14px 45px 14px 16px;
-            border: 2px solid #e8ecf0;
-            border-radius: 10px;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
-            font-family: inherit;
-        }
-        .login-form .input-wrap input:focus {
-            outline: none;
-            border-color: #c9a96e;
-            box-shadow: 0 0 0 4px rgba(201,169,110,0.15);
-        }
-        .login-form .btn-login {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #c9a96e, #a8884e);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.05rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            font-family: inherit;
-            margin-top: 8px;
-        }
-        .login-form .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 35px rgba(201,169,110,0.4);
-        }
-        .login-error {
-            background: #fff5f5;
-            color: #e17055;
-            padding: 12px 16px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            display: none;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.9rem;
-            border: 1px solid #fab1a0;
-        }
-        .login-error.show { display: flex; }
-        .demo-notes {
-            margin-top: 24px;
-            padding: 16px 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            font-size: 0.85rem;
-            color: #636e72;
-            text-align: center;
-            border: 1px dashed #e8ecf0;
-        }
-        .demo-notes strong { color: #1a1a2e; }
-        .back-link {
-            display: block;
-            text-align: center;
-            margin-top: 20px;
-            color: #b2bec3;
-            font-size: 0.85rem;
-            transition: all 0.3s ease;
-        }
-        .back-link:hover { color: #c9a96e; }
+        body{background:linear-gradient(135deg,var(--dark) 0%,var(--dark-2) 50%,var(--dark-3) 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+        .login-card{background:#fff;border-radius:20px;padding:44px 36px 36px;width:100%;max-width:400px;box-shadow:0 25px 80px rgba(0,0,0,0.25);position:relative;overflow:hidden}
+        .login-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--gold),var(--gold-light),var(--gold))}
+        .login-top{text-align:center;margin-bottom:32px}
+        .login-top img{height:52px;margin:0 auto 14px}
+        .login-top h1{font-size:1.3rem;font-weight:800;color:var(--dark)}
+        .login-top p{font-size:0.85rem;color:var(--text-sub);margin-top:2px}
+        .login-field{margin-bottom:18px}
+        .login-field label{display:block;margin-bottom:5px;font-weight:600;color:var(--dark);font-size:0.85rem}
+        .login-field .field-wrap{position:relative}
+        .login-field .field-wrap i{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:#9ca3af;font-size:0.95rem}
+        .login-field input{width:100%;padding:13px 42px 13px 14px;border:2px solid var(--border);border-radius:var(--r-sm);font-size:0.92rem;transition:all .3s var(--ease);background:#fff;color:var(--text)}
+        .login-field input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-glow)}
+        .login-field input::placeholder{color:#c0c4cc}
+        .login-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#fff;border:none;border-radius:var(--r-sm);font-size:1rem;font-weight:700;cursor:pointer;transition:all .3s var(--ease);display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;margin-top:6px}
+        .login-btn:hover{transform:translateY(-2px);box-shadow:var(--shadow-gold)}
+        .login-btn:active{transform:translateY(0)}
+        .login-error{background:#fee2e2;color:#991b1b;padding:11px 14px;border-radius:var(--r-sm);margin-bottom:18px;display:none;align-items:center;gap:8px;font-size:0.88rem;border:1px solid #fecaca;font-weight:500}
+        .login-error.show{display:flex}
+        .login-demo{margin-top:22px;padding:14px 18px;background:var(--bg);border-radius:var(--r-sm);font-size:0.82rem;color:var(--text-sub);text-align:center;border:1px dashed var(--border)}
+        .login-demo strong{color:var(--dark)}
+        .login-back{display:block;text-align:center;margin-top:18px;color:#9ca3af;font-size:0.82rem;transition:color .2s}
+        .login-back:hover{color:var(--gold)}
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-header">
+    <div class="login-card">
+        <div class="login-top">
             <img src="../assets/logo.png" alt="ميلانو OTC">
             <h1>لوحة التحكم</h1>
-            <p>مركز تتبع الطلب ميلانو OTC</p>
+            <p>مركز تتبع الطلبات ميلانو OTC</p>
         </div>
-        
         <div id="loginError" class="login-error"><i class="fas fa-exclamation-circle"></i><span>اسم المستخدم أو كلمة المرور غير صحيحة</span></div>
-        
-        <form class="login-form" id="loginForm">
-            <div class="form-group">
+        <form id="loginForm">
+            <div class="login-field">
                 <label>اسم المستخدم</label>
-                <div class="input-wrap">
-                    <i class="fas fa-user"></i>
-                    <input type="text" id="username" required placeholder="أدخل اسم المستخدم">
-                </div>
+                <div class="field-wrap"><i class="fas fa-user"></i><input type="text" id="username" required placeholder="admin"></div>
             </div>
-            <div class="form-group">
+            <div class="login-field">
                 <label>كلمة المرور</label>
-                <div class="input-wrap">
-                    <i class="fas fa-lock"></i>
-                    <input type="password" id="password" required placeholder="أدخل كلمة المرور">
-                </div>
+                <div class="field-wrap"><i class="fas fa-lock"></i><input type="password" id="password" required placeholder="••••••"></div>
             </div>
-            <button type="submit" class="btn-login"><i class="fas fa-sign-in-alt"></i>تسجيل الدخول</button>
+            <button type="submit" class="login-btn"><i class="fas fa-sign-in-alt"></i>تسجيل الدخول</button>
         </form>
-        
-        <div class="demo-notes">
-            <strong>بيانات تجريبية:</strong><br>
-            اسم المستخدم: <strong>admin</strong> | كلمة المرور: <strong>123456</strong>
-        </div>
-        
-        <a href="../index.html" class="back-link"><i class="fas fa-arrow-right"></i> العودة للرئيسية</a>
+        <div class="login-demo"><strong>تجريبي:</strong> admin / 123456</div>
+        <a href="../index.html" class="login-back"><i class="fas fa-arrow-right"></i> العودة للرئيسية</a>
     </div>
-    
     <script>
-        const defaultCredentials = { username: 'admin', password: '123456' };
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        if(sessionStorage.getItem('adminLoggedIn')==='true')window.location.href='index.html';
+        document.getElementById('loginForm').addEventListener('submit',function(e){
             e.preventDefault();
-            const u = document.getElementById('username').value;
-            const p = document.getElementById('password').value;
-            if (u === defaultCredentials.username && p === defaultCredentials.password) {
-                sessionStorage.setItem('adminLoggedIn', 'true');
-                sessionStorage.setItem('adminUser', u);
-                window.location.href = 'index.html';
-            } else {
-                document.getElementById('loginError').classList.add('show');
-            }
+            if(document.getElementById('username').value==='admin'&&document.getElementById('password').value==='123456'){
+                sessionStorage.setItem('adminLoggedIn','true');
+                window.location.href='index.html';
+            }else{document.getElementById('loginError').classList.add('show');}
         });
-        if (sessionStorage.getItem('adminLoggedIn') === 'true') window.location.href = 'index.html';
     </script>
 </body>
 </html>

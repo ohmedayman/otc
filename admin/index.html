@@ -9,150 +9,144 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body>
-    <script>if(sessionStorage.getItem('adminLoggedIn')!=='true')window.location.href='login.html';</script>
+<script>if(sessionStorage.getItem('adminLoggedIn')!=='true')window.location.href='login.html';</script>
 
-    <!-- Header -->
-    <header class="header">
-        <div class="header-inner">
-            <div class="logo">
-                <img src="../assets/logo.png" alt="ميلانو OTC">
-                <div class="logo-text"><h1>لوحة التحكم</h1><span>ميلانو OTC</span></div>
-            </div>
-            <div class="header-support" style="display:flex;gap:10px;align-items:center;">
-                <a href="../index.html" class="support-btn" style="background:transparent;border:2px solid rgba(255,255,255,0.2);color:white;"><i class="fas fa-home"></i></a>
-                <a href="#" id="exportExcelBtn" class="support-btn" style="background:#00b894;"><i class="fas fa-file-excel"></i> <span>تصدير</span></a>
-                <a href="#" id="logoutBtn" class="support-btn" style="background:#e17055;"><i class="fas fa-sign-out-alt"></i></a>
-            </div>
+<!-- Header -->
+<header class="header">
+    <div class="header-inner">
+        <div class="logo">
+            <img src="../assets/logo.png" alt="ميلانو OTC">
+            <div class="logo-text"><h1>لوحة التحكم</h1><span>ميلانو OTC</span></div>
         </div>
-    </header>
-    <script>
-        document.getElementById('logoutBtn')?.addEventListener('click',e=>{e.preventDefault();sessionStorage.removeItem('adminLoggedIn');window.location.href='login.html';});
-        document.getElementById('exportExcelBtn')?.addEventListener('click',e=>{e.preventDefault();exportToExcel();});
-    </script>
-
-    <main class="main-content" style="padding-top:40px;">
-
-        <!-- Dashboard Stats -->
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px;" id="statsGrid">
-            <div class="feature-card" style="padding:24px 16px;">
-                <div style="font-size:2.2rem;font-weight:900;color:var(--gold);" id="statTotal">0</div>
-                <div style="color:var(--text-muted);font-size:0.85rem;margin-top:4px;">إجمالي الطلبات</div>
-                <div style="margin-top:8px;height:4px;background:#e8ecf0;border-radius:4px;"><div id="barTotal" style="height:100%;background:var(--gold);border-radius:4px;width:0%;transition:width 0.5s;"></div></div>
-            </div>
-            <div class="feature-card" style="padding:24px 16px;">
-                <div style="font-size:2.2rem;font-weight:900;color:var(--info);" id="statTransit">0</div>
-                <div style="color:var(--text-muted);font-size:0.85rem;margin-top:4px;">في الطريق</div>
-                <div style="margin-top:8px;height:4px;background:#e8ecf0;border-radius:4px;"><div id="barTransit" style="height:100%;background:var(--info);border-radius:4px;width:0%;transition:width 0.5s;"></div></div>
-            </div>
-            <div class="feature-card" style="padding:24px 16px;">
-                <div style="font-size:2.2rem;font-weight:900;color:var(--success);" id="statDelivered">0</div>
-                <div style="color:var(--text-muted);font-size:0.85rem;margin-top:4px;">تم التوصيل</div>
-                <div style="margin-top:8px;height:4px;background:#e8ecf0;border-radius:4px;"><div id="barDelivered" style="height:100%;background:var(--success);border-radius:4px;width:0%;transition:width 0.5s;"></div></div>
-            </div>
-            <div class="feature-card" style="padding:24px 16px;">
-                <div style="font-size:2.2rem;font-weight:900;color:var(--warning);" id="statPending">0</div>
-                <div style="color:var(--text-muted);font-size:0.85rem;margin-top:4px;">قيد المعالجة</div>
-                <div style="margin-top:8px;height:4px;background:#e8ecf0;border-radius:4px;"><div id="barPending" style="height:100%;background:var(--warning);border-radius:4px;width:0%;transition:width 0.5s;"></div></div>
-            </div>
+        <div class="header-support" style="display:flex;gap:8px;align-items:center;">
+            <a href="../index.html" class="support-btn" style="background:transparent;border:2px solid var(--border);color:var(--text);"><i class="fas fa-home"></i></a>
+            <a href="#" id="exportExcelBtn" class="support-btn" style="background:var(--success);"><i class="fas fa-file-excel"></i><span>تصدير</span></a>
+            <a href="#" id="logoutBtn" class="support-btn" style="background:var(--danger);"><i class="fas fa-sign-out-alt"></i></a>
         </div>
+    </div>
+</header>
+<script>
+    document.getElementById('logoutBtn')?.addEventListener('click',e=>{e.preventDefault();sessionStorage.removeItem('adminLoggedIn');window.location.href='login.html';});
+    document.getElementById('exportExcelBtn')?.addEventListener('click',e=>{e.preventDefault();exportToExcel();});
+</script>
 
-        <!-- Add Order -->
-        <div class="result-container" style="margin-bottom:32px;">
-            <div class="result-header"><h3 style="color:white;font-size:1.15rem;"><i class="fas fa-plus-circle" style="margin-left:10px;"></i>إضافة طلب جديد</h3></div>
-            <div style="padding:28px 32px;">
-                <div id="alertMessage" class="hidden"></div>
-                <form id="orderForm">
-                    <div class="form-row">
-                        <div class="form-group"><label>اسم العميل</label><input type="text" id="customerName" required placeholder="اسم العميل"></div>
-                        <div class="form-group"><label>رقم الهاتف</label><input type="tel" id="customerPhone" required placeholder="01XXXXXXXXX"></div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group"><label>رقم التتبع</label><input type="text" id="trackingNumber" required placeholder="EE123456789EG" maxlength="13" style="font-family:monospace;letter-spacing:2px;direction:ltr;text-align:center;text-transform:uppercase;"></div>
-                        <div class="form-group"><label>حالة الطلب</label><select id="orderStatus" required><option value="pending">قيد المعالجة</option><option value="in-transit">في الطريق</option><option value="delivered">تم التوصيل</option><option value="exception">مشكلة في التوصيل</option></select></div>
-                    </div>
-                    <div class="form-group"><label>عنوان التوصيل</label><input type="text" id="orderAddress" required placeholder="العنوان بالتفصيل"></div>
-                    <div class="form-row">
-                        <div class="form-group"><label>ملاحظات</label><textarea id="orderNotes" rows="3" placeholder="أي ملاحظات"></textarea></div>
-                        <div class="form-group"><label>قيمة الطلب (ج.م)</label><input type="number" id="orderValue" min="0" step="0.01" placeholder="0.00"></div>
-                    </div>
-                    <div style="display:flex;gap:12px;margin-top:8px;">
-                        <button type="submit" class="support-btn" style="border:none;padding:12px 28px;"><i class="fas fa-save"></i> حفظ الطلب</button>
-                        <button type="reset" class="support-btn" style="background:#636e72;border:none;padding:12px 28px;"><i class="fas fa-undo"></i> إعادة تعيين</button>
-                    </div>
-                </form>
-            </div>
+<main class="main-content" style="padding-top:36px;">
+
+    <!-- Stats -->
+    <div id="statsGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;">
+        <div class="feature-card" style="padding:22px 14px;">
+            <div style="font-size:2rem;font-weight:900;color:var(--gold);" id="statTotal">0</div>
+            <div style="color:var(--text-sub);font-size:0.8rem;margin-top:2px;">إجمالي الطلبات</div>
+            <div style="margin-top:8px;height:4px;background:var(--border);border-radius:4px;overflow:hidden;"><div id="barTotal" style="height:100%;background:var(--gold);border-radius:4px;width:0%;transition:width .6s var(--ease);"></div></div>
         </div>
-
-        <!-- Orders List -->
-        <div class="result-container">
-            <div class="result-header"><h3 style="color:white;font-size:1.15rem;"><i class="fas fa-list" style="margin-left:10px;"></i>قائمة الطلبات</h3></div>
-            <div style="padding:28px 32px;">
-                <div class="form-row" style="margin-bottom:20px;">
-                    <div class="form-group" style="margin-bottom:0;"><input type="text" id="searchInput" placeholder="🔍 بحث بالاسم أو رقم التتبع..."></div>
-                    <div class="form-group" style="margin-bottom:0;">
-                        <select id="filterStatus">
-                            <option value="">جميع الحالات</option>
-                            <option value="pending">قيد المعالجة</option>
-                            <option value="in-transit">في الطريق</option>
-                            <option value="delivered">تم التوصيل</option>
-                            <option value="exception">مشكلة في التوصيل</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="table-container">
-                    <table class="data-table" id="ordersTable">
-                        <thead><tr><th>اسم العميل</th><th>رقم الهاتف</th><th>رقم التتبع</th><th>الحالة</th><th>التاريخ</th><th>الإجراءات</th></tr></thead>
-                        <tbody id="ordersTableBody"></tbody>
-                    </table>
-                </div>
-                <div id="noOrders" class="hidden" style="text-align:center;padding:40px;color:var(--text-muted);">
-                    <i class="fas fa-inbox" style="font-size:3rem;margin-bottom:15px;display:block;color:var(--border);"></i>
-                    <p>لا توجد طلبات بعد</p>
-                </div>
-            </div>
+        <div class="feature-card" style="padding:22px 14px;">
+            <div style="font-size:2rem;font-weight:900;color:var(--info);" id="statTransit">0</div>
+            <div style="color:var(--text-sub);font-size:0.8rem;margin-top:2px;">في الطريق</div>
+            <div style="margin-top:8px;height:4px;background:var(--border);border-radius:4px;overflow:hidden;"><div id="barTransit" style="height:100%;background:var(--info);border-radius:4px;width:0%;transition:width .6s var(--ease);"></div></div>
         </div>
-    </main>
+        <div class="feature-card" style="padding:22px 14px;">
+            <div style="font-size:2rem;font-weight:900;color:var(--success);" id="statDelivered">0</div>
+            <div style="color:var(--text-sub);font-size:0.8rem;margin-top:2px;">تم التوصيل</div>
+            <div style="margin-top:8px;height:4px;background:var(--border);border-radius:4px;overflow:hidden;"><div id="barDelivered" style="height:100%;background:var(--success);border-radius:4px;width:0%;transition:width .6s var(--ease);"></div></div>
+        </div>
+        <div class="feature-card" style="padding:22px 14px;">
+            <div style="font-size:2rem;font-weight:900;color:var(--warning);" id="statPending">0</div>
+            <div style="color:var(--text-sub);font-size:0.8rem;margin-top:2px;">قيد المعالجة</div>
+            <div style="margin-top:8px;height:4px;background:var(--border);border-radius:4px;overflow:hidden;"><div id="barPending" style="height:100%;background:var(--warning);border-radius:4px;width:0%;transition:width .6s var(--ease);"></div></div>
+        </div>
+    </div>
 
-    <!-- Edit Modal -->
-    <div class="modal" id="editModal" onclick="if(event.target===this)closeModal()">
-        <div class="modal-content">
-            <div class="modal-header"><h3>تعديل الطلب</h3><button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button></div>
-            <form id="editForm">
-                <input type="hidden" id="editOrderId">
+    <!-- Add Order -->
+    <div class="result-container" style="margin-bottom:28px;">
+        <div class="result-header"><h3 style="color:#fff;font-size:1.05rem;"><i class="fas fa-plus-circle" style="margin-left:8px;opacity:0.7;"></i>إضافة طلب جديد</h3></div>
+        <div style="padding:24px 28px;">
+            <div id="alertMessage" class="hidden"></div>
+            <form id="orderForm">
                 <div class="form-row">
-                    <div class="form-group"><label>اسم العميل</label><input type="text" id="editCustomerName" required></div>
-                    <div class="form-group"><label>رقم الهاتف</label><input type="tel" id="editCustomerPhone" required></div>
+                    <div class="form-group"><label>اسم العميل</label><input type="text" id="customerName" required placeholder="اسم العميل"></div>
+                    <div class="form-group"><label>رقم الهاتف</label><input type="tel" id="customerPhone" required placeholder="01XXXXXXXXX" dir="ltr"></div>
                 </div>
                 <div class="form-row">
-                    <div class="form-group"><label>رقم التتبع</label><input type="text" id="editTrackingNumber" required maxlength="13" style="font-family:monospace;letter-spacing:2px;direction:ltr;text-align:center;text-transform:uppercase;"></div>
-                    <div class="form-group"><label>الحالة</label><select id="editOrderStatus" required><option value="pending">قيد المعالجة</option><option value="in-transit">في الطريق</option><option value="delivered">تم التوصيل</option><option value="exception">مشكلة في التوصيل</option></select></div>
+                    <div class="form-group"><label>رقم التتبع</label><input type="text" id="trackingNumber" required placeholder="EE123456789EG" maxlength="13" style="font-family:monospace;letter-spacing:1.5px;direction:ltr;text-align:center;text-transform:uppercase;"></div>
+                    <div class="form-group"><label>حالة الطلب</label><select id="orderStatus" required><option value="pending">قيد المعالجة</option><option value="in-transit">في الطريق</option><option value="delivered">تم التوصيل</option><option value="exception">مشكلة في التوصيل</option></select></div>
                 </div>
-                <div class="form-group"><label>العنوان</label><input type="text" id="editOrderAddress" required></div>
+                <div class="form-group"><label>عنوان التوصيل</label><input type="text" id="orderAddress" required placeholder="العنوان بالتفصيل"></div>
                 <div class="form-row">
-                    <div class="form-group"><label>ملاحظات</label><textarea id="editOrderNotes" rows="3"></textarea></div>
-                    <div class="form-group"><label>القيمة (ج.م)</label><input type="number" id="editOrderValue" min="0" step="0.01"></div>
+                    <div class="form-group"><label>ملاحظات</label><textarea id="orderNotes" rows="2" placeholder="اختياري" style="resize:vertical;"></textarea></div>
+                    <div class="form-group"><label>قيمة الطلب (ج.م)</label><input type="number" id="orderValue" min="0" step="0.01" placeholder="0.00" dir="ltr"></div>
                 </div>
-                <div style="display:flex;gap:12px;margin-top:8px;">
-                    <button type="submit" class="support-btn" style="border:none;padding:12px 28px;">حفظ التعديلات</button>
-                    <button type="button" onclick="closeModal()" class="support-btn" style="background:#636e72;border:none;padding:12px 28px;">إلغاء</button>
+                <div style="display:flex;gap:10px;margin-top:4px;">
+                    <button type="submit" class="support-btn" style="border:none;padding:11px 26px;font-size:0.9rem;"><i class="fas fa-save"></i> حفظ</button>
+                    <button type="reset" class="support-btn" style="background:var(--text-sub);border:none;padding:11px 26px;font-size:0.9rem;"><i class="fas fa-undo"></i> مسح</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- WhatsApp Modal -->
-    <div class="modal" id="whatsappModal" onclick="if(event.target===this)document.getElementById('whatsappModal').classList.remove('active')">
-        <div class="modal-content">
-            <div class="modal-header"><h3><i class="fab fa-whatsapp" style="color:#25d366;margin-left:8px;"></i>إرسال واتساب</h3><button class="modal-close" onclick="document.getElementById('whatsappModal').classList.remove('active')"><i class="fas fa-times"></i></button></div>
-            <div style="padding:8px 0;">
-                <div class="form-group"><label>رقم الهاتف</label><input type="tel" id="whatsappPhone" readonly></div>
-                <div class="form-group"><label>رقم التتبع</label><input type="text" id="whatsappTracking" readonly style="font-family:monospace;"></div>
-                <div class="form-group"><label>الرسالة</label><textarea id="whatsappMessage" rows="4"></textarea></div>
-                <a id="whatsappSend" href="#" target="_blank" class="support-btn" style="background:#25d366;border:none;padding:14px 28px;width:100%;justify-content:center;text-align:center;"><i class="fab fa-whatsapp"></i> إرسال عبر واتساب</a>
+    <!-- Orders List -->
+    <div class="result-container">
+        <div class="result-header"><h3 style="color:#fff;font-size:1.05rem;"><i class="fas fa-list" style="margin-left:8px;opacity:0.7;"></i>قائمة الطلبات</h3></div>
+        <div style="padding:24px 28px;">
+            <div class="form-row" style="margin-bottom:18px;">
+                <div class="form-group" style="margin-bottom:0;"><input type="text" id="searchInput" placeholder="🔍 بحث بالاسم أو رقم التتبع..."></div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <select id="filterStatus"><option value="">جميع الحالات</option><option value="pending">قيد المعالجة</option><option value="in-transit">في الطريق</option><option value="delivered">تم التوصيل</option><option value="exception">مشكلة في التوصيل</option></select>
+                </div>
+            </div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead><tr><th>اسم العميل</th><th>الهاتف</th><th>رقم التتبع</th><th>الحالة</th><th>التاريخ</th><th>إجراءات</th></tr></thead>
+                    <tbody id="ordersTableBody"></tbody>
+                </table>
+            </div>
+            <div id="noOrders" class="hidden" style="text-align:center;padding:36px;color:var(--text-sub);">
+                <i class="fas fa-inbox" style="font-size:2.5rem;margin-bottom:12px;display:block;color:var(--border);"></i>
+                <p style="font-size:0.9rem;">لا توجد طلبات بعد</p>
             </div>
         </div>
     </div>
+</main>
 
-    <script src="../js/admin.js"></script>
+<!-- Edit Modal -->
+<div class="modal" id="editModal" onclick="if(event.target===this)closeModal()">
+    <div class="modal-content">
+        <div class="modal-header"><h3>تعديل الطلب</h3><button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button></div>
+        <form id="editForm">
+            <input type="hidden" id="editOrderId">
+            <div class="form-row">
+                <div class="form-group"><label>اسم العميل</label><input type="text" id="editCustomerName" required></div>
+                <div class="form-group"><label>رقم الهاتف</label><input type="tel" id="editCustomerPhone" required dir="ltr"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>رقم التتبع</label><input type="text" id="editTrackingNumber" required maxlength="13" style="font-family:monospace;letter-spacing:1.5px;direction:ltr;text-align:center;text-transform:uppercase;"></div>
+                <div class="form-group"><label>الحالة</label><select id="editOrderStatus" required><option value="pending">قيد المعالجة</option><option value="in-transit">في الطريق</option><option value="delivered">تم التوصيل</option><option value="exception">مشكلة في التوصيل</option></select></div>
+            </div>
+            <div class="form-group"><label>العنوان</label><input type="text" id="editOrderAddress" required></div>
+            <div class="form-row">
+                <div class="form-group"><label>ملاحظات</label><textarea id="editOrderNotes" rows="2" style="resize:vertical;"></textarea></div>
+                <div class="form-group"><label>القيمة (ج.م)</label><input type="number" id="editOrderValue" min="0" step="0.01" dir="ltr"></div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:4px;">
+                <button type="submit" class="support-btn" style="border:none;padding:11px 26px;font-size:0.9rem;">حفظ</button>
+                <button type="button" onclick="closeModal()" class="support-btn" style="background:var(--text-sub);border:none;padding:11px 26px;font-size:0.9rem;">إلغاء</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- WhatsApp Modal -->
+<div class="modal" id="whatsappModal" onclick="if(event.target===this)this.classList.remove('active')">
+    <div class="modal-content">
+        <div class="modal-header"><h3><i class="fab fa-whatsapp" style="color:#25d366;margin-left:8px;"></i>إرسال واتساب</h3><button class="modal-close" onclick="document.getElementById('whatsappModal').classList.remove('active')"><i class="fas fa-times"></i></button></div>
+        <div style="padding:4px 0;">
+            <div class="form-group"><label>رقم الهاتف</label><input type="tel" id="whatsappPhone" readonly style="background:var(--bg);"></div>
+            <div class="form-group"><label>رقم التتبع</label><input type="text" id="whatsappTracking" readonly style="font-family:monospace;background:var(--bg);"></div>
+            <div class="form-group"><label>الرسالة</label><textarea id="whatsappMessage" rows="4"></textarea></div>
+            <a id="whatsappSend" href="#" target="_blank" class="support-btn" style="background:#25d366;border:none;padding:13px 28px;width:100%;justify-content:center;"><i class="fab fa-whatsapp"></i> إرسال عبر واتساب</a>
+        </div>
+    </div>
+</div>
+
+<script src="../js/admin.js"></script>
 </body>
 </html>
