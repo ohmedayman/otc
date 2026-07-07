@@ -86,8 +86,9 @@ async function trackPackage() {
     loadingSpinner.classList.remove('hidden');
     await new Promise(r => setTimeout(r, 1200));
 
-    // 1. Check demo data, 2. Check admin localStorage, 3. Generate generic
-    const data = trackingData[num] || getAdminOrder(num) || generateDemoData(num);
+    // 1. Check admin localStorage orders only
+    const data = getAdminOrder(num);
+    if (!data) { showError('رقم التتبع غير موجود — تأكد من صحة الرقم'); return; }
     displayResults(data);
 }
 
@@ -104,8 +105,11 @@ async function bulkTrack() {
     await new Promise(r => setTimeout(r, 1500));
 
     bulkResultsBody.innerHTML = '';
+    let foundCount = 0;
     numbers.forEach(num => {
-        const data = trackingData[num] || getAdminOrder(num) || generateDemoData(num);
+        const data = getAdminOrder(num);
+        if (!data) return;
+        foundCount++;
         const statusColors = { 'pending':'#fdcb6e', 'in-transit':'#0984e3', 'delivered':'#00b894', 'exception':'#e17055' };
         const row = document.createElement('div');
         row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:var(--bg);border-radius:10px;margin-bottom:10px;border:1px solid var(--border);';
@@ -123,7 +127,8 @@ async function bulkTrack() {
 
     loadingSpinner.classList.add('hidden');
     bulkResults.classList.remove('hidden');
-    showToast(`تم تتبع ${numbers.length} شحنة بنجاح`, 'success');
+    if (foundCount === 0) { showToast('لم يتم العثور على أي شحنات', 'error'); }
+    else { showToast(`تم تتبع ${foundCount} شحنة بنجاح`, 'success'); }
 }
 
 // ===== Copy =====

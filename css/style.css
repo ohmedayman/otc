@@ -66,10 +66,10 @@ input,select,textarea{font-family:inherit}
 .support-btn:active{transform:translateY(0) scale(0.98)}
 
 /* ===== Hero ===== */
-.hero{position:relative;background:linear-gradient(160deg,var(--dark) 0%,var(--dark-2) 40%,var(--dark-3) 100%);padding:90px 24px 110px;text-align:center;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:650px}
-.hero::before{content:'';position:absolute;width:900px;height:900px;border-radius:50%;background:radial-gradient(circle,rgba(200,169,81,0.1) 0%,transparent 70%);top:-350px;left:-350px;animation:heroFloat 12s ease-in-out infinite alternate}
-.hero::after{content:'';position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(200,169,81,0.07) 0%,transparent 70%);bottom:-250px;right:-250px;animation:heroFloat 15s ease-in-out infinite alternate-reverse}
-.hero-particles{position:absolute;inset:0;background-image:radial-gradient(circle,rgba(200,169,81,0.15) 1px,transparent 1px);background-size:50px 50px;animation:particleDrift 20s linear infinite}
+.hero{position:relative;background:linear-gradient(160deg,#0a0e1a 0%,#1a1040 40%,#2d1b69 100%);padding:90px 24px 110px;text-align:center;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:650px}
+.hero::before{content:'';position:absolute;width:900px;height:900px;border-radius:50%;background:radial-gradient(circle,rgba(200,169,81,0.18) 0%,transparent 70%);top:-350px;left:-350px;animation:heroFloat 12s ease-in-out infinite alternate}
+.hero::after{content:'';position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(139,92,246,0.12) 0%,transparent 70%);bottom:-250px;right:-250px;animation:heroFloat 15s ease-in-out infinite alternate-reverse}
+.hero-particles{position:absolute;inset:0;background-image:radial-gradient(circle,rgba(200,169,81,0.2) 1.5px,transparent 1.5px);background-size:40px 40px;animation:particleDrift 15s linear infinite}
 @keyframes heroFloat{0%{transform:scale(1) rotate(0deg);opacity:0.5}100%{transform:scale(1.15) rotate(5deg);opacity:1}}
 @keyframes particleDrift{0%{transform:translate(0,0)}100%{transform:translate(50px,50px)}}
 .hero-content{position:relative;z-index:2;max-width:720px;width:100%}
@@ -174,11 +174,11 @@ input,select,textarea{font-family:inherit}
 .features{padding:70px 0 30px}
 .features-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
 .feature-card{background:#fff;border-radius:var(--r);padding:32px 20px;text-align:center;box-shadow:var(--shadow-sm);transition:all .4s var(--ease);border:1px solid var(--border);position:relative;overflow:hidden}
-.feature-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold-light));transform:scaleX(0);transition:transform .4s var(--ease);transform-origin:left}
+.feature-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--gold),#8b5cf6,var(--gold));transform:scaleX(0);transition:transform .4s var(--ease);transform-origin:left}
 .feature-card:hover::before{transform:scaleX(1)}
-.feature-card:hover{transform:translateY(-8px);box-shadow:var(--shadow-lg);border-color:var(--gold-light)}
-.feature-icon{width:56px;height:56px;background:linear-gradient(135deg,var(--gold-soft),rgba(200,169,81,0.02));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.35rem;color:var(--gold);margin:0 auto 14px;transition:all .4s var(--ease-bounce)}
-.feature-card:hover .feature-icon{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#fff;transform:scale(1.1) rotate(5deg);box-shadow:var(--shadow-gold)}
+.feature-card:hover{transform:translateY(-10px);box-shadow:0 20px 40px rgba(200,169,81,0.15);border-color:var(--gold-light)}
+.feature-icon{width:60px;height:60px;background:linear-gradient(135deg,rgba(200,169,81,0.15),rgba(139,92,246,0.08));border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:var(--gold);margin:0 auto 14px;transition:all .4s var(--ease-bounce);box-shadow:0 4px 12px rgba(200,169,81,0.1)}
+.feature-card:hover .feature-icon{background:linear-gradient(135deg,var(--gold),#8b5cf6);color:#fff;transform:scale(1.15) rotate(5deg);box-shadow:0 8px 30px rgba(200,169,81,0.4)}
 .feature-card h3{font-size:1rem;font-weight:700;color:var(--dark);margin-bottom:6px}
 .feature-card p{color:var(--text-sub);font-size:0.85rem;line-height:1.6}
 
