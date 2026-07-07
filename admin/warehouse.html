@@ -607,6 +607,12 @@ const WH_EASY_PAY = 'wh_easypay';
 
 const today = () => new Date().toLocaleDateString('ar-EG');
 const esc = t => { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; };
+function formatTimestamp(val) {
+    if (!val) return '-';
+    if (val && typeof val.toDate === 'function') return val.toDate().toLocaleDateString('ar-EG');
+    if (val && val.seconds) return new Date(val.seconds * 1000).toLocaleDateString('ar-EG');
+    return String(val);
+}
 
 // ===== REALTIME DATA STORE =====
 let productsData = [], stockinData = [], stockoutData = [], purchasesData = [];
@@ -719,7 +725,7 @@ function renderRecentActivity() {
     if (!items.length) {
         el.innerHTML = '<p style="color:var(--text-sub);text-align:center;padding:20px;">لا توجد عمليات بعد</p>';
     } else {
-        el.innerHTML = items.slice(0, 10).map(i => `<div style="padding:10px 0;border-bottom:1px solid var(--border);font-size:0.85rem;"><span style="color:var(--text-sub);font-size:0.75rem;">${esc(i.date)}</span><br>${i.text}</div>`).join('');
+        el.innerHTML = items.slice(0, 10).map(i => `<div style="padding:10px 0;border-bottom:1px solid var(--border);font-size:0.85rem;"><span style="color:var(--text-sub);font-size:0.75rem;">${esc(formatTimestamp(i.date))}</span><br>${i.text}</div>`).join('');
     }
 }
 

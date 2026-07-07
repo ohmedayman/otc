@@ -445,7 +445,7 @@ function exportToExcel() {
     const sm = { 'pending':'قيد المعالجة', 'in-transit':'في الطريق', 'delivered':'تم التوصيل', 'exception':'مشكلة في التوصيل' };
     let csv = '\uFEFF' + 'اسم العميل,الهاتف,رقم التتبع,شركة التوصيل,الحالة,العنوان,ملاحظات,القيمة,التاريخ\n';
     orders.forEach(o => {
-        csv += [o.customerName,o.customerPhone,o.m16Number,o.deliveryCompany||'',sm[o.status]||o.status,o.address||'',o.notes||'',o.value||0,o.createdAt||''].map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',') + '\n';
+        csv += [o.customerName,o.customerPhone,o.m16Number,o.deliveryCompany||'',sm[o.status]||o.status,o.address||'',o.notes||'',o.value||0,formatTimestamp(o.createdAt)].map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',') + '\n';
     });
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -455,6 +455,12 @@ function exportToExcel() {
     URL.revokeObjectURL(url); showAlert('success','تم التصدير بنجاح');
 }
 
+function formatTimestamp(val) {
+    if (!val) return '-';
+    if (val && typeof val.toDate === 'function') return val.toDate().toLocaleDateString('ar-EG');
+    if (val && val.seconds) return new Date(val.seconds * 1000).toLocaleDateString('ar-EG');
+    return String(val);
+}
 function statusText(s) { return { 'pending':'قيد المعالجة', 'in-transit':'في الطريق', 'delivered':'تم التوصيل', 'exception':'مشكلة في التوصيل' }[s]||s; }
 function esc(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
 function showAlert(type, msg) {

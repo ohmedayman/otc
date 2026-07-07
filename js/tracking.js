@@ -46,6 +46,13 @@ async function getAdminOrder(num) {
     }
 }
 
+function formatDate(val) {
+    if (!val) return '-';
+    if (val && typeof val.toDate === 'function') return val.toDate().toLocaleDateString('ar-EG');
+    if (val && val.seconds) return new Date(val.seconds * 1000).toLocaleDateString('ar-EG');
+    return String(val);
+}
+
 function buildTrackingData(o) {
     const statusMap = { 'pending':'قيد المعالجة', 'in-transit':'في الطريق', 'delivered':'تم التوصيل', 'exception':'مشكلة في التوصيل' };
     const statusLoc = { 'pending':'مستودع البائع', 'in-transit':'في الطريق', 'delivered':'تم التوصيل', 'exception':'مركز الخدمة' };
@@ -53,12 +60,12 @@ function buildTrackingData(o) {
         trackingNumber: o.m16Number || o.trackingNumber,
         status: o.status,
         statusText: statusMap[o.status] || o.status,
-        lastUpdate: o.createdAt || '-',
+        lastUpdate: formatDate(o.createdAt),
         location: o.address || statusLoc[o.status] || '-',
         lastEvent: statusMap[o.status] || o.status,
         events: [
-            { date: o.createdAt || '-', status: statusMap[o.status] || o.status, location: o.address || '-' },
-            ...(o.notes ? [{ date: o.createdAt || '-', status: o.notes, location: o.address || '-' }] : [])
+            { date: formatDate(o.createdAt), status: statusMap[o.status] || o.status, location: o.address || '-' },
+            ...(o.notes ? [{ date: formatDate(o.createdAt), status: o.notes, location: o.address || '-' }] : [])
         ]
     };
 }
