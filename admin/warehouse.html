@@ -675,6 +675,7 @@ function formatTimestamp(val) {
 // ===== REALTIME DATA STORE =====
 let productsData = [], stockinData = [], stockoutData = [], purchasesData = [];
 let expensesData = [], collectionsData = [], vodafoneData = [], easypayData = [];
+let isResettingProducts = false;
 
 
 
@@ -858,6 +859,7 @@ async function addProduct() {
 
 async function resetProductsToDefault() {
     if (!confirm('هل أنت متأكد؟ هتمسح كل المنتجات الحالية وترجع الـ 16 منتج أصلي بأصلهم.')) return;
+    isResettingProducts = true;
     const database = await initFirebase();
     const snap = await database.collection(WH_PRODUCTS).get();
     for (const d of snap.docs) {
@@ -866,6 +868,7 @@ async function resetProductsToDefault() {
     for (const p of DEFAULT_PRODUCTS) {
         await database.collection(WH_PRODUCTS).add(p);
     }
+    isResettingProducts = false;
     showWhAlert('success', 'تم إعادة تعيين المنتجات بنجاح');
 }
 
@@ -1348,8 +1351,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Products listener - seed defaults if empty
     fbListen(WH_PRODUCTS, async (data) => {
+        if (isResettingProducts) return;
         if (!data.length) {
+            isResettingProducts = true;
             for (const p of DEFAULT_PRODUCTS) { await fbAddDoc(WH_PRODUCTS, p); }
+            isResettingProducts = false;
             return;
         }
         productsData = data;
