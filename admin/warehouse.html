@@ -28,7 +28,7 @@
         .wh-main{margin-right:240px;padding:24px 28px 40px;min-height:100vh}
 
         /* Stats row */
-        .wh-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+        .wh-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:24px}
         .wh-stat{background:#fff;border-radius:var(--r);padding:20px;text-align:center;box-shadow:var(--shadow);border:1px solid var(--border);transition:all .3s var(--ease)}
         .wh-stat:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
         .wh-stat-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin:0 auto 10px}
@@ -103,7 +103,7 @@
         .wh-modal.active .wh-modal-content{transform:translateY(0) scale(1)}
 
         /* Responsive */
-        @media(max-width:1024px){.wh-stats{grid-template-columns:repeat(2,1fr)}.product-grid{grid-template-columns:repeat(2,1fr)}}
+        @media(max-width:1024px){.wh-stats{grid-template-columns:repeat(3,1fr)}.product-grid{grid-template-columns:repeat(2,1fr)}}
         @media(max-width:768px){
             .wh-sidebar{width:60px}
             .wh-sidebar-header h2,.wh-sidebar-header small,.wh-nav-item span,.wh-nav-section{display:none}
@@ -181,6 +181,11 @@
                 <div class="wh-stat-icon" style="background:#ede9fe;color:#7c3aed;"><i class="fas fa-coins"></i></div>
                 <div class="wh-stat-value" id="totalValue">0</div>
                 <div class="wh-stat-label">قيمة المخزن (ج.م)</div>
+            </div>
+            <div class="wh-stat">
+                <div class="wh-stat-icon" style="background:#fee2e2;color:#dc2626;"><i class="fas fa-shopping-cart"></i></div>
+                <div class="wh-stat-value" id="totalPurchasesTop">0</div>
+                <div class="wh-stat-label">إجمالي المشتريات (ج.م)</div>
             </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
@@ -733,7 +738,9 @@ function updateDashboard() {
     document.getElementById('totalStock').textContent = totalStock;
     document.getElementById('lowStock').textContent = lowStock;
     document.getElementById('totalValue').textContent = totalValue.toLocaleString('ar-EG');
-    document.getElementById('totalPurchases').textContent = purchasesData.reduce((s, p) => s + Number(p.total||0), 0).toLocaleString('ar-EG') + ' ج.م';
+    const totalPurchasesAmount = purchasesData.reduce((s, p) => s + Number(p.total||0), 0);
+    document.getElementById('totalPurchasesTop').textContent = totalPurchasesAmount.toLocaleString('ar-EG');
+    document.getElementById('totalPurchases').textContent = totalPurchasesAmount.toLocaleString('ar-EG') + ' ج.م';
     document.getElementById('totalExpenses').textContent = expensesData.reduce((s, e) => s + Number(e.amount||0), 0).toLocaleString('ar-EG') + ' ج.م';
     document.getElementById('totalCollections').textContent = collectionsData.reduce((s, c) => s + Number(c.amount||0), 0).toLocaleString('ar-EG') + ' ج.م';
     document.getElementById('totalVodafone').textContent = (vodafoneData.reduce((s, v) => s + Number(v.amount||0), 0) + easypayData.reduce((s, v) => s + Number(v.amount||0), 0)).toLocaleString('ar-EG') + ' ج.م';
