@@ -86,14 +86,15 @@
                         <div class="form-group"><label>رقم الهاتف</label><input type="tel" id="customerPhone" required placeholder="01XXXXXXXXX" dir="ltr"></div>
                     </div>
                     <div class="form-row">
+                        <div class="form-group"><label>شركة التوصيل</label><select id="deliveryCompany" required><option value="">اختر شركة التوصيل</option><option value="Bosta">Bosta</option><option value="Aramex">Aramex</option><option value="J&T Express">J&T Express</option><option value="Mylerz">Mylerz</option><option value="أخرى">أخرى</option></select></div>
                         <div class="form-group"><label>السيريل الحقيقي (البريد المصري)</label><input type="text" id="realTrackingNumber" required placeholder="EE123456789EG" maxlength="13" style="font-family:monospace;letter-spacing:1.5px;direction:ltr;text-align:center;text-transform:uppercase;"></div>
-                        <div class="form-group"><label>حالة الطلب</label><select id="orderStatus" required><option value="pending">قيد المعالجة</option><option value="in-transit">في الطريق</option><option value="delivered">تم التوصيل</option><option value="exception">مشكلة في التوصيل</option></select></div>
                     </div>
-                    <div class="form-group"><label>عنوان التوصيل</label><input type="text" id="orderAddress" required placeholder="العنوان بالتفصيل"></div>
                     <div class="form-row">
-                        <div class="form-group"><label>ملاحظات</label><textarea id="orderNotes" rows="2" placeholder="اختياري" style="resize:vertical;"></textarea></div>
+                        <div class="form-group"><label>حالة الطلب</label><select id="orderStatus" required><option value="pending">قيد المعالجة</option><option value="in-transit">في الطريق</option><option value="delivered">تم التوصيل</option><option value="exception">مشكلة في التوصيل</option></select></div>
                         <div class="form-group"><label>قيمة الطلب (ج.م) — تظهر للأدمن فقط</label><input type="number" id="orderValue" min="0" step="0.01" placeholder="0.00" dir="ltr"></div>
                     </div>
+                    <div class="form-group"><label>عنوان التوصيل</label><input type="text" id="orderAddress" required placeholder="العنوان بالتفصيل"></div>
+                    <div class="form-group"><label>ملاحظات</label><textarea id="orderNotes" rows="2" placeholder="اختياري" style="resize:vertical;"></textarea></div>
                     <div style="display:flex;gap:10px;margin-top:4px;">
                         <button type="submit" class="support-btn" style="border:none;padding:11px 26px;font-size:0.9rem;"><i class="fas fa-save"></i> حفظ</button>
                         <button type="reset" class="support-btn" style="background:var(--text-sub);border:none;padding:11px 26px;font-size:0.9rem;"><i class="fas fa-undo"></i> مسح</button>
@@ -114,7 +115,7 @@
                 </div>
                 <div class="table-container">
                     <table class="data-table">
-                        <thead><tr><th>اسم العميل</th><th>الهاتف</th><th>رقم M16</th><th>السيريل الحقيقي</th><th>القيمة</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+                        <thead><tr><th>اسم العميل</th><th>الهاتف</th><th>رقم M16</th><th>شركة التوصيل</th><th>السيريل الحقيقي</th><th>القيمة</th><th>الحالة</th><th>إجراءات</th></tr></thead>
                         <tbody id="ordersTableBody"></tbody>
                     </table>
                 </div>
@@ -139,8 +140,12 @@
                 <div class="form-group"><label>رقم الهاتف</label><input type="tel" id="editCustomerPhone" required dir="ltr"></div>
             </div>
             <div class="form-row">
+                <div class="form-group"><label>شركة التوصيل</label><select id="editDeliveryCompany"><option value="">اختر شركة التوصيل</option><option value="Bosta">Bosta</option><option value="Aramex">Aramex</option><option value="J&T Express">J&T Express</option><option value="Mylerz">Mylerz</option><option value="أخرى">أخرى</option></select></div>
                 <div class="form-group"><label>السيريل الحقيقي</label><input type="text" id="editRealTrackingNumber" required maxlength="13" style="font-family:monospace;letter-spacing:1.5px;direction:ltr;text-align:center;text-transform:uppercase;"></div>
+            </div>
+            <div class="form-row">
                 <div class="form-group"><label>الحالة</label><select id="editOrderStatus" required><option value="pending">قيد المعالجة</option><option value="in-transit">في الطريق</option><option value="delivered">تم التوصيل</option><option value="exception">مشكلة في التوصيل</option></select></div>
+                <div class="form-group"><label>القيمة (ج.م)</label><input type="number" id="editOrderValue" min="0" step="0.01" dir="ltr"></div>
             </div>
             <div class="form-group"><label>العنوان</label><input type="text" id="editOrderAddress" required></div>
             <div class="form-row">
@@ -274,6 +279,7 @@ function renderOrders(orders) {
             <td>${esc(o.customerName)}</td>
             <td>${esc(o.customerPhone)}</td>
             <td><code style="font-weight:800;color:var(--gold);letter-spacing:1px;">${esc(o.m16Number||'-')}</code></td>
+            <td><span style="font-size:0.82rem;font-weight:600;color:var(--info);">${esc(o.deliveryCompany||'-')}</span></td>
             <td><code style="font-size:0.78rem;color:var(--text-sub);">${esc(o.realTrackingNumber||'-')}</code></td>
             <td><strong>${o.value ? o.value + ' ج.م' : '-'}</strong></td>
             <td><span class="status-badge ${o.status}">${statusText(o.status)}</span></td>
@@ -292,6 +298,7 @@ function handleAddOrder(e) {
         m16Number: generateM16(),
         customerName: document.getElementById('customerName').value.trim(),
         customerPhone: document.getElementById('customerPhone').value.trim(),
+        deliveryCompany: document.getElementById('deliveryCompany').value,
         realTrackingNumber: document.getElementById('realTrackingNumber').value.trim().toUpperCase(),
         status: document.getElementById('orderStatus').value,
         address: document.getElementById('orderAddress').value.trim(),
@@ -315,6 +322,7 @@ function handleEditOrder(e) {
         orders[i] = { ...orders[i],
             customerName: document.getElementById('editCustomerName').value.trim(),
             customerPhone: document.getElementById('editCustomerPhone').value.trim(),
+            deliveryCompany: document.getElementById('editDeliveryCompany').value,
             realTrackingNumber: document.getElementById('editRealTrackingNumber').value.trim().toUpperCase(),
             status: document.getElementById('editOrderStatus').value,
             address: document.getElementById('editOrderAddress').value.trim(),
@@ -333,6 +341,7 @@ function editOrder(id) {
     document.getElementById('editM16Number').value = o.m16Number || '';
     document.getElementById('editCustomerName').value = o.customerName;
     document.getElementById('editCustomerPhone').value = o.customerPhone;
+    document.getElementById('editDeliveryCompany').value = o.deliveryCompany || '';
     document.getElementById('editRealTrackingNumber').value = o.realTrackingNumber || '';
     document.getElementById('editOrderStatus').value = o.status;
     document.getElementById('editOrderAddress').value = o.address;
