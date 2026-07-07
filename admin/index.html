@@ -281,7 +281,7 @@ function renderOrders(orders) {
             <td><strong>${o.value ? o.value + ' ج.م' : '-'}</strong></td>
             <td><span class="status-badge ${o.status}">${statusText(o.status)}</span></td>
             <td><div class="btn-group">
-                <button class="btn btn-view" onclick="openWhatsApp('${esc(o.customerPhone)}','${esc(o.m16Number)}','${esc(o.status)}')" title="واتساب"><i class="fab fa-whatsapp"></i></button>
+                <button class="btn btn-view" onclick="openWhatsApp('${esc(o.customerPhone)}','${esc(o.m16Number)}','${esc(o.status)}','${esc(o.customerName)}','${o.value||0}','${esc(o.deliveryCompany||'-')}')" title="واتساب"><i class="fab fa-whatsapp"></i></button>
                 <button class="btn btn-edit" onclick="editOrder(${o.id})" title="تعديل"><i class="fas fa-edit"></i></button>
                 <button class="btn btn-delete" onclick="delOrder(${o.id})" title="حذف"><i class="fas fa-trash"></i></button>
             </div></td>`;
@@ -382,9 +382,20 @@ function updateStats() {
     }, 200);
 }
 
-function openWhatsApp(phone, tracking, status) {
+function openWhatsApp(phone, tracking, status, name, value, deliveryCompany) {
     const sm = { 'pending':'قيد المعالجة', 'in-transit':'في الطريق', 'delivered':'تم التوصيل', 'exception':'مشكلة في التوصيل' };
-    const msg = `مرحباً،\nتتبع طلبك:\nرقم التتبع: ${tracking}\nالحالة: ${sm[status]||status}\n\nتتبع شحنتك:\nhttps://otc.milanof16.com/?track=${tracking}`;
+    const msg = `مرحباً ${name}،
+
+تتبع طلبك:
+رقم التتبع: ${tracking}
+الاسم: ${name}
+رقم الهاتف: ${phone}
+إجمالي المبلغ: ${value} ج.م
+طريقة الشحن: ${deliveryCompany}
+الحالة: ${sm[status]||status}
+
+تتبع شحنتك:
+https://otc.milanof16.com/?track=${tracking}`;
     document.getElementById('whatsappPhone').value = phone;
     document.getElementById('whatsappTracking').value = tracking;
     document.getElementById('whatsappMessage').value = msg;
