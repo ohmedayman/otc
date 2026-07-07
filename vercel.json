@@ -1,10 +1,15 @@
 {
   "version": 2,
-  "outputDirectory": ".",
   "cleanUrls": true,
+  "builds": [
+    { "src": "index.html", "use": "@vercel/static" },
+    { "src": "css/**", "use": "@vercel/static" },
+    { "src": "js/**", "use": "@vercel/static" },
+    { "src": "assets/**", "use": "@vercel/static" },
+    { "src": "admin/**", "use": "@vercel/static" }
+  ],
   "rewrites": [
-    { "source": "/warehouse", "destination": "/admin/warehouse.html" },
-    { "source": "/warehouse.html", "destination": "/admin/warehouse.html" }
+    { "source": "/warehouse", "destination": "/admin/warehouse.html" }
   ],
   "routes": [
     { "src": "/(.*)", "dest": "/$1" }
