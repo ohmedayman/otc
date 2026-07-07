@@ -857,12 +857,14 @@ async function addProduct() {
 }
 
 async function resetProductsToDefault() {
-    if (!confirm('هل أنت متأكد؟ هتمسح كل المنتجات الحالية وترجع الـ 17 منتج أصلي بأصلهم.')) return;
-    for (const p of productsData) {
-        if (p._fbId) await fbDeleteDoc(WH_PRODUCTS, p._fbId);
+    if (!confirm('هل أنت متأكد؟ هتمسح كل المنتجات الحالية وترجع الـ 16 منتج أصلي بأصلهم.')) return;
+    const database = await initFirebase();
+    const snap = await database.collection(WH_PRODUCTS).get();
+    for (const d of snap.docs) {
+        await database.collection(WH_PRODUCTS).doc(d.id).delete();
     }
     for (const p of DEFAULT_PRODUCTS) {
-        await fbAddDoc(WH_PRODUCTS, p);
+        await database.collection(WH_PRODUCTS).add(p);
     }
     showWhAlert('success', 'تم إعادة تعيين المنتجات بنجاح');
 }
