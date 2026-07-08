@@ -1059,21 +1059,25 @@ async function savePurchase() {
     if (!supplier) { showWhAlert('error', 'أدخل اسم المورد'); return; }
     const payMethod = document.getElementById('purchasePayMethod').value;
     const invoiceNo = 'INV-' + Date.now().toString(36).toUpperCase();
-    const stockSnapshot = {};
+    const database = await initFirebase();
+    const stockUpdates = [];
     for (const item of purchaseCart) {
-        if (!stockSnapshot[item.productId]) {
-            const p = productsData.find(x => x._fbId === item.productId);
-            stockSnapshot[item.productId] = p ? (p.stock || 0) : 0;
+        const doc = await database.collection(WH_PRODUCTS).doc(item.productId).get();
+        if (doc.exists) {
+            const currentStock = doc.data().stock || 0;
+            const newStock = currentStock + item.qty;
+            await database.collection(WH_PRODUCTS).doc(item.productId).update({ stock: newStock });
+            stockUpdates.push({ name: item.productName, old: currentStock, add: item.qty, new: newStock });
+            console.log('[SAVE] Stock updated:', item.productName, currentStock, '+', item.qty, '=', newStock);
+        } else {
+            console.error('[SAVE] Product not found:', item.productId);
         }
-        stockSnapshot[item.productId] += item.qty;
-    }
-    for (const [prodId, newStock] of Object.entries(stockSnapshot)) {
-        await updateProductStock(prodId, newStock);
     }
     await fbAddDoc(WH_PURCHASES, { date: today(), invoiceNo, supplier, payMethod, items: [...purchaseCart], total: purchaseCart.reduce((s, i) => s + (i.qty * i.price), 0) });
     purchaseCart = []; renderCart();
     document.getElementById('purchaseSupplier').value = '';
-    showWhAlert('success', `تم حفظ الفاتورة ${invoiceNo}`);
+    console.log('[SAVE] Purchase saved:', invoiceNo, 'Stock updates:', stockUpdates);
+    showWhAlert('success', `تم حفظ الفاتورة ${invoiceNo} — تم تحديث ${stockUpdates.length} منتج`);
 }
 
 function renderPurchases() {
