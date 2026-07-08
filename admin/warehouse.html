@@ -1161,21 +1161,21 @@ async function saveEditPurchase() {
     const newItems = window._editPurchaseItems || [];
     const newTotal = newItems.reduce((s, item) => s + (item.qty * item.price), 0);
     const oldItems = r.items || [];
+    const database = await initFirebase();
+    const allProdIds = [...new Set([...oldItems.map(i => i.productId), ...newItems.map(i => i.productId)])];
     const stockSnapshot = {};
-    for (const item of [...oldItems, ...newItems]) {
-        if (!stockSnapshot[item.productId]) {
-            const p = productsData.find(x => x._fbId === item.productId);
-            stockSnapshot[item.productId] = p ? (p.stock || 0) : 0;
-        }
+    for (const prodId of allProdIds) {
+        const doc = await database.collection(WH_PRODUCTS).doc(prodId).get();
+        stockSnapshot[prodId] = doc.exists ? (doc.data().stock || 0) : 0;
     }
     for (const oldItem of oldItems) {
-        stockSnapshot[oldItem.productId] -= oldItem.qty;
+        if (stockSnapshot[oldItem.productId] !== undefined) stockSnapshot[oldItem.productId] -= oldItem.qty;
     }
     for (const newItem of newItems) {
-        stockSnapshot[newItem.productId] += newItem.qty;
+        if (stockSnapshot[newItem.productId] !== undefined) stockSnapshot[newItem.productId] += newItem.qty;
     }
     for (const [prodId, newStock] of Object.entries(stockSnapshot)) {
-        await updateProductStock(prodId, newStock);
+        await database.collection(WH_PRODUCTS).doc(prodId).update({ stock: newStock });
     }
     await fbUpdateDoc(WH_PURCHASES, fbId, { supplier: newSupplier, date: newDate, payMethod: newPayMethod, items: newItems, total: newTotal });
     document.getElementById('purchaseEditModal').classList.remove('active');
