@@ -1409,6 +1409,19 @@ function showWhAlert(type, msg) {
 // ===== DELETE RECORD =====
 async function deleteRecord(collection, id, label) {
     if (!confirm(`هل أنت متأكد من حذف "${label}"؟`)) return;
+    if (collection === WH_PURCHASES) {
+        const r = purchasesData.find(x => x._fbId === id);
+        if (r && r.items) {
+            const database = await initFirebase();
+            for (const item of r.items) {
+                const doc = await database.collection(WH_PRODUCTS).doc(item.productId).get();
+                if (doc.exists) {
+                    const newStock = Math.max(0, (doc.data().stock || 0) - item.qty);
+                    await database.collection(WH_PRODUCTS).doc(item.productId).update({ stock: newStock });
+                }
+            }
+        }
+    }
     await fbDeleteDoc(collection, id);
     showWhAlert('success', `تم حذف ${label}`);
 }
