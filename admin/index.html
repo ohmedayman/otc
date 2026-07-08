@@ -462,7 +462,7 @@ function formatTimestamp(val) {
     return String(val);
 }
 function statusText(s) { return { 'pending':'قيد المعالجة', 'in-transit':'في الطريق', 'delivered':'تم التوصيل', 'exception':'مشكلة في التوصيل' }[s]||s; }
-function esc(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+function esc(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML.replace(/'/g, '&#39;'); }
 function showAlert(type, msg) {
     const el = document.getElementById('alertMessage');
     el.className = 'alert alert-' + type;
