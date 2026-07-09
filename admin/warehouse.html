@@ -146,6 +146,9 @@
         <div class="wh-nav-section">التقارير</div>
         <div class="wh-nav-item" data-page="reports"><i class="fas fa-chart-line"></i><span>التقارير الشاملة</span></div>
 
+        <div class="wh-nav-section">التواصل</div>
+        <div class="wh-nav-item" data-page="whatsapp"><i class="fab fa-whatsapp"></i><span>واتساب جماعي</span></div>
+
         <div class="wh-nav-section">روابط</div>
         <a href="index.html" class="wh-nav-item"><i class="fas fa-arrow-right"></i><span>لوحة التحكم</span></a>
         <a href="../index.html" class="wh-nav-item"><i class="fas fa-home"></i><span>الرئيسية</span></a>
@@ -658,6 +661,78 @@
         </div>
     </div>
 
+    <!-- ===== واتساب جماعي ===== -->
+    <div class="wh-section" id="page-whatsapp">
+        <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:20px;"><i class="fab fa-whatsapp" style="color:#25d366;margin-left:8px;"></i>رسائل واتساب جماعية</h2>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+            <!-- Left: Numbers + Message -->
+            <div>
+                <div class="wh-card" style="margin-bottom:16px;">
+                    <div class="wh-card-header"><h3><i class="fas fa-phone" style="margin-left:8px;"></i>أرقام الهواتف</h3></div>
+                    <div class="wh-card-body">
+                        <div class="wh-form-group">
+                            <label>أدخل الأرقام (كل رقم في سطر)</label>
+                            <textarea id="waNumbers" rows="8" placeholder="01012345678&#10;01123456789&#10;01234567890" style="width:100%;padding:12px;border:1px solid var(--border);border-radius:var(--r-xs);font-family:inherit;font-size:0.88rem;resize:vertical;direction:ltr;text-align:left;"></textarea>
+                        </div>
+                        <div style="display:flex;gap:8px;align-items:center;">
+                            <span style="font-size:0.78rem;color:var(--text-sub);">عدد الأرقام:</span>
+                            <strong id="waCount" style="color:var(--success);">0</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wh-card">
+                    <div class="wh-card-header"><h3><i class="fas fa-comment-dots" style="margin-left:8px;"></i>الرسالة</h3></div>
+                    <div class="wh-card-body">
+                        <div class="wh-form-group">
+                            <label>اكتب الرسالة</label>
+                            <textarea id="waMessage" rows="6" placeholder="اكتب رسالتك هنا..." style="width:100%;padding:12px;border:1px solid var(--border);border-radius:var(--r-xs);font-family:inherit;font-size:0.88rem;resize:vertical;"></textarea>
+                        </div>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+                            <span style="font-size:0.72rem;color:var(--text-sub);">快捷:</span>
+                            <button class="wh-btn wh-btn-secondary" style="padding:4px 10px;font-size:0.72rem;" onclick="insertWaTemplate('迟发货提醒')">迟发货</button>
+                            <button class="wh-btn wh-btn-secondary" style="padding:4px 10px;font-size:0.72rem;" onclick="insertWaTemplate('有新货')">جديد</button>
+                            <button class="wh-btn wh-btn-secondary" style="padding:4px 10px;font-size:0.72rem;" onclick="insertWaTemplate('عرض تخفيض')">عرض</button>
+                            <button class="wh-btn wh-btn-secondary" style="padding:4px 10px;font-size:0.72rem;" onclick="insertWaTemplate('تذكير بالدفع')">تذكير</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Preview + Send -->
+            <div>
+                <div class="wh-card" style="margin-bottom:16px;">
+                    <div class="wh-card-header" style="background:linear-gradient(135deg,#25d366,#128c7e);"><h3><i class="fab fa-whatsapp" style="margin-left:8px;"></i>معاينة الرسالة</h3></div>
+                    <div class="wh-card-body">
+                        <div id="waPreview" style="background:#e5ddd5;border-radius:12px;padding:16px;min-height:120px;font-size:0.88rem;line-height:1.6;direction:rtl;text-align:right;position:relative;">
+                            <div style="background:#dcf8c6;border-radius:8px;padding:12px 16px;display:inline-block;max-width:90%;position:relative;">
+                                <span id="waPreviewText" style="color:#303030;">اكتب رسالتك هنا لمعاينتها...</span>
+                                <div style="text-align:left;font-size:0.65rem;color:#667781;margin-top:4px;">✓✓</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wh-card" style="margin-bottom:16px;">
+                    <div class="wh-card-header"><h3><i class="fas fa-history" style="margin-left:8px;"></i>سجل الإرسال</h3></div>
+                    <div class="wh-card-body" style="max-height:200px;overflow-y:auto;">
+                        <div id="waLog"><p style="color:var(--text-sub);text-align:center;padding:12px;">لم يتم إرسال أي رسائل بعد</p></div>
+                    </div>
+                </div>
+
+                <div style="display:flex;gap:10px;">
+                    <button class="wh-btn wh-btn-success" style="flex:1;padding:14px;font-size:1rem;" onclick="sendWhatsAppBulk()"><i class="fab fa-whatsapp"></i> إرسال للجميع</button>
+                    <button class="wh-btn wh-btn-secondary" style="padding:14px;" onclick="previewFirstWa()"><i class="fas fa-eye"></i> معاينة</button>
+                </div>
+                <div style="margin-top:10px;padding:12px;background:#fffbeb;border:1px solid #fde68a;border-radius:var(--r-xs);font-size:0.78rem;color:#92400e;">
+                    <i class="fas fa-info-circle" style="margin-left:4px;"></i>
+                    سيتم فتح واتساب لكل رقم على حدة مع الرسالة الجاهزة. اضغط "إرسال" في كل محادثة.
+                </div>
+            </div>
+        </div>
+    </div>
+
 </main>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -746,6 +821,62 @@ async function deleteProductDoc(id) {
 
 async function updateProductStock(id, newStock) {
     await fbUpdateDoc(WH_PRODUCTS, id, { stock: newStock });
+}
+
+// ===== WHATSAPP BULK =====
+function countWaNumbers() {
+    const nums = document.getElementById('waNumbers').value.split('\n').map(n => n.trim()).filter(n => n.length >= 10);
+    document.getElementById('waCount').textContent = nums.length;
+    return nums;
+}
+
+function insertWaTemplate(type) {
+    const templates = {
+        '迟发货提醒': 'مرحباً 👋\n\nنحن في مرحلة تأخير في الطلبات بسبب الظروف الحالية.\n\nنعتذر عن أي إزعاج، وسنقوم بالتوصيل في أقرب وقت ممكن.\n\nشكراً لتفهمكم 🙏\n\nميلانو OTC\n01029293339',
+        'جديد': 'مرحباً 👋\n\nوصلنا منتجات جديدة في ميلانو OTC!\n\nتصفح каталогنا على:\nmilanof16.com/shop\n\nللاستفسار: 01029293339',
+        'عرض تخفيض': 'مرحباً 👋\n\nعرض خاص من ميلانو OTC 🔥\n\nخصم على جميع المبيدات الحشرية!\n\nللاستفسار: 01029293339\nmilanof16.com',
+        'تذكير بالدفع': 'مرحباً 👋\n\nتذكير بدفع المبلغ المتبقي على طلبك.\n\nيمكنك الدفع عبر:\n- فودافون كاش\n- تحويل بنكي\n- Easy Pay\n\nللاستفسار: 01029293339'
+    };
+    document.getElementById('waMessage').value = templates[type] || '';
+    updateWaPreview();
+}
+
+function updateWaPreview() {
+    const msg = document.getElementById('waMessage').value || 'اكتب رسالتك هنا لمعاينتها...';
+    document.getElementById('waPreviewText').textContent = msg;
+}
+
+function previewFirstWa() {
+    const nums = countWaNumbers();
+    const msg = document.getElementById('waMessage').value.trim();
+    if (!msg) { showWhAlert('error', 'اكتب الرسالة أولاً'); return; }
+    if (nums.length === 0) { showWhAlert('error', 'أدخل رقم واحد على الأقل'); return; }
+    const phone = nums[0].replace(/^0/, '20');
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+function sendWhatsAppBulk() {
+    const nums = countWaNumbers();
+    const msg = document.getElementById('waMessage').value.trim();
+    if (!msg) { showWhAlert('error', 'اكتب الرسالة أولاً'); return; }
+    if (nums.length === 0) { showWhAlert('error', 'أدخل رقم واحد على الأقل'); return; }
+    if (!confirm(`هل أنت متأكد من إرسال الرسالة إلى ${nums.length} رقم؟`)) return;
+    const log = document.getElementById('waLog');
+    const timestamp = new Date().toLocaleTimeString('ar-EG');
+    let sent = 0;
+    function openNext(i) {
+        if (i >= nums.length) {
+            log.insertAdjacentHTML('afterbegin', `<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:0.82rem;"><span style="color:var(--success);font-weight:700;">✓</span> ${timestamp} — تم فتح ${sent} محادثة واتساب</div>`);
+            showWhAlert('success', `تم فتح ${sent} محادثة واتساب`);
+            return;
+        }
+        const phone = nums[i].replace(/^0/, '20');
+        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+        sent++;
+        log.insertAdjacentHTML('afterbegin', `<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:0.78rem;color:var(--text-sub);">${timestamp} — ${nums[i]} <i class="fas fa-check" style="color:var(--success);margin-right:4px;"></i></div>`);
+        setTimeout(() => openNext(i + 1), 1500);
+    }
+    openNext(0);
 }
 
 // ===== NAVIGATION =====
@@ -1497,6 +1628,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const el = document.getElementById(id);
         if (el) el.value = new Date().toISOString().split('T')[0];
     });
+
+    const waMsg = document.getElementById('waMessage');
+    const waNums = document.getElementById('waNumbers');
+    if (waMsg) waMsg.addEventListener('input', updateWaPreview);
+    if (waNums) waNums.addEventListener('input', countWaNumbers);
 
     // Products listener - seed defaults if empty
     fbListen(WH_PRODUCTS, async (data) => {
