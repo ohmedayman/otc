@@ -980,7 +980,7 @@ async function saveWaContact() {
     document.getElementById('waContactName').value = '';
     document.getElementById('waContactPhone').value = '';
     document.getElementById('waContactNotes').value = '';
-    showWhAlert('success', 'تم حفظجهة الاتصال');
+    showWhAlert('success', 'تم حفظ جهة الاتصال');
 }
 
 function renderWaContacts() {
@@ -1500,9 +1500,13 @@ function renderEditPurchaseItems() {
 function updateEditItemTotal(el) {
     const i = parseInt(el.dataset.idx);
     const items = window._editPurchaseItems;
-    items[i].qty = parseInt(document.querySelectorAll('.edit-pi-qty')[i].value) || 1;
-    items[i].price = parseFloat(document.querySelectorAll('.edit-pi-price')[i].value) || 0;
-    document.querySelectorAll('.edit-pi-line')[i].textContent = (items[i].qty * items[i].price).toLocaleString('ar-EG') + ' ج.م';
+    const row = el.closest('tr') || el.parentElement;
+    const qtyInput = row.querySelector('.edit-pi-qty');
+    const priceInput = row.querySelector('.edit-pi-price');
+    const lineEl = row.querySelector('.edit-pi-line');
+    if (qtyInput) items[i].qty = parseInt(qtyInput.value) || 1;
+    if (priceInput) items[i].price = parseFloat(priceInput.value) || 0;
+    if (lineEl) lineEl.textContent = (items[i].qty * items[i].price).toLocaleString('ar-EG') + ' ج.م';
     const total = items.reduce((s, item) => s + (item.qty * item.price), 0);
     document.getElementById('editPurchaseTotal').textContent = total.toLocaleString('ar-EG') + ' ج.م';
 }
