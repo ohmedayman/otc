@@ -663,7 +663,22 @@
 
     <!-- ===== واتساب جماعي ===== -->
     <div class="wh-section" id="page-whatsapp">
-        <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:20px;"><i class="fab fa-whatsapp" style="color:#25d366;margin-left:8px;"></i>رسائل واتساب جماعية</h2>
+        <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:20px;"><i class="fab fa-whatsapp" style="color:#25d366;margin-left:8px;"></i>رسائل واتساب</h2>
+
+        <!-- إرسال لشخص واحد -->
+        <div class="wh-card" style="margin-bottom:20px;border:2px solid #25d366;">
+            <div class="wh-card-header" style="background:linear-gradient(135deg,#25d366,#128c7e);"><h3><i class="fab fa-whatsapp" style="margin-left:8px;"></i>إرسال لشخص واحد</h3></div>
+            <div class="wh-card-body">
+                <div style="display:flex;gap:12px;align-items:flex-end;">
+                    <div class="wh-form-group" style="flex:1;margin:0;"><label>رقم الموبايل</label><input type="tel" id="waSinglePhone" placeholder="01012345678" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--r-xs);font-family:inherit;direction:ltr;text-align:left;"></div>
+                    <div class="wh-form-group" style="flex:2;margin:0;"><label>الرسالة</label><input type="text" id="waSingleMsg" placeholder="اكتب رسالتك..." style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--r-xs);font-family:inherit;"></div>
+                    <button class="wh-btn wh-btn-success" style="padding:10px 24px;white-space:nowrap;" onclick="sendWhatsAppSingle()"><i class="fab fa-whatsapp"></i> إرسال</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- رسائل جماعية -->
+        <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:14px;color:var(--text-sub);"><i class="fas fa-users" style="margin-left:6px;"></i>رسائل جماعية</h3>
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
             <!-- Left: Numbers + Message -->
@@ -824,6 +839,14 @@ async function updateProductStock(id, newStock) {
 }
 
 // ===== WHATSAPP BULK =====
+function sendWhatsAppSingle() {
+    const phone = document.getElementById('waSinglePhone').value.trim();
+    const msg = document.getElementById('waSingleMsg').value.trim();
+    if (!phone || phone.length < 10) { showWhAlert('error', 'أدخل رقم صحيح (10 أرقام على الأقل)'); return; }
+    if (!msg) { showWhAlert('error', 'اكتب الرسالة'); return; }
+    const formatted = phone.replace(/^0/, '20');
+    window.open(`https://wa.me/${formatted}?text=${encodeURIComponent(msg)}`, '_blank');
+}
 function countWaNumbers() {
     const nums = document.getElementById('waNumbers').value.split('\n').map(n => n.trim()).filter(n => n.length >= 10);
     document.getElementById('waCount').textContent = nums.length;
