@@ -1210,7 +1210,7 @@ function updateDashboard() {
     document.getElementById('totalPurchases').textContent = totalPurchasesAmount.toLocaleString('ar-EG') + ' ج.م';
     document.getElementById('totalExpenses').textContent = expensesData.reduce((s, e) => s + Number(e.amount||0), 0).toLocaleString('ar-EG') + ' ج.م';
     document.getElementById('totalCollections').textContent = collectionsData.reduce((s, c) => s + Number(c.amount||0), 0).toLocaleString('ar-EG') + ' ج.م';
-    document.getElementById('totalVodafone').textContent = (vodafoneData.reduce((s, v) => s + Number(v.amount||0), 0) + easypayData.reduce((s, v) => s + Number(v.amount||0), 0)).toLocaleString('ar-EG') + ' ج.م';
+    document.getElementById('totalVodafone').textContent = vodafoneData.reduce((s, v) => s + Number(v.amount||0), 0).toLocaleString('ar-EG') + ' ج.م';
     const totalProfit = products.reduce((s, p) => s + ((Number(p.price||0) - Number(p.buyPrice||0)) * Number(p.stock||0)), 0);
     document.getElementById('totalProfit').textContent = totalProfit.toLocaleString('ar-EG') + ' ج.م';
     renderRecentActivity();
@@ -1710,6 +1710,7 @@ async function saveEditPurchase() {
 // ===== RECEIPT =====
 function showReceipt(index) {
     const r = purchasesData[index]; if (!r) return;
+    window._lastReceipt = r;
     const items = r.items || [];
     const totalInWords = numberToArabicWords(r.total || 0);
     let totalProfit = 0;
@@ -1822,6 +1823,7 @@ function numberToArabicWords(num) {
 
 function printReceipt() {
     const content = document.getElementById('printableReceipt').innerHTML;
+    const r = window._lastReceipt || {};
     const win = window.open('', '_blank', 'width=480,height=700');
     win.document.write(`<!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -2164,7 +2166,7 @@ function resetReport() {
 function exportReportToExcel() {
     const fromDate = document.getElementById('reportDateFrom').value || 'الكل';
     const toDate = document.getElementById('reportDateTo').value || 'الكل';
-    let csv = '\uFEBSuppliers Invoice Report\n';
+    let csv = '\uFEFF' + 'Suppliers Invoice Report\n';
     csv += `From: ${fromDate} To: ${toDate}\n\n`;
     csv += 'Type,Date,Details,Amount,Payment\n';
     purchasesData.forEach(p => {
