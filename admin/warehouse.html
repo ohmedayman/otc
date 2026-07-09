@@ -623,6 +623,7 @@
                         <button class="wh-btn wh-btn-primary" onclick="generateReport()"><i class="fas fa-search"></i> عرض التقرير</button>
                         <button class="wh-btn wh-btn-secondary" onclick="resetReport()"><i class="fas fa-undo"></i> مسح الفلتر</button>
                         <button class="wh-btn wh-btn-info" onclick="printReport()"><i class="fas fa-print"></i> طباعة</button>
+                        <button class="wh-btn wh-btn-success" onclick="exportReportToExcel()"><i class="fas fa-file-excel"></i> تصدير Excel</button>
                     </div>
                 </div>
             </div>
@@ -2157,6 +2158,28 @@ function resetReport() {
         const el = document.getElementById(id);
         if (el) el.textContent = '0';
     });
+}
+
+function exportReportToExcel() {
+    const fromDate = document.getElementById('reportDateFrom').value || 'الكل';
+    const toDate = document.getElementById('reportDateTo').value || 'الكل';
+    let csv = '\uFEBSuppliers Invoice Report\n';
+    csv += `From: ${fromDate} To: ${toDate}\n\n`;
+    csv += 'Type,Date,Details,Amount,Payment\n';
+    purchasesData.forEach(p => {
+        const items = (p.items||[]).map(i => i.name + 'x' + i.qty).join('; ');
+        csv += `Purchase,${p.date||''},${p.supplier||''} - ${items},${p.total||0},${p.payMethod||''}\n`;
+    });
+    expensesData.forEach(e => { csv += `Expense,${e.date||''},${e.type||''} - ${e.desc||''},${e.amount||0},\n`; });
+    collectionsData.forEach(c => { csv += `Collection,${c.date||''},${c.from||''},${c.amount||0},${c.method||''}\n`; });
+    vodafoneData.forEach(v => { csv += `Vodafone,${v.date||''},${v.type||''} - ${v.phone||''},${v.amount||0},\n`; });
+    easypayData.forEach(e => { csv += `EasyPay,${e.date||''},${e.type||''} - ${e.account||''},${e.amount||0},\n`; });
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `OTC_Report_${today()}.csv`;
+    link.click();
+    showWhAlert('success', 'تم تصدير التقرير');
 }
 
 function printReport() {
