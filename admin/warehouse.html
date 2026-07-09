@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
     <style>
         :root{--gold:#c8a951;--gold-light:#e8d5a3;--gold-dark:#a8884e;--gold-glow:rgba(200,169,81,0.25);--dark:#111827;--dark-2:#1f2937;--dark-3:#374151;--card:#fff;--bg:#f3f4f6;--text:#111827;--text-sub:#6b7280;--border:#e5e7eb;--shadow:0 4px 20px rgba(0,0,0,0.07);--shadow-lg:0 12px 40px rgba(0,0,0,0.12);--shadow-gold:0 8px 30px rgba(200,169,81,0.3);--r:16px;--r-sm:10px;--r-xs:6px;--success:#10b981;--info:#3b82f6;--warning:#f59e0b;--danger:#ef4444;--ease:cubic-bezier(.4,0,.2,1)}
         body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direction:rtl}
@@ -214,9 +216,25 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- ===== المخزن ===== -->
+        <!-- Charts -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+            <div class="wh-card">
+                <div class="wh-card-header"><h3><i class="fas fa-chart-pie" style="margin-left:8px;"></i>توزيع المصروفات</h3></div>
+                <div class="wh-card-body" style="height:280px;"><canvas id="chartExpenses"></canvas></div>
+            </div>
+            <div class="wh-card">
+                <div class="wh-card-header"><h3><i class="fas fa-chart-line" style="margin-left:8px;"></i>المشتريات خلال الشهر</h3></div>
+                <div class="wh-card-body" style="height:280px;"><canvas id="chartPurchases"></canvas></div>
+            </div>
+        </div>
+
+        <!-- Low Stock Alerts -->
+        <div class="wh-card" id="lowStockAlert" style="display:none;border:2px solid var(--warning);">
+            <div class="wh-card-header" style="background:linear-gradient(135deg,#f59e0b,#d97706);"><h3><i class="fas fa-exclamation-triangle" style="margin-left:8px;"></i>تنبيه: منتجات على وشك النفاد</h3></div>
+            <div class="wh-card-body"><div id="lowStockList"></div></div>
+        </div>
+    </div>
     <div class="wh-section" id="page-inventory">
         <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:20px;"><i class="fas fa-warehouse" style="color:var(--gold);margin-left:8px;"></i>المخزن</h2>
         <div class="wh-card">
@@ -331,6 +349,16 @@
                 <button class="wh-btn wh-btn-primary" onclick="saveEditProduct()"><i class="fas fa-save"></i> حفظ</button>
                 <button class="wh-btn wh-btn-secondary" onclick="document.getElementById('productEditModal').classList.remove('active')">إلغاء</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Barcode Modal -->
+    <div class="wh-modal" id="barcodeModal" onclick="if(event.target===this)this.classList.remove('active')">
+        <div class="wh-modal-content" style="max-width:350px;text-align:center;">
+            <h3 style="margin-bottom:16px;"><i class="fas fa-barcode" style="color:var(--gold);margin-left:8px;"></i>باركود المنتج</h3>
+            <div id="barcodeProductName" style="font-weight:700;font-size:1rem;margin-bottom:12px;"></div>
+            <div style="background:#fff;padding:16px;border-radius:8px;border:1px solid var(--border);"><svg id="modalBarcode"></svg></div>
+            <button class="wh-btn wh-btn-secondary" style="margin-top:16px;width:100%;" onclick="document.getElementById('barcodeModal').classList.remove('active')">إغلاق</button>
         </div>
     </div>
 
@@ -1157,6 +1185,8 @@ function updateDashboard() {
     const totalProfit = products.reduce((s, p) => s + ((Number(p.price||0) - Number(p.buyPrice||0)) * Number(p.stock||0)), 0);
     document.getElementById('totalProfit').textContent = totalProfit.toLocaleString('ar-EG') + ' ج.م';
     renderRecentActivity();
+    renderCharts();
+    checkLowStock();
 }
 
 function renderRecentActivity() {
@@ -1176,6 +1206,78 @@ function renderRecentActivity() {
         el.innerHTML = '<p style="color:var(--text-sub);text-align:center;padding:20px;">لا توجد عمليات بعد</p>';
     } else {
         el.innerHTML = items.slice(0, 10).map(i => `<div style="padding:10px 0;border-bottom:1px solid var(--border);font-size:0.85rem;"><span style="color:var(--text-sub);font-size:0.75rem;">${esc(formatTimestamp(i.date))}</span><br>${i.text}</div>`).join('');
+    }
+}
+
+// ===== CHARTS =====
+let chartExpensesInstance = null, chartPurchasesInstance = null;
+
+function renderCharts() {
+    // Expenses by type
+    const expTypes = {};
+    expensesData.forEach(e => { const t = e.type || 'أخرى'; expTypes[t] = (expTypes[t]||0) + Number(e.amount||0); });
+    const expLabels = Object.keys(expTypes);
+    const expValues = Object.values(expTypes);
+    if (chartExpensesInstance) chartExpensesInstance.destroy();
+    const ctx1 = document.getElementById('chartExpenses');
+    if (ctx1 && expLabels.length) {
+        chartExpensesInstance = new Chart(ctx1, {
+            type: 'doughnut',
+            data: { labels: expLabels, datasets: [{ data: expValues, backgroundColor: ['#ef4444','#f59e0b','#3b82f6','#10b981','#8b5cf6','#ec4899','#06b6d4'] }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { family: 'Cairo', size: 11 } } } } }
+        });
+    } else if (ctx1) {
+        ctx1.parentElement.innerHTML = '<p style="text-align:center;color:var(--text-sub);padding:40px;">لا توجد مصروفات بعد</p>';
+    }
+
+    // Purchases by month
+    const months = {};
+    purchasesData.forEach(p => {
+        if (!p.date) return;
+        const d = new Date(p.date);
+        const key = d.toLocaleDateString('ar-EG', { month: 'short', year: 'numeric' });
+        months[key] = (months[key]||0) + Number(p.total||0);
+    });
+    const mLabels = Object.keys(months);
+    const mValues = Object.values(months);
+    if (chartPurchasesInstance) chartPurchasesInstance.destroy();
+    const ctx2 = document.getElementById('chartPurchases');
+    if (ctx2 && mLabels.length) {
+        chartPurchasesInstance = new Chart(ctx2, {
+            type: 'bar',
+            data: { labels: mLabels, datasets: [{ label: 'المشتريات (ج.م)', data: mValues, backgroundColor: '#c8a951', borderRadius: 6 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { font: { family: 'Cairo' } } }, x: { ticks: { font: { family: 'Cairo' } } } } }
+        });
+    } else if (ctx2) {
+        ctx2.parentElement.innerHTML = '<p style="text-align:center;color:var(--text-sub);padding:40px;">لا توجد مشتريات بعد</p>';
+    }
+}
+
+// ===== LOW STOCK ALERTS =====
+function checkLowStock() {
+    const low = productsData.filter(p => Number(p.stock||0) > 0 && Number(p.stock||0) <= 5);
+    const out = productsData.filter(p => Number(p.stock||0) === 0);
+    const alertEl = document.getElementById('lowStockAlert');
+    const listEl = document.getElementById('lowStockList');
+    if (!low.length && !out.length) { alertEl.style.display = 'none'; return; }
+    alertEl.style.display = 'block';
+    let html = '';
+    if (out.length) {
+        html += '<div style="margin-bottom:12px;"><strong style="color:var(--danger);"><i class="fas fa-times-circle"></i> نفدت من المخزن (' + out.length + '):</strong></div>';
+        html += out.map(p => `<div style="padding:6px 12px;background:#fee2e2;border-radius:6px;margin-bottom:4px;font-size:0.85rem;"><strong>${esc(p.name)}</strong> — <span style="color:var(--danger);">0 ${esc(p.unit||'قطعة')}</span></div>`).join('');
+    }
+    if (low.length) {
+        html += '<div style="margin-top:12px;margin-bottom:8px;"><strong style="color:var(--warning);"><i class="fas fa-exclamation-circle"></i> على وشك النفاد (' + low.length + '):</strong></div>';
+        html += low.map(p => `<div style="padding:6px 12px;background:#fef3c7;border-radius:6px;margin-bottom:4px;font-size:0.85rem;"><strong>${esc(p.name)}</strong> — <span style="color:var(--warning);">${p.stock} ${esc(p.unit||'قطعة')} متبقي</span></div>`).join('');
+    }
+    listEl.innerHTML = html;
+}
+
+// ===== BARCODE =====
+function generateBarcode(elementId, value) {
+    const el = document.getElementById(elementId);
+    if (el && typeof JsBarcode !== 'undefined') {
+        JsBarcode(el, value, { format: 'CODE128', width: 1.5, height: 30, displayValue: true, fontSize: 12, margin: 5 });
     }
 }
 
@@ -1236,6 +1338,7 @@ function renderProducts() {
             <td><strong class="${(p.stock||0) < 5 ? 'stock-low' : ''}">${p.stock||0}</strong></td>
             <td style="display:flex;gap:6px;">
                 <button class="wh-btn wh-btn-primary" style="padding:5px 10px;font-size:0.78rem;" onclick="editProduct('${p._fbId}')"><i class="fas fa-edit"></i></button>
+                <button class="wh-btn wh-btn-info" style="padding:5px 10px;font-size:0.78rem;" onclick="showProductBarcode('${esc(p.name).replace(/'/g,"\\'")}','PRD-${p._fbId.substring(0,6).toUpperCase()}')"><i class="fas fa-barcode"></i></button>
                 <button class="wh-btn wh-btn-secondary" style="padding:5px 10px;font-size:0.78rem;" onclick="delProduct('${p._fbId}')"><i class="fas fa-trash"></i></button>
             </td>
         </tr>`;
@@ -1272,6 +1375,17 @@ async function resetProductsToDefault() {
     }
     isResettingProducts = false;
     showWhAlert('success', 'تم إعادة تعيين المنتجات بنجاح');
+}
+
+function showProductBarcode(name, code) {
+    document.getElementById('barcodeProductName').textContent = name;
+    document.getElementById('barcodeModal').classList.add('active');
+    setTimeout(() => {
+        const svg = document.getElementById('modalBarcode');
+        if (svg && typeof JsBarcode !== 'undefined') {
+            JsBarcode(svg, code, { format: 'CODE128', width: 2, height: 50, displayValue: true, fontSize: 16, margin: 10 });
+        }
+    }, 100);
 }
 
 function editProduct(fbId) {
@@ -1654,7 +1768,7 @@ function showReceipt(index) {
 
         <div class="r-footer">
             <div class="r-footer-thank">شكراً لتعاملكم مع ميلانو OTC</div>
-            <div class="r-footer-barcode">||||| ${esc(r.invoiceNo)} |||||</div>
+            <div class="r-footer-barcode"><svg id="receiptBarcode"></svg></div>
             <div class="r-footer-note">هذه فاتورة مشتريات نظامية — يُرجى الاحتفاظ بها للمرجع</div>
         </div>
         <div class="r-bottom-bar"></div>
@@ -1687,6 +1801,7 @@ function printReceipt() {
     <title>فاتورة مشتريات — ميلانو OTC</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Cairo', Arial, sans-serif; direction: rtl; background: #fff; color: #1a1a2e; padding: 0; }
@@ -1748,7 +1863,15 @@ function printReceipt() {
 <body>${content}</body>
 </html>`);
     win.document.close();
-    setTimeout(() => { win.print(); }, 600);
+    setTimeout(() => {
+        try {
+            const svg = win.document.getElementById('receiptBarcode');
+            if (svg && typeof win.JsBarcode !== 'undefined') {
+                win.JsBarcode(svg, r.invoiceNo, { format: 'CODE128', width: 1.5, height: 40, displayValue: true, fontSize: 14, margin: 5 });
+            }
+        } catch(e) {}
+        win.print();
+    }, 800);
 }
 
 // ===== EXPENSES =====

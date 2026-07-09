@@ -285,7 +285,7 @@ async function generateM16() {
     let maxNum = 0;
     snap.docs.forEach(d => {
         const o = d.data();
-        if (o.m16Number && o.m16Number.startsWith('M16')) {
+        if (o.m16Number && typeof o.m16Number === 'string' && o.m16Number.startsWith('M16')) {
             const n = parseInt(o.m16Number.replace('M16', ''));
             if (n > maxNum) maxNum = n;
         }
@@ -338,7 +338,7 @@ async function handleAddOrder(e) {
         status: document.getElementById('orderStatus').value,
         address: document.getElementById('orderAddress').value.trim(),
         notes: document.getElementById('orderNotes').value.trim(),
-        value: document.getElementById('orderValue').value || 0
+        value: parseFloat(document.getElementById('orderValue').value) || 0
     };
     if (data.realTrackingNumber.length < 10) { showAlert('error','السيريل الحقيقي يجب أن يكون 10 أحرف على الأقل'); return; }
     console.log('[Admin] Saving order:', data);
@@ -359,7 +359,7 @@ async function handleEditOrder(e) {
         status: document.getElementById('editOrderStatus').value,
         address: document.getElementById('editOrderAddress').value.trim(),
         notes: document.getElementById('editOrderNotes').value.trim(),
-        value: document.getElementById('editOrderValue').value || 0
+        value: parseFloat(document.getElementById('editOrderValue').value) || 0
     };
     await updateOrder(id, data);
     closeModal();
