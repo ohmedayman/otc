@@ -652,6 +652,34 @@
             </div>
         </div>
 
+        <!-- P&L Statement -->
+        <div class="wh-card" style="margin-bottom:16px;" id="plStatement">
+            <div class="wh-card-header" style="background:linear-gradient(135deg,#065f46,#047857);"><h3><i class="fas fa-file-invoice-dollar" style="margin-left:8px;"></i>قائمة الدخل (Profit & Loss)</h3></div>
+            <div class="wh-card-body">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+                    <div>
+                        <h4 style="color:var(--success);margin-bottom:12px;font-size:0.95rem;"><i class="fas fa-arrow-down" style="margin-left:6px;"></i>الإيرادات</h4>
+                        <div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;"><span>إجمالي التحصيل</span><strong id="plCollections" style="color:var(--success);">0</strong></div>
+                        <div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;"><span>فودافون كاش (إيداع)</span><strong id="plVodafoneIn" style="color:var(--success);">0</strong></div>
+                        <div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;"><span>Easy Pay (إيداع)</span><strong id="plEasyPayIn" style="color:var(--success);">0</strong></div>
+                        <div style="padding:10px 0;display:flex;justify-content:space-between;background:#f0fdf4;margin:0 -22px;padding:10px 22px;border-radius:0 0 8px 8px;"><span style="font-weight:800;">إجمالي الإيرادات</span><strong id="plTotalIncome" style="color:var(--success);font-size:1.1rem;">0</strong></div>
+                    </div>
+                    <div>
+                        <h4 style="color:var(--danger);margin-bottom:12px;font-size:0.95rem;"><i class="fas fa-arrow-up" style="margin-left:6px;"></i>المصروفات</h4>
+                        <div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;"><span>إجمالي المشتريات</span><strong id="plPurchases" style="color:var(--danger);">0</strong></div>
+                        <div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;"><span>إجمالي المصروفات</span><strong id="plExpenses" style="color:var(--danger);">0</strong></div>
+                        <div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;"><span>فودافون كاش (سحب)</span><strong id="plVodafoneOut" style="color:var(--danger);">0</strong></div>
+                        <div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;"><span>Easy Pay (سحب)</span><strong id="plEasyPayOut" style="color:var(--danger);">0</strong></div>
+                        <div style="padding:10px 0;display:flex;justify-content:space-between;background:#fef2f2;margin:0 -22px;padding:10px 22px;border-radius:0 0 8px 8px;"><span style="font-weight:800;">إجمالي المصروفات</span><strong id="plTotalExpenses" style="color:var(--danger);font-size:1.1rem;">0</strong></div>
+                    </div>
+                </div>
+                <div style="margin-top:20px;padding:16px;background:var(--dark);border-radius:var(--r-sm);display:flex;justify-content:space-between;align-items:center;">
+                    <span style="color:#fff;font-size:1rem;font-weight:700;">صافي الربح/الخسارة</span>
+                    <strong id="plNetResult" style="font-size:1.4rem;">0</strong>
+                </div>
+            </div>
+        </div>
+
         <!-- Detailed Report Tables -->
         <div id="reportContent">
             <div class="wh-card" style="margin-bottom:16px;">
@@ -2062,12 +2090,28 @@ function generateReport() {
     const totalEasyPayOut = fEasyPay.filter(e => e.type === 'سحب').reduce((s, e) => s + Number(e.amount || 0), 0);
     const netProfit = totalCollections + totalVodafoneIn + totalEasyPayIn - totalExpenses - totalPurchases - totalVodafoneOut - totalEasyPayOut;
 
-    document.getElementById('rptTotalPurchases').textContent = totalPurchases.toFixed(2);
-    document.getElementById('rptTotalExpenses').textContent = totalExpenses.toFixed(2);
-    document.getElementById('rptTotalCollections').textContent = totalCollections.toFixed(2);
-    document.getElementById('rptNetProfit').textContent = netProfit.toFixed(2);
+    document.getElementById('rptTotalPurchases').textContent = totalPurchases.toLocaleString('ar-EG');
+    document.getElementById('rptTotalExpenses').textContent = totalExpenses.toLocaleString('ar-EG');
+    document.getElementById('rptTotalCollections').textContent = totalCollections.toLocaleString('ar-EG');
+    document.getElementById('rptNetProfit').textContent = netProfit.toLocaleString('ar-EG');
     document.getElementById('rptNetProfit').style.color = netProfit >= 0 ? 'var(--success)' : 'var(--danger)';
     document.getElementById('reportStats').style.display = 'grid';
+
+    // P&L Statement
+    const totalIncome = totalCollections + totalVodafoneIn + totalEasyPayIn;
+    const totalExpAll = totalPurchases + totalExpenses + totalVodafoneOut + totalEasyPayOut;
+    document.getElementById('plCollections').textContent = totalCollections.toLocaleString('ar-EG') + ' ج.م';
+    document.getElementById('plVodafoneIn').textContent = totalVodafoneIn.toLocaleString('ar-EG') + ' ج.م';
+    document.getElementById('plEasyPayIn').textContent = totalEasyPayIn.toLocaleString('ar-EG') + ' ج.م';
+    document.getElementById('plTotalIncome').textContent = totalIncome.toLocaleString('ar-EG') + ' ج.م';
+    document.getElementById('plPurchases').textContent = totalPurchases.toLocaleString('ar-EG') + ' ج.م';
+    document.getElementById('plExpenses').textContent = totalExpenses.toLocaleString('ar-EG') + ' ج.م';
+    document.getElementById('plVodafoneOut').textContent = totalVodafoneOut.toLocaleString('ar-EG') + ' ج.م';
+    document.getElementById('plEasyPayOut').textContent = totalEasyPayOut.toLocaleString('ar-EG') + ' ج.م';
+    document.getElementById('plTotalExpenses').textContent = totalExpAll.toLocaleString('ar-EG') + ' ج.م';
+    const netEl = document.getElementById('plNetResult');
+    netEl.textContent = netProfit.toLocaleString('ar-EG') + ' ج.م';
+    netEl.style.color = netProfit >= 0 ? '#10b981' : '#ef4444';
 
     renderReportTable('rptPurchasesBody', 'rptPurchasesEmpty', 'rptPurchasesCount', fPurchases, p =>
         `<tr><td>${esc(p.date || '—')}</td><td>${esc(p.invoiceNo || '—')}</td><td>${esc(p.supplier || '—')}</td><td>${esc((p.items || []).map(i => i.name + '×' + i.qty).join('، ') || '—')}</td><td style="font-weight:700;">${(p.total || 0).toFixed(2)}</td><td>${esc(p.payMethod || '—')}</td></tr>`
