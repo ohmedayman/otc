@@ -113,21 +113,28 @@
         /* Responsive */
         @media(max-width:1024px){.wh-stats{grid-template-columns:repeat(3,1fr)}.product-grid{grid-template-columns:repeat(2,1fr)}}
         @media(max-width:768px){
-            .wh-sidebar{width:60px}
-            .wh-sidebar-header h2,.wh-sidebar-header small,.wh-nav-item span,.wh-nav-section{display:none}
-            .wh-nav-item{justify-content:center;padding:14px}
-            .wh-nav-item i{font-size:1.2rem}
-            .wh-main{margin-right:60px}
+            .wh-sidebar{transform:translateX(100%);width:260px}
+            .wh-sidebar.open{transform:translateX(0)}
+            .wh-sidebar-header h2,.wh-sidebar-header small,.wh-nav-item span,.wh-nav-section{display:block}
+            .wh-nav-item{justify-content:flex-start;padding:12px 20px}
+            .wh-main{margin-right:0;padding:16px}
             .wh-stats{grid-template-columns:1fr 1fr}
             .wh-form-row{grid-template-columns:1fr}
             .product-grid{grid-template-columns:1fr}
+            .wa-menu-btn{display:flex!important}
         }
+        .wa-menu-btn{display:none;position:fixed;top:12px;right:12px;z-index:200;width:44px;height:44px;border-radius:12px;background:var(--dark);color:#fff;border:none;font-size:1.2rem;cursor:pointer;align-items:center;justify-content:center;box-shadow:var(--shadow-lg)}
+        .wa-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99}
+        .wa-overlay.active{display:block}
     </style>
 </head>
 <body>
 
+<button class="wa-menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+<div class="wa-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
 <!-- Sidebar -->
-<aside class="wh-sidebar">
+<aside class="wh-sidebar" id="whSidebar">
     <div class="wh-sidebar-header">
         <img src="../assets/logo.png" alt="ميلانو">
         <h2>مركز التجمع</h2>
@@ -137,7 +144,7 @@
         <div class="wh-nav-section">القائمة الرئيسية</div>
         <div class="wh-nav-item active" data-page="dashboard"><i class="fas fa-chart-pie"></i><span>لوحة التحكم</span></div>
         <div class="wh-nav-item" data-page="inventory"><i class="fas fa-warehouse"></i><span>المخزن</span></div>
-        <div class="wh-nav-item" data-page="products"><i class="fas fa-boxes"></i><span>المنتجات</span></div>
+        <div class="wh-nav-item" data-page="products"><i class="fas fa-boxes"></i><span>المنتجات</span><span class="wa-badge" id="lowStockBadge" style="display:none;background:var(--danger);color:#fff;font-size:0.65rem;padding:2px 6px;border-radius:10px;margin-right:auto;"></span></div>
 
         <div class="wh-nav-section">العمليات</div>
         <div class="wh-nav-item" data-page="stockin"><i class="fas fa-arrow-circle-down"></i><span>بضاعة واردة</span></div>
@@ -1186,6 +1193,12 @@ function renderWaHistory() {
     </tr>`).join('');
 }
 
+// ===== MOBILE SIDEBAR =====
+function toggleSidebar() {
+    document.getElementById('whSidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('active');
+}
+
 // ===== NAVIGATION =====
 document.querySelectorAll('.wh-nav-item[data-page]').forEach(item => {
     item.addEventListener('click', function() {
@@ -1193,6 +1206,7 @@ document.querySelectorAll('.wh-nav-item[data-page]').forEach(item => {
         this.classList.add('active');
         document.querySelectorAll('.wh-section').forEach(s => s.classList.remove('active'));
         document.getElementById('page-' + this.dataset.page).classList.add('active');
+        if (window.innerWidth <= 768) toggleSidebar();
     });
 });
 
@@ -1289,6 +1303,12 @@ function checkLowStock() {
     const out = productsData.filter(p => Number(p.stock||0) === 0);
     const alertEl = document.getElementById('lowStockAlert');
     const listEl = document.getElementById('lowStockList');
+    const badge = document.getElementById('lowStockBadge');
+    const totalAlerts = low.length + out.length;
+    if (badge) {
+        if (totalAlerts > 0) { badge.style.display = 'inline'; badge.textContent = totalAlerts; }
+        else { badge.style.display = 'none'; }
+    }
     if (!low.length && !out.length) { alertEl.style.display = 'none'; return; }
     alertEl.style.display = 'block';
     let html = '';
