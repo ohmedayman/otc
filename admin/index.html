@@ -344,6 +344,25 @@ async function handleAddOrder(e) {
     console.log('[Admin] Saving order:', data);
     const docId = await saveOrder(data);
     console.log('[Admin] Order saved with ID:', docId);
+
+    // Auto-save customer to WhatsApp contacts
+    try {
+        const db = await initFirebase();
+        const waSnap = await db.collection('wa_contacts').where('phone', '==', data.customerPhone).get();
+        if (!waSnap.docs.length && data.customerPhone) {
+            await db.collection('wa_contacts').add({
+                name: data.customerName,
+                phone: data.customerPhone,
+                group: 'عملاء',
+                notes: 'طلب ' + data.m16Number + ' — ' + data.value + ' ج.م',
+                order: data.m16Number,
+                amount: String(data.value),
+                createdAt: new Date().toISOString()
+            });
+            console.log('[Admin] Customer saved to WhatsApp contacts');
+        }
+    } catch(e) { console.error('[Admin] Failed to save WA contact:', e); }
+
     document.getElementById('orderForm').reset();
     showAlert('success','تم إضافة الطلب بنجاح — رقم التتبع: ' + data.m16Number);
 }

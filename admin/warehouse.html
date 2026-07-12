@@ -1051,7 +1051,7 @@ function renderWaContacts() {
     if (!list.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
     empty.style.display = 'none';
     tbody.innerHTML = list.map(c => `<tr>
-        <td><strong>${esc(c.name)}</strong></td>
+        <td><strong>${esc(c.name)}</strong>${c.notes ? '<br><span style="font-size:0.72rem;color:var(--text-sub);">' + esc(c.notes) + '</span>' : ''}</td>
         <td dir="ltr">${esc(c.phone)}</td>
         <td><span class="wh-badge wh-badge-info">${esc(c.group)}</span></td>
         <td><button onclick="deleteRecord('${WA_CONTACTS}','${c._fbId}','${esc(c.name)}')" style="background:#fee2e2;color:#b91c1c;border:none;border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:0.8rem;"><i class="fas fa-trash"></i></button></td>
