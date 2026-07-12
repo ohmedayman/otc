@@ -801,7 +801,9 @@
                 <div>
                     <!-- Message -->
                     <div class="wh-card" style="margin-bottom:16px;">
-                        <div class="wh-card-header"><h3><i class="fas fa-comment-dots" style="margin-left:8px;"></i>الرسالة</h3></div>
+                        <div class="wh-card-header"><h3><i class="fas fa-comment-dots" style="margin-left:8px;"></i>الرسالة</h3>
+                            <span id="waCharCount" style="font-size:0.72rem;color:rgba(255,255,255,0.6);">0 حرف</span>
+                        </div>
                         <div class="wh-card-body">
                             <div class="wh-form-group">
                                 <label>اختر قالب</label>
@@ -809,9 +811,20 @@
                                     <option value="">اكتب يدوياً</option>
                                 </select>
                             </div>
+                            <!-- Quick Replies -->
+                            <div style="margin-bottom:10px;">
+                                <label style="font-size:0.78rem;color:var(--text-sub);margin-bottom:6px;display:block;">ردود سريعة</label>
+                                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                                    <button class="wh-btn wh-btn-success" style="padding:4px 10px;font-size:0.72rem;" onclick="insertQuickReply('تم التوصيل بنجاح، شكراً لتعاملكم معنا')"><i class="fas fa-check"></i> تم التوصيل</button>
+                                    <button class="wh-btn wh-btn-warning" style="padding:4px 10px;font-size:0.72rem;" onclick="insertQuickReply('تم شحن طلبكم وسيصل خلال 2-3 أيام عمل')"><i class="fas fa-shipping-fast"></i> تم الشحن</button>
+                                    <button class="wh-btn wh-btn-danger" style="padding:4px 10px;font-size:0.72rem;" onclick="insertQuickReply('عذراً، هناك تأخير في التوصيل. سنوافيكم بالتحديث قريباً')"><i class="fas fa-clock"></i> تأخير</button>
+                                    <button class="wh-btn wh-btn-info" style="padding:4px 10px;font-size:0.72rem;" onclick="insertQuickReply('يرجى تأكيد استلام الطلب بالرد على هذه الرسالة')"><i class="fas fa-question-circle"></i> تأكيد استلام</button>
+                                    <button class="wh-btn wh-btn-secondary" style="padding:4px 10px;font-size:0.72rem;" onclick="insertQuickReply('مرحباً، كيف يمكننا مساعدتك؟')"><i class="fas fa-hand-wave"></i> ترحيب</button>
+                                </div>
+                            </div>
                             <div class="wh-form-group">
                                 <label>الرسالة <span style="font-size:0.7rem;color:var(--text-sub);">— المتغيرات: {name} {phone} {order} {amount}</span></label>
-                                <textarea id="waMessage" rows="6" placeholder="مرحباً {name}..." style="width:100%;padding:12px;border:1px solid var(--border);border-radius:var(--r-xs);font-family:inherit;font-size:0.85rem;resize:vertical;"></textarea>
+                                <textarea id="waMessage" rows="6" placeholder="مرحباً {name}..." oninput="updateWaPreview();updateWaCharCount();" style="width:100%;padding:12px;border:1px solid var(--border);border-radius:var(--r-xs);font-family:inherit;font-size:0.85rem;resize:vertical;"></textarea>
                             </div>
                             <div style="display:flex;gap:6px;flex-wrap:wrap;">
                                 <button class="wh-btn wh-btn-secondary" style="padding:4px 10px;font-size:0.72rem;" onclick="insertWaVar('{name}')">{name}</button>
@@ -835,6 +848,7 @@
 
                     <div style="display:flex;gap:10px;">
                         <button class="wh-btn wh-btn-success" style="flex:1;padding:14px;font-size:1rem;" onclick="sendWhatsAppBulk()"><i class="fab fa-whatsapp"></i> إرسال للجميع</button>
+                        <button class="wh-btn wh-btn-info" style="padding:14px;" onclick="scheduleWhatsApp()"><i class="fas fa-clock"></i> جدولة</button>
                         <button class="wh-btn wh-btn-secondary" style="padding:14px;" onclick="previewFirstWa()"><i class="fas fa-eye"></i> معاينة</button>
                     </div>
                     <div style="margin-top:10px;padding:10px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:var(--r-xs);font-size:0.75rem;color:#166534;">
@@ -847,14 +861,27 @@
         <!-- TAB: Contacts -->
         <div id="waPanelContacts" style="display:none;">
             <div style="display:grid;grid-template-columns:1fr 2fr;gap:20px;">
-                <div class="wh-card">
-                    <div class="wh-card-header"><h3><i class="fas fa-user-plus" style="margin-left:8px;"></i>إضافة جهة اتصال</h3></div>
-                    <div class="wh-card-body">
-                        <div class="wh-form-group"><label>الاسم</label><input type="text" id="waContactName" placeholder="اسم الشخص" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--r-xs);font-family:inherit;"></div>
-                        <div class="wh-form-group"><label>رقم الموبايل</label><input type="tel" id="waContactPhone" placeholder="01012345678" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--r-xs);font-family:inherit;direction:ltr;text-align:left;"></div>
-                        <div class="wh-form-group"><label>المجموعة</label><select id="waContactGroup" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--r-xs);font-family:inherit;"><option value="عملاء">عملاء</option><option value="موردين">موردين</option><option value="Staff">Staff</option><option value="أخرى">أخرى</option></select></div>
-                        <div class="wh-form-group"><label>ملاحظات</label><input type="text" id="waContactNotes" placeholder="اختياري" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--r-xs);font-family:inherit;"></div>
-                        <button class="wh-btn wh-btn-success" style="width:100%;padding:10px;" onclick="saveWaContact()"><i class="fas fa-save"></i> حفظ</button>
+                <div>
+                    <!-- Add Contact -->
+                    <div class="wh-card" style="margin-bottom:16px;">
+                        <div class="wh-card-header"><h3><i class="fas fa-user-plus" style="margin-left:8px;"></i>إضافة جهة اتصال</h3></div>
+                        <div class="wh-card-body">
+                            <div class="wh-form-group"><label>الاسم</label><input type="text" id="waContactName" placeholder="اسم الشخص" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--r-xs);font-family:inherit;"></div>
+                            <div class="wh-form-group"><label>رقم الموبايل</label><input type="tel" id="waContactPhone" placeholder="01012345678" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--r-xs);font-family:inherit;direction:ltr;text-align:left;"></div>
+                            <div class="wh-form-group"><label>المجموعة</label><select id="waContactGroup" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--r-xs);font-family:inherit;"><option value="عملاء">عملاء</option><option value="موردين">موردين</option><option value="Staff">Staff</option><option value="أخرى">أخرى</option></select></div>
+                            <div class="wh-form-group"><label>ملاحظات</label><input type="text" id="waContactNotes" placeholder="اختياري" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--r-xs);font-family:inherit;"></div>
+                            <button id="waContactSaveBtn" class="wh-btn wh-btn-success" style="width:100%;padding:10px;" onclick="saveWaContact()"><i class="fas fa-save"></i> حفظ</button>
+                        </div>
+                    </div>
+
+                    <!-- Import/Export -->
+                    <div class="wh-card">
+                        <div class="wh-card-header"><h3><i class="fas fa-file-csv" style="margin-left:8px;"></i>استيراد / تصدير</h3></div>
+                        <div class="wh-card-body">
+                            <button class="wh-btn wh-btn-info" style="width:100%;padding:10px;margin-bottom:8px;" onclick="exportWaContacts()"><i class="fas fa-download"></i> تصدير CSV</button>
+                            <label style="display:block;width:100%;padding:10px;text-align:center;background:#ede9fe;color:#7c3aed;border-radius:var(--r-xs);cursor:pointer;font-weight:600;font-size:0.85rem;"><i class="fas fa-upload" style="margin-left:6px;"></i> استيراد CSV<input type="file" accept=".csv" onchange="importWaContacts(this)" style="display:none;"></label>
+                            <p style="font-size:0.7rem;color:var(--text-sub);margin-top:6px;">الملف يجب أن يحتوي أعمدة: name, phone, group, notes</p>
+                        </div>
                     </div>
                 </div>
                 <div class="wh-card">
@@ -864,8 +891,12 @@
                             <select id="waContactFilter" onchange="renderWaContacts()" style="padding:6px;border:1px solid rgba(255,255,255,0.2);border-radius:var(--r-xs);background:rgba(255,255,255,0.1);color:#fff;font-family:inherit;font-size:0.8rem;"><option value="">الكل</option><option value="عملاء">عملاء</option><option value="موردين">موردين</option><option value="Staff">Staff</option></select>
                         </div>
                     </div>
-                    <div class="wh-card-body" style="max-height:400px;overflow-y:auto;">
-                        <table class="wh-table"><thead><tr><th>الاسم</th><th>الرقم</th><th>المجموعة</th><th>إجراءات</th></tr></thead><tbody id="waContactsTable"></tbody></table>
+                    <div class="wh-card-body" style="max-height:500px;overflow-y:auto;">
+                        <div style="display:flex;gap:8px;margin-bottom:12px;">
+                            <label style="font-size:0.78rem;color:var(--text-sub);cursor:pointer;display:flex;align-items:center;gap:4px;"><input type="checkbox" id="waSelectAll" onchange="toggleSelectAllContacts()" style="width:16px;height:16px;"> تحديد الكل</label>
+                            <button class="wh-btn wh-btn-danger" style="padding:4px 12px;font-size:0.75rem;display:none;" id="waBulkDeleteBtn" onclick="bulkDeleteContacts()"><i class="fas fa-trash"></i> حذف المحدد (<span id="waSelectedCount">0</span>)</button>
+                        </div>
+                        <table class="wh-table"><thead><tr><th style="width:30px;"></th><th>الاسم</th><th>الرقم</th><th>المجموعة</th><th>إجراءات</th></tr></thead><tbody id="waContactsTable"></tbody></table>
                         <div id="waContactsEmpty" style="text-align:center;padding:20px;color:var(--text-sub);">لا توجد جهات اتصال محفوظة</div>
                     </div>
                 </div>
@@ -895,6 +926,16 @@
 
         <!-- TAB: History -->
         <div id="waPanelHistory" style="display:none;">
+            <!-- Scheduled Messages -->
+            <div class="wh-card" style="margin-bottom:20px;">
+                <div class="wh-card-header" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);"><h3><i class="fas fa-clock" style="margin-left:8px;"></i>الرسائل المجدولة</h3></div>
+                <div class="wh-card-body" style="max-height:300px;overflow-y:auto;">
+                    <table class="wh-table"><thead><tr><th>التاريخ</th><th>الوقت</th><th>العدد</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody id="waScheduledTable"></tbody></table>
+                    <div id="waScheduledEmpty" style="text-align:center;padding:20px;color:var(--text-sub);">لا توجد رسائل مجدولة</div>
+                </div>
+            </div>
+
+            <!-- Sent History -->
             <div class="wh-card">
                 <div class="wh-card-header"><h3><i class="fas fa-history" style="margin-left:8px;"></i>سجل الرسائل المرسلة</h3></div>
                 <div class="wh-card-body" style="max-height:500px;overflow-y:auto;">
@@ -904,6 +945,23 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- Bulk Send Progress Modal -->
+    <div id="waBulkProgressModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:1000;align-items:center;justify-content:center;">
+        <div style="background:#fff;border-radius:var(--r);padding:32px;width:90%;max-width:420px;text-align:center;box-shadow:var(--shadow-xl);">
+            <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#25d366,#128c7e);margin:0 auto 20px;display:flex;align-items:center;justify-content:center;"><i class="fab fa-whatsapp" style="color:#fff;font-size:2rem;"></i></div>
+            <h3 id="waProgressTitle" style="font-size:1.1rem;font-weight:800;margin-bottom:6px;">جاري الإرسال...</h3>
+            <p id="waProgressSubtitle" style="font-size:0.85rem;color:var(--text-sub);margin-bottom:16px;">0 من 0</p>
+            <div style="width:100%;height:8px;background:var(--border);border-radius:8px;overflow:hidden;margin-bottom:12px;"><div id="waProgressBar" style="height:100%;background:linear-gradient(90deg,#25d366,#128c7e);border-radius:8px;width:0%;transition:width .3s var(--ease);"></div></div>
+            <p id="waProgressCurrent" style="font-size:0.8rem;color:var(--text-sub);margin-bottom:16px;min-height:20px;"></p>
+            <div style="display:flex;gap:10px;">
+                <button id="waProgressCancel" onclick="waBulkCancel()" class="wh-btn wh-btn-danger" style="flex:1;padding:10px;">إيقاف</button>
+            </div>
+            <div id="waProgressDone" style="display:none;margin-top:12px;">
+                <div style="padding:12px;background:#dcfce7;border-radius:var(--r-xs);color:#166534;font-weight:700;"><i class="fas fa-check-circle" style="margin-left:6px;"></i> <span id="waProgressDoneText">تم!</span></div>
+            </div>
+        </div>
     </div>
 
 </main>
@@ -924,6 +982,7 @@ const WH_EASY_PAY = 'wh_easypay';
 const WA_CONTACTS = 'wa_contacts';
 const WA_TEMPLATES = 'wa_templates';
 const WA_HISTORY = 'wa_history';
+const WA_SCHEDULED = 'wa_scheduled';
 
 const today = () => new Date().toISOString().split('T')[0];
 const esc = t => { const d = document.createElement('div'); d.textContent = t; return d.innerHTML.replace(/'/g, '&#39;'); };
@@ -1025,7 +1084,19 @@ function insertWaVar(v) {
     const start = ta.selectionStart, end = ta.selectionEnd;
     ta.value = ta.value.substring(0, start) + v + ta.value.substring(end);
     ta.focus(); ta.selectionStart = ta.selectionEnd = start + v.length;
-    updateWaPreview();
+    updateWaPreview(); updateWaCharCount();
+}
+
+function insertQuickReply(text) {
+    document.getElementById('waMessage').value = text;
+    updateWaPreview(); updateWaCharCount();
+}
+
+function updateWaCharCount() {
+    const len = document.getElementById('waMessage').value.length;
+    const el = document.getElementById('waCharCount');
+    el.textContent = len + ' حرف';
+    el.style.color = len > 1000 ? '#ef4444' : len > 500 ? '#f59e0b' : 'rgba(255,255,255,0.6)';
 }
 
 function updateWaPreview() {
@@ -1067,11 +1138,101 @@ function renderWaContacts() {
     if (!list.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
     empty.style.display = 'none';
     tbody.innerHTML = list.map(c => `<tr>
+        <td><input type="checkbox" class="wa-contact-cb" value="${c._fbId}" onchange="updateBulkDeleteBtn()" style="width:16px;height:16px;cursor:pointer;"></td>
         <td><strong>${esc(c.name)}</strong>${c.notes ? '<br><span style="font-size:0.72rem;color:var(--text-sub);">' + esc(c.notes) + '</span>' : ''}</td>
         <td dir="ltr">${esc(c.phone)}</td>
         <td><span class="wh-badge wh-badge-info">${esc(c.group)}</span></td>
-        <td><button onclick="deleteRecord('${WA_CONTACTS}','${c._fbId}','${esc(c.name)}')" style="background:#fee2e2;color:#b91c1c;border:none;border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:0.8rem;"><i class="fas fa-trash"></i></button></td>
+        <td><div style="display:flex;gap:4px;">
+            <button onclick="editWaContact('${c._fbId}')" style="background:#dbeafe;color:#2563eb;border:none;border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:0.8rem;" title="تعديل"><i class="fas fa-edit"></i></button>
+            <button onclick="deleteRecord('${WA_CONTACTS}','${c._fbId}','${esc(c.name)}')" style="background:#fee2e2;color:#b91c1c;border:none;border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:0.8rem;" title="حذف"><i class="fas fa-trash"></i></button>
+        </div></td>
     </tr>`).join('');
+}
+
+let waEditingContactId = null;
+function editWaContact(id) {
+    const c = waContactsData.find(x => x._fbId === id);
+    if (!c) return;
+    waEditingContactId = id;
+    document.getElementById('waContactName').value = c.name || '';
+    document.getElementById('waContactPhone').value = c.phone || '';
+    document.getElementById('waContactGroup').value = c.group || 'عملاء';
+    document.getElementById('waContactNotes').value = c.notes || '';
+    document.getElementById('waContactSaveBtn').innerHTML = '<i class="fas fa-save"></i> تحديث';
+    document.getElementById('waContactSaveBtn').onclick = updateWaContact;
+    document.getElementById('waContactName').focus();
+}
+
+async function updateWaContact() {
+    if (!waEditingContactId) return;
+    const name = document.getElementById('waContactName').value.trim();
+    const phone = document.getElementById('waContactPhone').value.trim();
+    const group = document.getElementById('waContactGroup').value;
+    const notes = document.getElementById('waContactNotes').value.trim();
+    if (!name || !phone) { showWhAlert('error', 'أدخل الاسم والرقم'); return; }
+    await fbUpdateDoc(WA_CONTACTS, waEditingContactId, { name, phone, group, notes });
+    waEditingContactId = null;
+    document.getElementById('waContactSaveBtn').innerHTML = '<i class="fas fa-save"></i> حفظ';
+    document.getElementById('waContactSaveBtn').onclick = saveWaContact;
+    document.getElementById('waContactName').value = '';
+    document.getElementById('waContactPhone').value = '';
+    document.getElementById('waContactNotes').value = '';
+    showWhAlert('success', 'تم تحديث جهة الاتصال');
+}
+
+function toggleSelectAllContacts() {
+    const checked = document.getElementById('waSelectAll').checked;
+    document.querySelectorAll('.wa-contact-cb').forEach(cb => cb.checked = checked);
+    updateBulkDeleteBtn();
+}
+
+function updateBulkDeleteBtn() {
+    const selected = document.querySelectorAll('.wa-contact-cb:checked').length;
+    const btn = document.getElementById('waBulkDeleteBtn');
+    const cnt = document.getElementById('waSelectedCount');
+    if (selected > 0) { btn.style.display = 'block'; cnt.textContent = selected; }
+    else { btn.style.display = 'none'; }
+}
+
+async function bulkDeleteContacts() {
+    const ids = [...document.querySelectorAll('.wa-contact-cb:checked')].map(cb => cb.value);
+    if (!ids.length) return;
+    if (!confirm(`هل أنت متأكد من حذف ${ids.length} جهة اتصال؟`)) return;
+    for (const id of ids) await fbDeleteDoc(WA_CONTACTS, id);
+    document.getElementById('waSelectAll').checked = false;
+    showWhAlert('success', `تم حذف ${ids.length} جهة اتصال`);
+}
+
+function exportWaContacts() {
+    if (!waContactsData.length) { showWhAlert('error', 'لا توجد جهات اتصال للتصدير'); return; }
+    let csv = 'name,phone,group,notes\n';
+    waContactsData.forEach(c => { csv += `"${(c.name||'').replace(/"/g,'""')}","${c.phone||''}","${c.group||''}","${(c.notes||'').replace(/"/g,'""')}"\n`; });
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'contacts-' + today() + '.csv'; a.click();
+    URL.revokeObjectURL(url);
+    showWhAlert('success', 'تم التصدير بنجاح');
+}
+
+async function importWaContacts(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const text = await file.text();
+    const lines = text.split('\n').filter(l => l.trim());
+    if (lines.length < 2) { showWhAlert('error', 'الملف فارغ'); return; }
+    let imported = 0;
+    for (let i = 1; i < lines.length; i++) {
+        const cols = lines[i].match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g) || [];
+        const name = (cols[0]||'').replace(/^"|"$/g,'').trim();
+        const phone = (cols[1]||'').replace(/^"|"$/g,'').trim();
+        const group = (cols[2]||'').replace(/^"|"$/g,'').trim() || 'عملاء';
+        const notes = (cols[3]||'').replace(/^"|"$/g,'').trim();
+        if (!name || !phone) continue;
+        await fbAddDoc(WA_CONTACTS, { name, phone, group, notes, createdAt: new Date().toISOString() });
+        imported++;
+    }
+    input.value = '';
+    showWhAlert('success', `تم استيراد ${imported} جهة اتصال`);
 }
 
 function loadWaGroupContacts() {
@@ -1159,6 +1320,9 @@ function previewFirstWa() {
     window.open(`https://wa.me/${nums[0].replace(/^0/, '20')}?text=${encodeURIComponent(finalMsg)}`, '_blank');
 }
 
+let waBulkCancelled = false;
+function waBulkCancel() { waBulkCancelled = true; }
+
 function sendWhatsAppBulk() {
     const nums = countWaNumbers();
     const msg = document.getElementById('waMessage').value.trim();
@@ -1166,27 +1330,115 @@ function sendWhatsAppBulk() {
     if (nums.length === 0) { showWhAlert('error', 'أدخل رقم واحد على الأقل'); return; }
     if (!confirm(`إرسال الرسالة إلى ${nums.length} رقم؟`)) return;
     const includeNames = document.getElementById('waIncludeNames')?.checked;
+
+    // Show progress modal
+    const modal = document.getElementById('waBulkProgressModal');
+    const bar = document.getElementById('waProgressBar');
+    const title = document.getElementById('waProgressTitle');
+    const sub = document.getElementById('waProgressSubtitle');
+    const cur = document.getElementById('waProgressCurrent');
+    const done = document.getElementById('waProgressDone');
+    const doneText = document.getElementById('waProgressDoneText');
+    const cancelBtn = document.getElementById('waProgressCancel');
+    modal.style.display = 'flex';
+    bar.style.width = '0%';
+    title.textContent = 'جاري فتح واتساب...';
+    sub.textContent = `0 من ${nums.length}`;
+    cur.textContent = '';
+    done.style.display = 'none';
+    cancelBtn.style.display = 'block';
+    waBulkCancelled = false;
+
     let sent = 0;
     function openNext(i) {
+        if (waBulkCancelled) {
+            title.textContent = 'تم الإيقاف';
+            sub.textContent = `تم فتح ${sent} من ${nums.length}`;
+            bar.style.width = Math.round((sent / nums.length) * 100) + '%';
+            cancelBtn.style.display = 'none';
+            done.style.display = 'block';
+            doneText.textContent = `تم فتح ${sent} محادثة فقط (تم الإيقاف)`;
+            renderWaStats();
+            return;
+        }
         if (i >= nums.length) {
-            showWhAlert('success', `تم فتح ${sent} محادثة واتساب`);
+            title.textContent = 'تم بنجاح!';
+            sub.textContent = `${sent} من ${nums.length}`;
+            bar.style.width = '100%';
+            cur.textContent = '';
+            cancelBtn.style.display = 'none';
+            done.style.display = 'block';
+            doneText.textContent = `تم فتح ${sent} محادثة واتساب`;
             renderWaStats();
             return;
         }
         let finalMsg = msg;
+        let contactName = '-';
         if (includeNames) {
             const c = waContactsData.find(x => x.phone === nums[i]);
             finalMsg = applyWaVars(msg, c);
+            contactName = c?.name || '-';
         }
         const phone = nums[i].replace(/^0/, '20');
         window.open(`https://wa.me/${phone}?text=${encodeURIComponent(finalMsg)}`, '_blank');
         sent++;
-        fbAddDoc(WA_HISTORY, { date: today(), phone: nums[i], name: includeNames ? (waContactsData.find(x => x.phone === nums[i])?.name || '-') : '-', message: msg.substring(0, 100), status: 'تم الفتح' });
-        setTimeout(() => openNext(i + 1), 1500);
+        fbAddDoc(WA_HISTORY, { date: today(), phone: nums[i], name: contactName, message: msg.substring(0, 100), status: 'تم الفتح' });
+        bar.style.width = Math.round(((i + 1) / nums.length) * 100) + '%';
+        sub.textContent = `${i + 1} من ${nums.length}`;
+        cur.textContent = nums[i] + (contactName !== '-' ? ' — ' + contactName : '');
+        setTimeout(() => openNext(i + 1), 2000);
     }
     openNext(0);
 }
 
+// ===== SCHEDULED MESSAGES =====
+let waScheduledData = [];
+async function scheduleWhatsApp() {
+    const nums = countWaNumbers();
+    const msg = document.getElementById('waMessage').value.trim();
+    if (!msg) { showWhAlert('error', 'اكتب الرسالة'); return; }
+    if (nums.length === 0) { showWhAlert('error', 'أدخل رقم واحد على الأقل'); return; }
+    const date = prompt('أدخل تاريخ الإرسال (YYYY-MM-DD):', today());
+    if (!date) return;
+    const time = prompt('أدخل وقت الإرسال (HH:MM) مثل 10:00:', '10:00');
+    if (!time) return;
+    const includeNames = document.getElementById('waIncludeNames')?.checked;
+    await fbAddDoc(WA_SCHEDULED, {
+        date, time, message: msg, numbers: nums,
+        includeNames, status: 'مجدول',
+        totalNumbers: nums.length
+    });
+    showWhAlert('success', `تم جدولة الرسالة لـ ${date} الساعة ${time}`);
+    renderWaScheduled();
+}
+
+async function renderWaScheduled() {
+    try {
+        const db = await initFirebase();
+        const snap = await db.collection(WA_SCHEDULED).orderBy('createdAt', 'desc').get();
+        waScheduledData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    } catch(e) { waScheduledData = []; }
+    const tbody = document.getElementById('waScheduledTable');
+    const empty = document.getElementById('waScheduledEmpty');
+    if (!waScheduledData.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+    tbody.innerHTML = waScheduledData.map(s => `<tr>
+        <td>${s.date||'-'}</td>
+        <td>${s.time||'-'}</td>
+        <td>${s.totalNumbers||0}</td>
+        <td><span class="wh-badge ${s.status==='مجدول'?'wh-badge-info':s.status==='تم الإرسال'?'wh-badge-success':'wh-badge-warning'}">${esc(s.status)}</span></td>
+        <td>${s.status === 'مجدول' ? `<button onclick="cancelScheduled('${s.id}')" style="background:#fee2e2;color:#b91c1c;border:none;border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:0.8rem;"><i class="fas fa-times"></i></button>` : ''}</td>
+    </tr>`).join('');
+}
+
+async function cancelScheduled(id) {
+    if (!confirm('إلغاء هذه الرسالة المجدولة؟')) return;
+    await fbDeleteDoc(WA_SCHEDULED, id);
+    showWhAlert('success', 'تم الإلغاء');
+    renderWaScheduled();
+}
+
+// ===== HISTORY =====
 function renderWaHistory() {
     const tbody = document.getElementById('waHistoryTable');
     const empty = document.getElementById('waHistoryEmpty');
