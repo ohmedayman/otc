@@ -336,14 +336,28 @@ function renderOrders(orders) {
             <td><span style="font-size:0.82rem;font-weight:600;color:var(--info);">${esc(o.deliveryCompany||'-')}</span></td>
             <td><code style="font-size:0.78rem;color:var(--text-sub);">${esc(o.realTrackingNumber||'-')}</code></td>
             <td><strong>${o.value ? o.value + ' ج.م' : '-'}</strong></td>
-            <td><span class="status-badge ${o.status}">${statusText(o.status)}</span></td>
+            <td><select onchange="quickStatus('${o.id}',this.value)" style="border:2px solid var(--border);border-radius:var(--r-xs);padding:6px 10px;font-size:0.8rem;font-family:inherit;font-weight:700;cursor:pointer;background:${o.status==='delivered'?'#dcfce7':o.status==='in-transit'?'#dbeafe':o.status==='exception'?'#fee2e2':'#fef3c7'};">
+                <option value="pending" ${o.status==='pending'?'selected':''}>⏳ قيد المعالجة</option>
+                <option value="in-transit" ${o.status==='in-transit'?'selected':''}>🚚 في الطريق</option>
+                <option value="delivered" ${o.status==='delivered'?'selected':''}>✅ تم التوصيل</option>
+                <option value="exception" ${o.status==='exception'?'selected':''}>⚠️ مشكلة</option>
+            </select></td>
             <td><div class="btn-group">
                 <button class="btn btn-view" onclick="openWhatsApp('${esc(o.customerPhone)}','${esc(o.m16Number)}','${esc(o.status)}','${esc(o.customerName)}','${o.value||0}','${esc(o.deliveryCompany||'-')}')" title="واتساب"><i class="fab fa-whatsapp"></i></button>
+                <button class="btn btn-edit" onclick="printOrderReceipt('${o.id}')" title="طباعة فاتورة" style="background:#8b5cf6;"><i class="fas fa-print"></i></button>
                 <button class="btn btn-edit" onclick="editOrder('${o.id}')" title="تعديل"><i class="fas fa-edit"></i></button>
                 <button class="btn btn-delete" onclick="delOrder('${o.id}')" title="حذف"><i class="fas fa-trash"></i></button>
             </div></td>`;
         tbody.appendChild(tr);
     });
+}
+
+async function quickStatus(id, status) {
+    await updateOrder(id, { status });
+    const o = ordersData.find(x => x.id === id);
+    if (o) o.status = status;
+    updateStats();
+    showAlert('تم تحديث الحالة', 'success');
 }
 
 async function handleAddOrder(e) {
@@ -442,6 +456,51 @@ async function editOrder(id) {
     document.getElementById('editOrderNotes').value = o.notes || '';
     document.getElementById('editOrderValue').value = o.value || '';
     document.getElementById('editModal').classList.add('active');
+}
+
+function printOrderReceipt(id) {
+    const o = ordersData.find(x => x.id === id);
+    if (!o) return;
+    const statusLabels = {'pending':'قيد المعالجة','in-transit':'في الطريق','delivered':'تم التوصيل','exception':'مشكلة'};
+    const win = window.open('','_blank','width=420,height=650');
+    win.document.write(`<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>فاتورة طلب</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Cairo',sans-serif;padding:24px;color:#1a1a2e;background:#fff}
+    .inv-header{display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #C9A84C;padding-bottom:16px;margin-bottom:20px}
+    .inv-logo img{height:40px}
+    .inv-title{font-size:1.1rem;font-weight:800;color:#0f1729}
+    .inv-sub{font-size:0.75rem;color:#64748b}
+    .inv-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:0.88rem}
+    .inv-row strong{color:#0f1729}
+    .inv-badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:0.8rem;font-weight:700;margin-top:12px;text-align:center}
+    .inv-footer{margin-top:24px;padding-top:16px;border-top:2px solid #C9A84C;text-align:center;font-size:0.78rem;color:#64748b}
+    .inv-barcode{text-align:center;margin:16px 0;}
+    @media print{body{padding:16px}}
+    </style></head><body>
+    <div class="inv-header">
+        <div class="inv-logo"><img src="https://otc.milanof16.com/assets/logo.png" alt="ميلانو"></div>
+        <div><div class="inv-title">فاتورة طلب</div><div class="inv-sub">${new Date().toLocaleDateString('ar-EG')}</div></div>
+    </div>
+    <div class="inv-barcode"><svg id="bc"></svg></div>
+    <div class="inv-row"><span>رقم التتبع</span><strong style="color:#C9A84C;">${esc(o.m16Number||'-')}</strong></div>
+    <div class="inv-row"><span>العميل</span><strong>${esc(o.customerName)}</strong></div>
+    <div class="inv-row"><span>الهاتف</span><strong dir="ltr">${esc(o.customerPhone)}</strong></div>
+    <div class="inv-row"><span>العنوان</span><strong>${esc(o.address||'-')}</strong></div>
+    <div class="inv-row"><span>شركة الشحن</span><strong>${esc(o.deliveryCompany||'-')}</strong></div>
+    <div class="inv-row"><span>السيريل</span><code style="font-size:0.8rem;">${esc(o.realTrackingNumber||'-')}</code></div>
+    <div class="inv-row"><span>الحالة</span><strong>${statusLabels[o.status]||o.status}</strong></div>
+    <div class="inv-row" style="border-top:2px solid #C9A84C;margin-top:8px;padding-top:12px;"><span style="font-size:1rem;font-weight:800;">الإجمالي</span><strong style="font-size:1.2rem;color:#C9A84C;">${o.value?o.value+' ج.م':'-'}</strong></div>
+    <div class="inv-footer">
+        <i class="fab fa-whatsapp" style="color:#25D366;font-size:1.1rem;margin-bottom:6px;display:block;"></i>
+        <div>للتواصل: 01029293339</div>
+        <div>milanof16.com</div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.umd.min.js"><\/script>
+    <script>try{JsBarcode("#bc","${esc(o.m16Number||'000000')}",{format:"CODE128",width:2,height:35,displayValue:true,fontSize:13,font:"Cairo",textAlign:"center",textMargin:6,lineColor:"#0f1729"});setTimeout(()=>window.print(),500)}catch(e){}<\/script>
+    </body></html>`);
+    win.document.close();
 }
 
 async function delOrder(id) {
