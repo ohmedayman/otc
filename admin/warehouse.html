@@ -912,6 +912,7 @@ const WA_HISTORY = 'wa_history';
 
 const today = () => new Date().toISOString().split('T')[0];
 const esc = t => { const d = document.createElement('div'); d.textContent = t; return d.innerHTML.replace(/'/g, '&#39;'); };
+const escJs = t => String(t||'').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
 function formatTimestamp(val) {
     if (!val) return '-';
     if (val && typeof val.toDate === 'function') return val.toDate().toLocaleDateString('ar-EG');
@@ -1825,6 +1826,7 @@ function printReceipt() {
     const content = document.getElementById('printableReceipt').innerHTML;
     const r = window._lastReceipt || {};
     const win = window.open('', '_blank', 'width=480,height=700');
+    if (!win) { showWhAlert('error', 'تم حظر النافذة المنبثقة — اسمح بالنوافذ المنبثقة للمتصفح'); return; }
     win.document.write(`<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -2187,6 +2189,7 @@ function exportReportToExcel() {
 
 function printReport() {
     const printWindow = window.open('', '_blank');
+    if (!printWindow) { showWhAlert('error', 'تم حظر النافذة المنبثقة — اسمح بالنوافذ المنبثقة للمتصفح'); return; }
     const stats = document.getElementById('reportStats').style.display !== 'none';
     printWindow.document.write(`
         <html><head><title>تقرير شامل</title>

@@ -381,6 +381,29 @@ async function handleEditOrder(e) {
         value: parseFloat(document.getElementById('editOrderValue').value) || 0
     };
     await updateOrder(id, data);
+
+    // Auto-update customer in WhatsApp contacts
+    try {
+        const db = await initFirebase();
+        const waSnap = await db.collection('wa_contacts').where('phone', '==', data.customerPhone).get();
+        if (waSnap.docs.length) {
+            await db.collection('wa_contacts').doc(waSnap.docs[0].id).update({
+                name: data.customerName,
+                notes: 'طلب معدّل — ' + data.value + ' ج.م',
+                amount: String(data.value)
+            });
+        } else if (data.customerPhone) {
+            await db.collection('wa_contacts').add({
+                name: data.customerName,
+                phone: data.customerPhone,
+                group: 'عملاء',
+                notes: 'طلب معدّل — ' + data.value + ' ج.م',
+                amount: String(data.value),
+                createdAt: new Date().toISOString()
+            });
+        }
+    } catch(e) { console.error('[Admin] Failed to update WA contact:', e); }
+
     closeModal();
     showAlert('success','تم تعديل الطلب بنجاح');
 }
