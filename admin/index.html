@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
@@ -74,6 +75,18 @@
                 <div style="font-size:2rem;font-weight:900;color:var(--warning);" id="statPending">0</div>
                 <div style="color:var(--text-sub);font-size:0.8rem;margin-top:2px;">قيد المعالجة</div>
                 <div style="margin-top:8px;height:4px;background:var(--border);border-radius:4px;overflow:hidden;"><div id="barPending" style="height:100%;background:var(--warning);border-radius:4px;width:0%;transition:width .6s var(--ease);"></div></div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-bottom:28px;">
+            <div class="result-container">
+                <div class="result-header"><h3 style="color:#fff;font-size:0.95rem;"><i class="fas fa-chart-line" style="margin-left:6px;opacity:0.7;"></i>الطلبات خلال آخر 30 يوم</h3></div>
+                <div style="padding:20px;height:260px;"><canvas id="ordersChart"></canvas></div>
+            </div>
+            <div class="result-container">
+                <div class="result-header"><h3 style="color:#fff;font-size:0.95rem;"><i class="fas fa-chart-pie" style="margin-left:6px;opacity:0.7;"></i>حالة الطلبات</h3></div>
+                <div style="padding:20px;height:260px;"><canvas id="statusChart"></canvas></div>
             </div>
         </div>
 
@@ -191,6 +204,12 @@
     .login-error.show{display:flex}
     .login-back{display:block;text-align:center;margin-top:18px;color:#9ca3af;font-size:0.82rem;transition:color .2s}
     .login-back:hover{color:var(--gold)}
+    @media(max-width:768px){
+        #statsGrid{grid-template-columns:1fr 1fr!important}
+        .charts-row{grid-template-columns:1fr!important}
+        .data-table{font-size:0.75rem}
+        .data-table th,.data-table td{padding:6px 8px}
+    }
 </style>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -458,6 +477,38 @@ async function updateStats() {
         document.getElementById('barDelivered').style.width = pct(delivered) + '%';
         document.getElementById('barPending').style.width = pct(pending) + '%';
     }, 200);
+    updateCharts(orders);
+}
+
+let ordersLineChart = null;
+let statusDoughnut = null;
+function updateCharts(orders) {
+    const dayMap = {};
+    const dayStatus = {};
+    orders.forEach(o => {
+        const d = (o.createdAt||'').slice(0,10);
+        if (!d) return;
+        dayMap[d] = (dayMap[d]||0) + 1;
+        if (!dayStatus[d]) dayStatus[d] = {pending:0,'in-transit':0,delivered:0,exception:0};
+        dayStatus[d][o.status] = (dayStatus[d][o.status]||0) + 1;
+    });
+    const days = Object.keys(dayMap).sort().slice(-30);
+    const lineData = days.map(d => dayMap[d]);
+    const ctx1 = document.getElementById('ordersChart');
+    const ctx2 = document.getElementById('statusChart');
+    if (!ctx1 || !ctx2) return;
+    if (ordersLineChart) ordersLineChart.destroy();
+    if (statusDoughnut) statusDoughnut.destroy();
+    ordersLineChart = new Chart(ctx1, {
+        type:'line', data:{labels:days.map(d=>d.slice(5)),datasets:[{label:'طلبات',data:lineData,borderColor:'#C9A84C',backgroundColor:'rgba(201,168,76,0.15)',fill:true,tension:0.4,pointRadius:3,pointBackgroundColor:'#C9A84C'}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,ticks:{stepSize:1}}}}
+    });
+    const lastDay = days[days.length-1];
+    const lastStat = dayStatus[lastDay] || {};
+    statusDoughnut = new Chart(ctx2, {
+        type:'doughnut', data:{labels:['قيد المعالجة','في الطريق','تم التوصيل','مشكلة'],datasets:[{data:[lastStat.pending||0,lastStat['in-transit']||0,lastStat.delivered||0,lastStat.exception||0],backgroundColor:['#f59e0b','#3b82f6','#22c55e','#ef4444'],borderWidth:0}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{family:'Cairo',size:11}}}}}
+    });
 }
 
 function openWhatsApp(phone, tracking, status, name, value, deliveryCompany) {
