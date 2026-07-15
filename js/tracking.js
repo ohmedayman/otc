@@ -63,6 +63,9 @@ function buildTrackingData(o) {
         lastUpdate: formatDate(o.createdAt),
         location: o.address || statusLoc[o.status] || '-',
         lastEvent: statusMap[o.status] || o.status,
+        customerName: o.customerName || '-',
+        value: o.value || 0,
+        deliveryCompany: o.deliveryCompany || '-',
         events: [
             { date: formatDate(o.createdAt), status: statusMap[o.status] || o.status, location: o.address || '-' },
             ...(o.notes ? [{ date: formatDate(o.createdAt), status: o.notes, location: o.address || '-' }] : [])
@@ -151,6 +154,9 @@ function displayResults(data) {
     resultLastUpdate.textContent = data.lastUpdate;
     resultLocation.textContent = data.location;
     if (resultLastEvent) resultLastEvent.textContent = data.lastEvent;
+    document.getElementById('resultCustomerName').textContent = data.customerName;
+    document.getElementById('resultAmount').textContent = data.value ? data.value + ' ج.م' : '-';
+    document.getElementById('resultDeliveryCompany').textContent = data.deliveryCompany;
 
     trackingEvents.innerHTML = '';
     data.events.forEach((e, i) => {
