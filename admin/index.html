@@ -378,8 +378,8 @@ function renderOrders(orders) {
                 <option value="exception" ${o.status==='exception'?'selected':''}>⚠️ مشكلة</option>
             </select></td>
             <td><div class="btn-group">
-                <button class="btn btn-view" onclick="openWhatsApp('${esc(o.customerPhone)}','${esc(o.m16Number)}','${esc(o.status)}','${esc(o.customerName)}','${o.value||0}','${esc(o.deliveryCompany||'-')}')" title="واتساب" style="background:#25d366;"><i class="fab fa-whatsapp"></i></button>
-                <button class="btn btn-view" onclick="openSms('${esc(o.customerPhone)}','${esc(o.m16Number)}','${esc(o.status)}','${esc(o.customerName)}','${o.value||0}','${esc(o.deliveryCompany||'-')}')" title="SMS" style="background:#3b82f6;"><i class="fas fa-sms"></i></button>
+                <button class="btn btn-view" onclick="openWhatsApp('${escJs(o.customerPhone)}','${escJs(o.m16Number)}','${escJs(o.status)}','${escJs(o.customerName)}','${o.value||0}','${escJs(o.deliveryCompany||'-')}')" title="واتساب" style="background:#25d366;"><i class="fab fa-whatsapp"></i></button>
+                <button class="btn btn-view" onclick="openSms('${escJs(o.customerPhone)}','${escJs(o.m16Number)}','${escJs(o.status)}','${escJs(o.customerName)}','${o.value||0}','${escJs(o.deliveryCompany||'-')}')" title="SMS" style="background:#3b82f6;"><i class="fas fa-sms"></i></button>
                 <button class="btn btn-edit" onclick="printOrderReceipt('${o.id}')" title="طباعة فاتورة" style="background:#8b5cf6;"><i class="fas fa-print"></i></button>
                 <button class="btn btn-edit" onclick="editOrder('${o.id}')" title="تعديل"><i class="fas fa-edit"></i></button>
                 <button class="btn btn-delete" onclick="delOrder('${o.id}')" title="حذف"><i class="fas fa-trash"></i></button>
@@ -741,6 +741,7 @@ function formatTimestamp(val) {
 }
 function statusText(s) { return { 'pending':'قيد المعالجة', 'in-transit':'في الطريق', 'delivered':'تم التوصيل', 'exception':'مشكلة في التوصيل' }[s]||s; }
 function esc(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML.replace(/'/g, '&#39;'); }
+function escJs(t) { return String(t||'').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
 function showAlert(type, msg) {
     const el = document.getElementById('alertMessage');
     el.className = 'alert alert-' + type;
