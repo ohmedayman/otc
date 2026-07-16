@@ -371,18 +371,18 @@ function renderOrders(orders) {
             <td><span style="font-size:0.82rem;font-weight:600;color:var(--info);">${esc(o.deliveryCompany||'-')}</span></td>
             <td><code style="font-size:0.78rem;color:var(--text-sub);">${esc(o.realTrackingNumber||'-')}</code></td>
             <td><strong>${o.value ? o.value + ' ج.م' : '-'}</strong></td>
-            <td><select onchange="quickStatus('${o.id}',this.value)" style="border:2px solid var(--border);border-radius:var(--r-xs);padding:6px 10px;font-size:0.8rem;font-family:inherit;font-weight:700;cursor:pointer;background:${o.status==='delivered'?'#dcfce7':o.status==='in-transit'?'#dbeafe':o.status==='exception'?'#fee2e2':'#fef3c7'};">
+            <td><select data-quickstatus="${o.id}" style="border:2px solid var(--border);border-radius:var(--r-xs);padding:6px 10px;font-size:0.8rem;font-family:inherit;font-weight:700;cursor:pointer;background:${o.status==='delivered'?'#dcfce7':o.status==='in-transit'?'#dbeafe':o.status==='exception'?'#fee2e2':'#fef3c7'};">
                 <option value="pending" ${o.status==='pending'?'selected':''}>⏳ قيد المعالجة</option>
                 <option value="in-transit" ${o.status==='in-transit'?'selected':''}>🚚 في الطريق</option>
                 <option value="delivered" ${o.status==='delivered'?'selected':''}>✅ تم التوصيل</option>
                 <option value="exception" ${o.status==='exception'?'selected':''}>⚠️ مشكلة</option>
             </select></td>
             <td><div class="btn-group">
-                <button class="btn btn-view" onclick="openWhatsApp('${escJs(o.customerPhone)}','${escJs(o.m16Number)}','${escJs(o.status)}','${escJs(o.customerName)}','${o.value||0}','${escJs(o.deliveryCompany||'-')}')" title="واتساب" style="background:#25d366;"><i class="fab fa-whatsapp"></i></button>
-                <button class="btn btn-view" onclick="openSms('${escJs(o.customerPhone)}','${escJs(o.m16Number)}','${escJs(o.status)}','${escJs(o.customerName)}','${o.value||0}','${escJs(o.deliveryCompany||'-')}')" title="SMS" style="background:#3b82f6;"><i class="fas fa-sms"></i></button>
-                <button class="btn btn-edit" onclick="printOrderReceipt('${o.id}')" title="طباعة فاتورة" style="background:#8b5cf6;"><i class="fas fa-print"></i></button>
-                <button class="btn btn-edit" onclick="editOrder('${o.id}')" title="تعديل"><i class="fas fa-edit"></i></button>
-                <button class="btn btn-delete" onclick="delOrder('${o.id}')" title="حذف"><i class="fas fa-trash"></i></button>
+                <button class="btn btn-view" data-action="wa" data-id="${o.id}" title="واتساب" style="background:#25d366;"><i class="fab fa-whatsapp"></i></button>
+                <button class="btn btn-view" data-action="sms" data-id="${o.id}" title="SMS" style="background:#3b82f6;"><i class="fas fa-sms"></i></button>
+                <button class="btn btn-edit" data-action="print" data-id="${o.id}" title="طباعة فاتورة" style="background:#8b5cf6;"><i class="fas fa-print"></i></button>
+                <button class="btn btn-edit" data-action="edit" data-id="${o.id}" title="تعديل"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-delete" data-action="delete" data-id="${o.id}" title="حذف"><i class="fas fa-trash"></i></button>
             </div></td>`;
         tbody.appendChild(tr);
     });
@@ -741,7 +741,7 @@ function formatTimestamp(val) {
 }
 function statusText(s) { return { 'pending':'قيد المعالجة', 'in-transit':'في الطريق', 'delivered':'تم التوصيل', 'exception':'مشكلة في التوصيل' }[s]||s; }
 function esc(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML.replace(/'/g, '&#39;'); }
-function escJs(t) { return String(t||'').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
+function escJs(t) { return String(t||'').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/[\n\r]/g, ' '); }
 function showAlert(type, msg) {
     const el = document.getElementById('alertMessage');
     el.className = 'alert alert-' + type;
@@ -755,6 +755,31 @@ document.getElementById('orderForm')?.addEventListener('submit', handleAddOrder)
 document.getElementById('editForm')?.addEventListener('submit', handleEditOrder);
 document.getElementById('searchInput')?.addEventListener('input', filterOrders);
 document.getElementById('filterStatus')?.addEventListener('change', filterOrders);
+
+// Event delegation for order table buttons
+document.getElementById('ordersTableBody')?.addEventListener('click', function(e) {
+    const btn = e.target.closest('button');
+    if (!btn || !btn.dataset.action) return;
+    const o = ordersData.find(x => x.id === btn.dataset.id);
+    if (!o) return;
+    if (btn.dataset.action === 'wa') {
+        openWhatsApp(o.customerPhone, o.m16Number, o.status, o.customerName, o.value||0, o.deliveryCompany||'-');
+    } else if (btn.dataset.action === 'sms') {
+        openSms(o.customerPhone, o.m16Number, o.status, o.customerName, o.value||0, o.deliveryCompany||'-');
+    } else if (btn.dataset.action === 'print') {
+        printOrderReceipt(o.id);
+    } else if (btn.dataset.action === 'edit') {
+        editOrder(o.id);
+    } else if (btn.dataset.action === 'delete') {
+        delOrder(o.id);
+    }
+});
+
+document.getElementById('ordersTableBody')?.addEventListener('change', function(e) {
+    if (e.target.dataset.quickstatus) {
+        quickStatus(e.target.dataset.quickstatus, e.target.value);
+    }
+});
 </script>
 </body>
 </html>
