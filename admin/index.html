@@ -194,7 +194,7 @@
             <div class="form-group">
                 <label>القالب</label>
                 <select id="smsTemplate" onchange="loadSmsTemplate()" style="width:100%;padding:10px;border:2px solid var(--border);border-radius:var(--r-sm);font-family:inherit;font-size:0.9rem;">
-                    <option value="">اختر قالب...</option>
+                    <option value="">رسالة مخصصة</option>
                     <option value="تم الشحن">تم الشحن — طلبك في الطريق</option>
                     <option value="في الطريق">في الطريق — سيصل خلال 24 ساعة</option>
                     <option value="تم التوصيل">تم التوصيل — شكراً لتعاملكم</option>
@@ -204,7 +204,7 @@
             </div>
             <div class="form-group">
                 <label>الرسالة <span style="font-size:0.7rem;color:var(--text-sub);" id="smsCharCount">(0 حرف)</span></label>
-                <textarea id="smsMessage" rows="3" oninput="updateSmsCharCount()" placeholder="اكتب رسالتك..." style="width:100%;padding:12px;border:2px solid var(--border);border-radius:var(--r-sm);font-family:inherit;font-size:0.9rem;resize:vertical;"></textarea>
+                <textarea id="smsMessage" rows="3" oninput="updateSmsCharCount()" placeholder="اكتب رسالتك المخصصة هنا..." style="width:100%;padding:12px;border:2px solid var(--border);border-radius:var(--r-sm);font-family:inherit;font-size:0.9rem;resize:vertical;"></textarea>
             </div>
             <div style="display:flex;gap:8px;margin-bottom:12px;">
                 <button class="wh-btn wh-btn-secondary" style="padding:6px 12px;font-size:0.75rem;" onclick="insertSmsVar('{name}')">{name}</button>
@@ -635,11 +635,12 @@ const SMS_API_URL = 'https://api.smsmode.com/http/1.6/sendBatch.php';
 let smsOrderData = {};
 function openSms(phone, tracking, status, name, value, deliveryCompany) {
     smsOrderData = { phone, tracking, status, name, value, deliveryCompany };
-    const sm = { 'pending':'قيد المعالجة', 'in-transit':'في الطريق', 'delivered':'تم التوصيل', 'exception':'مشكلة في التوصيل' };
     document.getElementById('smsPhone').value = phone;
-    document.getElementById('smsMessage').value = `ميلانو: طلبك ${tracking} — ${sm[status]||status}. تتبع: otc.milanof16.com/?track=${tracking}`;
+    document.getElementById('smsMessage').value = '';
+    document.getElementById('smsTemplate').value = '';
     updateSmsCharCount();
     document.getElementById('smsModal').classList.add('active');
+    document.getElementById('smsMessage').focus();
 }
 
 function loadSmsTemplate() {
