@@ -1610,9 +1610,10 @@ async function sendSmsBulk() {
                 body: JSON.stringify({ to: formatted, message: msg.substring(0, 160) })
             });
             const data = await resp.json();
-            if (resp.ok && data.status === 'success') sent++;
+            console.log('[SMS] Response:', phone, data);
+            if (resp.ok && (data.status === 'success' || data.status === 'delivered')) sent++;
             else { failed++; console.error('[SMS] Failed:', phone, data); }
-            await fbAddDoc(WA_HISTORY, { date: today(), phone, name: '-', message: msg.substring(0, 100), status: data.status === 'success' ? 'تم الإرسال' : 'فشل' });
+            await fbAddDoc(WA_HISTORY, { date: today(), phone, name: '-', message: msg.substring(0, 100), status: (data.status === 'success' || data.status === 'delivered') ? 'تم الإرسال' : 'فشل' });
         } catch(e) { failed++; console.error('[SMS] Error:', e); }
         await new Promise(r => setTimeout(r, 300));
     }
