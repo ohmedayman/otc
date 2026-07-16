@@ -685,6 +685,7 @@ async function sendSms() {
 
     try {
         const formatted = phone.startsWith('0') ? phone : '0' + phone;
+        console.log('[SMS] Sending to:', formatted, 'msg:', msg.substring(0, 160));
         const resp = await fetch(SMS_API_URL, {
             method: 'POST',
             headers: {
@@ -698,17 +699,19 @@ async function sendSms() {
                 message: msg.substring(0, 160)
             })
         });
-        const data = await resp.json();
-        console.log('[SMS] Response:', data);
-        if (resp.ok && data.status === 'success') {
+        const text = await resp.text();
+        console.log('[SMS] Status:', resp.status, 'Body:', text);
+        let data;
+        try { data = JSON.parse(text); } catch(e) { data = { raw: text }; }
+        if (resp.ok) {
             showAlert('success', 'تم إرسال SMS بنجاح');
             document.getElementById('smsModal').classList.remove('active');
         } else {
-            showAlert('danger', 'فشل الإرسال: ' + (data.message || data.error || 'خطأ غير معروف'));
+            showAlert('danger', 'فشل الإرسال (' + resp.status + '): ' + (data.message || data.error || text.substring(0, 100)));
         }
     } catch(e) {
-        console.error('[SMS] Error:', e);
-        showAlert('danger', 'خطأ في الاتصال بخدمة SMS');
+        console.error('[SMS] Error:', e.message, e);
+        showAlert('danger', 'خطأ: ' + e.message);
     }
 
     btn.innerHTML = '<i class="fas fa-paper-plane" style="margin-left:8px;"></i> إرسال SMS';
