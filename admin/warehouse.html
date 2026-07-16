@@ -1543,7 +1543,9 @@ function renderWaHistory() {
 }
 
 // ===== SMS BULK =====
-const SMS_API_URL_W = '/api/sms';
+const SMS_API_URL_W = 'https://smsapi.zadx.net/api/v1/sms/send';
+const SMS_API_KEY_W = 'pk_J9mvUtc7wETvuX5q5V2W3uTMoG7k2hz9';
+const SMS_API_SECRET_W = 'sk_CB1odRcCfZ23M8RlimP42a0bDaWidrVj1SEngrx8';
 
 function loadSmsGroupContacts() {
     const group = document.getElementById('smsBulkGroup').value;
@@ -1606,7 +1608,12 @@ async function sendSmsBulk() {
             const formatted = phone.startsWith('0') ? phone : '0' + phone;
             const resp = await fetch(SMS_API_URL_W, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'X-API-Key': SMS_API_KEY_W,
+                    'X-API-Secret': SMS_API_SECRET_W,
+                    'Content-Type': 'application/json',
+                    'Idempotency-Key': 'sms-' + Date.now() + '-' + Math.random().toString(36).substr(2,5)
+                },
                 body: JSON.stringify({ to: formatted, message: msg.substring(0, 160) })
             });
             const data = await resp.json();
