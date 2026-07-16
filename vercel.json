@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "headers": [
-    { "source": "/api/(.*)", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] }
+  "builds": [
+    { "src": "api/sms.js", "use": "@vercel/node" }
   ],
-  "rewrites": [
-    { "source": "/warehouse", "destination": "/admin/warehouse.html" }
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/warehouse", "dest": "/admin/warehouse.html" }
   ]
 }
