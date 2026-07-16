@@ -185,6 +185,41 @@
     </div>
 </div>
 
+<!-- SMS Modal -->
+<div class="modal" id="smsModal" onclick="if(event.target===this)this.classList.remove('active')">
+    <div class="modal-content">
+        <div class="modal-header"><h3><i class="fas fa-sms" style="color:#3b82f6;margin-left:8px;"></i>إرسال SMS</h3><button class="modal-close" onclick="document.getElementById('smsModal').classList.remove('active')"><i class="fas fa-times"></i></button></div>
+        <div style="padding:4px 0;">
+            <div class="form-group"><label>رقم الهاتف</label><input type="tel" id="smsPhone" readonly style="background:var(--bg);"></div>
+            <div class="form-group">
+                <label>القالب</label>
+                <select id="smsTemplate" onchange="loadSmsTemplate()" style="width:100%;padding:10px;border:2px solid var(--border);border-radius:var(--r-sm);font-family:inherit;font-size:0.9rem;">
+                    <option value="">اختر قالب...</option>
+                    <option value="تم الشحن">تم الشحن — طلبك في الطريق</option>
+                    <option value="في الطريق">في الطريق — سيصل خلال 24 ساعة</option>
+                    <option value="تم التوصيل">تم التوصيل — شكراً لتعاملكم</option>
+                    <option value="معلق">الطلب معلق — سنوافيكم بالتحديث</option>
+                    <option value="متوفر">المنتج متوفر Again — تواصل معنا</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>الرسالة <span style="font-size:0.7rem;color:var(--text-sub);" id="smsCharCount">(0 حرف)</span></label>
+                <textarea id="smsMessage" rows="3" oninput="updateSmsCharCount()" placeholder="اكتب رسالتك..." style="width:100%;padding:12px;border:2px solid var(--border);border-radius:var(--r-sm);font-family:inherit;font-size:0.9rem;resize:vertical;"></textarea>
+            </div>
+            <div style="display:flex;gap:8px;margin-bottom:12px;">
+                <button class="wh-btn wh-btn-secondary" style="padding:6px 12px;font-size:0.75rem;" onclick="insertSmsVar('{name}')">{name}</button>
+                <button class="wh-btn wh-btn-secondary" style="padding:6px 12px;font-size:0.75rem;" onclick="insertSmsVar('{tracking}')">{tracking}</button>
+                <button class="wh-btn wh-btn-secondary" style="padding:6px 12px;font-size:0.75rem;" onclick="insertSmsVar('{amount}')">{amount}</button>
+                <button class="wh-btn wh-btn-secondary" style="padding:6px 12px;font-size:0.75rem;" onclick="insertSmsVar('{company}')">{company}</button>
+            </div>
+            <button id="smsSendBtn" onclick="sendSms()" class="support-btn" style="background:#3b82f6;border:none;padding:13px 28px;width:100%;justify-content:center;font-size:1rem;"><i class="fas fa-paper-plane" style="margin-left:8px;"></i> إرسال SMS</button>
+            <div style="margin-top:8px;padding:8px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:var(--r-sm);font-size:0.75rem;color:#1e40af;">
+                <i class="fas fa-info-circle" style="margin-left:4px;"></i> الرسالة مختصرة ومفيدة — الحد الأقصى 160 حرف للـ SMS
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
     .login-card{background:#fff;border-radius:20px;padding:44px 36px 36px;width:100%;max-width:400px;box-shadow:0 25px 80px rgba(0,0,0,0.25);position:relative;overflow:hidden}
     .login-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--gold),var(--gold-light),var(--gold))}
@@ -343,7 +378,8 @@ function renderOrders(orders) {
                 <option value="exception" ${o.status==='exception'?'selected':''}>⚠️ مشكلة</option>
             </select></td>
             <td><div class="btn-group">
-                <button class="btn btn-view" onclick="openWhatsApp('${esc(o.customerPhone)}','${esc(o.m16Number)}','${esc(o.status)}','${esc(o.customerName)}','${o.value||0}','${esc(o.deliveryCompany||'-')}')" title="واتساب"><i class="fab fa-whatsapp"></i></button>
+                <button class="btn btn-view" onclick="openWhatsApp('${esc(o.customerPhone)}','${esc(o.m16Number)}','${esc(o.status)}','${esc(o.customerName)}','${o.value||0}','${esc(o.deliveryCompany||'-')}')" title="واتساب" style="background:#25d366;"><i class="fab fa-whatsapp"></i></button>
+                <button class="btn btn-view" onclick="openSms('${esc(o.customerPhone)}','${esc(o.m16Number)}','${esc(o.status)}','${esc(o.customerName)}','${o.value||0}','${esc(o.deliveryCompany||'-')}')" title="SMS" style="background:#3b82f6;"><i class="fas fa-sms"></i></button>
                 <button class="btn btn-edit" onclick="printOrderReceipt('${o.id}')" title="طباعة فاتورة" style="background:#8b5cf6;"><i class="fas fa-print"></i></button>
                 <button class="btn btn-edit" onclick="editOrder('${o.id}')" title="تعديل"><i class="fas fa-edit"></i></button>
                 <button class="btn btn-delete" onclick="delOrder('${o.id}')" title="حذف"><i class="fas fa-trash"></i></button>
@@ -589,6 +625,95 @@ https://otc.milanof16.com/?track=${tracking}`;
     document.getElementById('whatsappMessage').value = msg;
     document.getElementById('whatsappSend').href = `https://wa.me/${phone.startsWith('0')?'20'+phone.slice(1):phone}?text=${encodeURIComponent(msg)}`;
     document.getElementById('whatsappModal').classList.add('active');
+}
+
+// ===== SMS =====
+const SMS_API_KEY = 'pk_J9mvUtc7wETvuXSq5V2W3uTMoG7k2hz9';
+const SMS_API_SECRET = 'sk_CB1odRcCfZ2Z3M8RlimP42a0bDaWidrVj1SEngrx8';
+const SMS_API_URL = 'https://api.smsmode.com/http/1.6/sendBatch.php';
+
+let smsOrderData = {};
+function openSms(phone, tracking, status, name, value, deliveryCompany) {
+    smsOrderData = { phone, tracking, status, name, value, deliveryCompany };
+    const sm = { 'pending':'قيد المعالجة', 'in-transit':'في الطريق', 'delivered':'تم التوصيل', 'exception':'مشكلة في التوصيل' };
+    document.getElementById('smsPhone').value = phone;
+    document.getElementById('smsMessage').value = `ميلانو: طلبك ${tracking} — ${sm[status]||status}. تتبع: otc.milanof16.com/?track=${tracking}`;
+    updateSmsCharCount();
+    document.getElementById('smsModal').classList.add('active');
+}
+
+function loadSmsTemplate() {
+    const tpl = document.getElementById('smsTemplate').value;
+    const sm = { 'pending':'قيد المعالجة', 'in-transit':'في الطريق', 'delivered':'تم التوصيل', 'exception':'مشكلة في التوصيل' };
+    const msgs = {
+        'تم الشحن': `ميلانو: تم شحن طلبك ${smsOrderData.tracking} — في الطريق إليك. تتبع: otc.milanof16.com/?track=${smsOrderData.tracking}`,
+        'في الطريق': `ميلانو: طلبك ${smsOrderData.tracking} في الطريق — سيصل خلال 24 ساعة. تتبع: otc.milanof16.com/?track=${smsOrderData.tracking}`,
+        'تم التوصيل': `ميلانو: تم توصيل طلبك ${smsOrderData.tracking}. شكراً لتعاملكم — 01029293339`,
+        'معلق': `ميلانو: طلبك ${smsOrderData.tracking} معلق حالياً — سنوافيكم بالتحديث قريباً. 01029293339`,
+        'متوفر': `ميلانو: المنتج متوفر Again! تواصل معنا: 01029293339`
+    };
+    if (msgs[tpl]) {
+        document.getElementById('smsMessage').value = msgs[tpl];
+        updateSmsCharCount();
+    }
+}
+
+function insertSmsVar(v) {
+    const ta = document.getElementById('smsMessage');
+    const start = ta.selectionStart, end = ta.selectionEnd;
+    ta.value = ta.value.substring(0, start) + v + ta.value.substring(end);
+    ta.focus(); ta.selectionStart = ta.selectionEnd = start + v.length;
+    updateSmsCharCount();
+}
+
+function updateSmsCharCount() {
+    const len = document.getElementById('smsMessage').value.length;
+    const el = document.getElementById('smsCharCount');
+    el.textContent = `(${len} حرف)`;
+    el.style.color = len > 160 ? '#ef4444' : len > 140 ? '#f59e0b' : '#64748b';
+}
+
+async function sendSms() {
+    const phone = document.getElementById('smsPhone').value.trim();
+    const msg = document.getElementById('smsMessage').value.trim();
+    if (!phone || !msg) { showAlert('danger', 'أدخل الرقم والرسالة'); return; }
+    if (msg.length > 160) { showAlert('warning', 'الرسالة أطول من 160 حرف — سيتم قصها'); }
+
+    const btn = document.getElementById('smsSendBtn');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-left:8px;"></i> جاري الإرسال...';
+    btn.disabled = true;
+
+    try {
+        const formatted = phone.startsWith('0') ? '20' + phone.slice(1) : phone;
+        const body = new URLSearchParams();
+        body.append('mobile', formatted);
+        body.append('message', msg.substring(0, 160));
+        body.append('encoding', 'UTF-8');
+
+        const resp = await fetch(SMS_API_URL, {
+            method: 'POST',
+            headers: {
+                'X-API-KEY': SMS_API_KEY,
+                'X-API-SECRET': SMS_API_SECRET,
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: body.toString()
+        });
+        const data = await resp.json();
+        console.log('[SMS] Response:', data);
+        if (data.status === 'success' || data.responseCode === '2000') {
+            showAlert('success', 'تم إرسال SMS بنجاح');
+            document.getElementById('smsModal').classList.remove('active');
+        } else {
+            showAlert('danger', 'فشل الإرسال: ' + (data.message || data.responseCode || 'خطأ غير معروف'));
+        }
+    } catch(e) {
+        console.error('[SMS] Error:', e);
+        showAlert('danger', 'خطأ في الاتصال بخدمة SMS');
+    }
+
+    btn.innerHTML = '<i class="fas fa-paper-plane" style="margin-left:8px;"></i> إرسال SMS';
+    btn.disabled = false;
 }
 
 function exportToExcel() {

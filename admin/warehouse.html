@@ -756,6 +756,7 @@
             <button class="wa-tab" onclick="switchWaTab('contacts')" id="waTabContacts"><i class="fas fa-address-book"></i> جهات الاتصال</button>
             <button class="wa-tab" onclick="switchWaTab('templates')" id="waTabTemplates"><i class="fas fa-file-alt"></i> القوالب</button>
             <button class="wa-tab" onclick="switchWaTab('history')" id="waTabHistory"><i class="fas fa-history"></i> السجل</button>
+            <button class="wa-tab" onclick="switchWaTab('sms')" id="waTabSms"><i class="fas fa-sms"></i> SMS جماعي</button>
         </div>
 
         <!-- TAB: Send -->
@@ -960,6 +961,94 @@
             </div>
             <div id="waProgressDone" style="display:none;margin-top:12px;">
                 <div style="padding:12px;background:#dcfce7;border-radius:var(--r-xs);color:#166534;font-weight:700;"><i class="fas fa-check-circle" style="margin-left:6px;"></i> <span id="waProgressDoneText">تم!</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB: SMS Bulk -->
+    <div class="wh-section" id="page-sms" style="display:none;">
+        <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:20px;"><i class="fas fa-sms" style="color:#3b82f6;margin-left:8px;"></i>إرسال SMS جماعي</h2>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+            <div>
+                <!-- Numbers -->
+                <div class="wh-card" style="margin-bottom:16px;">
+                    <div class="wh-card-header"><h3><i class="fas fa-users" style="margin-left:8px;"></i>المستلمين</h3></div>
+                    <div class="wh-card-body">
+                        <div class="wh-form-group">
+                            <label>اختر المجموعة</label>
+                            <select id="smsBulkGroup" onchange="loadSmsGroupContacts()" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--r-xs);font-family:inherit;">
+                                <option value="">ادخل أرقام يدوياً</option>
+                                <option value="عملاء">عملاء</option>
+                                <option value="موردين">موردين</option>
+                                <option value="Staff">Staff</option>
+                                <option value="الكل">الكل</option>
+                            </select>
+                        </div>
+                        <div class="wh-form-group">
+                            <label>أرقام الهواتف (كل رقم في سطر)</label>
+                            <textarea id="smsNumbers" rows="6" placeholder="01012345678&#10;01123456789" style="width:100%;padding:12px;border:1px solid var(--border);border-radius:var(--r-xs);font-family:inherit;font-size:0.85rem;resize:vertical;direction:ltr;text-align:left;" oninput="countSmsNumbers()"></textarea>
+                        </div>
+                        <span style="font-size:0.78rem;color:var(--text-sub);">العدد: <strong id="smsCount" style="color:#3b82f6;">0</strong></span>
+                    </div>
+                </div>
+
+                <!-- Message -->
+                <div class="wh-card">
+                    <div class="wh-card-header" style="background:linear-gradient(135deg,#3b82f6,#2563eb);"><h3><i class="fas fa-comment-dots" style="margin-left:8px;"></i>الرسالة</h3>
+                        <span id="smsWarehouseCharCount" style="font-size:0.72rem;color:rgba(255,255,255,0.6);">0 حرف</span>
+                    </div>
+                    <div class="wh-card-body">
+                        <div class="wh-form-group">
+                            <label>اختر قالب</label>
+                            <select id="smsWarehouseTemplate" onchange="loadSmsWarehouseTemplate()" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--r-xs);font-family:inherit;">
+                                <option value="">اختر قالب...</option>
+                                <option value="تم الشحن">تم الشحن — طلبك في الطريق</option>
+                                <option value="في الطريق">في الطريق — سيصل خلال 24 ساعة</option>
+                                <option value="تم التوصيل">تم التوصيل — شكراً</option>
+                                <option value="معلق">الطلب معلق</option>
+                                <option value="عرض">عرض خاص</option>
+                            </select>
+                        </div>
+                        <div class="wh-form-group">
+                            <label>الرسالة <span style="font-size:0.7rem;color:var(--text-sub);">— المتغيرات: {name} {phone}</span></label>
+                            <textarea id="smsWarehouseMessage" rows="5" placeholder="ميلانو: رسالتك هنا..." oninput="updateSmsWarehouseCharCount()" style="width:100%;padding:12px;border:1px solid var(--border);border-radius:var(--r-xs);font-family:inherit;font-size:0.85rem;resize:vertical;"></textarea>
+                        </div>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
+                            <button class="wh-btn wh-btn-secondary" style="padding:4px 10px;font-size:0.72rem;" onclick="insertSmsWarehouseVar('{name}')">{name}</button>
+                            <button class="wh-btn wh-btn-secondary" style="padding:4px 10px;font-size:0.72rem;" onclick="insertSmsWarehouseVar('{phone}')">{phone}</button>
+                        </div>
+                        <button class="wh-btn wh-btn-success" style="width:100%;padding:12px;font-size:1rem;" onclick="sendSmsBulk()"><i class="fas fa-paper-plane" style="margin-left:8px;"></i> إرسال SMS للجميع</button>
+                        <div style="margin-top:8px;padding:8px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:var(--r-xs);font-size:0.75rem;color:#1e40af;">
+                            <i class="fas fa-info-circle" style="margin-left:4px;"></i> حد SMS: 160 حرف — الرسائل القصيرة الأكثر فاعلية
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <!-- Preview -->
+                <div class="wh-card" style="margin-bottom:16px;">
+                    <div class="wh-card-header" style="background:linear-gradient(135deg,#3b82f6,#2563eb);"><h3><i class="fas fa-eye" style="margin-left:8px;"></i>معاينة</h3></div>
+                    <div class="wh-card-body" style="background:#f8fafc;padding:20px;">
+                        <div style="background:#fff;border:2px solid var(--border);border-radius:var(--r-sm);padding:16px;max-width:320px;margin:0 auto;box-shadow:var(--shadow);">
+                            <div style="font-size:0.7rem;color:#9ca3af;margin-bottom:8px;">ميلانو OTC</div>
+                            <div id="smsWarehousePreview" style="font-size:0.9rem;line-height:1.6;color:#1a1a2e;">اكتب رسالتك هنا...</div>
+                            <div style="text-align:left;font-size:0.65rem;color:#9ca3af;margin-top:8px;border-top:1px solid var(--border);padding-top:6px;">SMS</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="wh-card">
+                    <div class="wh-card-header"><h3><i class="fas fa-chart-bar" style="margin-left:8px;"></i>إحصائيات SMS</h3></div>
+                    <div class="wh-card-body">
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                            <div style="text-align:center;padding:16px;background:#f0f9ff;border-radius:var(--r-xs);"><div style="font-size:1.5rem;font-weight:800;color:#3b82f6;" id="smsStatTotal">0</div><div style="font-size:0.78rem;color:var(--text-sub);">إجمالي</div></div>
+                            <div style="text-align:center;padding:16px;background:#dcfce7;border-radius:var(--r-xs);"><div style="font-size:1.5rem;font-weight:800;color:#22c55e;" id="smsStatSent">0</div><div style="font-size:0.78rem;color:var(--text-sub);">تم الإرسال</div></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1451,6 +1540,91 @@ function renderWaHistory() {
         <td style="max-width:250px;font-size:0.8rem;">${esc(h.message||'-')}</td>
         <td><span class="wh-badge wh-badge-success">${esc(h.status)}</span></td>
     </tr>`).join('');
+}
+
+// ===== SMS BULK =====
+const SMS_API_KEY_W = 'pk_J9mvUtc7wETvuXSq5V2W3uTMoG7k2hz9';
+const SMS_API_SECRET_W = 'sk_CB1odRcCfZ2Z3M8RlimP42a0bDaWidrVj1SEngrx8';
+const SMS_API_URL_W = 'https://api.smsmode.com/http/1.6/sendBatch.php';
+
+function loadSmsGroupContacts() {
+    const group = document.getElementById('smsBulkGroup').value;
+    const ta = document.getElementById('smsNumbers');
+    if (!group) { ta.value = ''; countSmsNumbers(); return; }
+    let contacts = waContactsData;
+    if (group !== 'الكل') contacts = contacts.filter(c => c.group === group);
+    ta.value = contacts.map(c => c.phone).join('\n');
+    countSmsNumbers();
+}
+
+function countSmsNumbers() {
+    const nums = document.getElementById('smsNumbers').value.split('\n').map(n => n.trim()).filter(n => n.length >= 10);
+    document.getElementById('smsCount').textContent = nums.length;
+}
+
+function loadSmsWarehouseTemplate() {
+    const tpl = document.getElementById('smsWarehouseTemplate').value;
+    const msgs = {
+        'تم الشحن': 'ميلانو: تم شحن طلبك — في الطريق إليك. تتبع: otc.milanof16.com',
+        'في الطريق': 'ميلانو: طلبك في الطريق — سيصل خلال 24 ساعة.',
+        'تم التوصيل': 'ميلانو: تم توصيل طلبك. شكراً لتعاملكم — 01029293339',
+        'معلق': 'ميلانو: طلبك معلق حالياً — سنوافيكم بالتحديث. 01029293339',
+        'عرض': 'ميلانو: عرض خاص! خصم على منتجاتنا — تواصل معنا: 01029293339'
+    };
+    if (msgs[tpl]) {
+        document.getElementById('smsWarehouseMessage').value = msgs[tpl];
+        updateSmsWarehouseCharCount();
+    }
+}
+
+function insertSmsWarehouseVar(v) {
+    const ta = document.getElementById('smsWarehouseMessage');
+    const start = ta.selectionStart, end = ta.selectionEnd;
+    ta.value = ta.value.substring(0, start) + v + ta.value.substring(end);
+    ta.focus(); ta.selectionStart = ta.selectionEnd = start + v.length;
+    updateSmsWarehouseCharCount();
+}
+
+function updateSmsWarehouseCharCount() {
+    const len = document.getElementById('smsWarehouseMessage').value.length;
+    const el = document.getElementById('smsWarehouseCharCount');
+    el.textContent = len + ' حرف';
+    el.style.color = len > 160 ? '#ef4444' : len > 140 ? '#f59e0b' : 'rgba(255,255,255,0.6)';
+    const preview = document.getElementById('smsWarehousePreview');
+    if (preview) preview.textContent = document.getElementById('smsWarehouseMessage').value || 'اكتب رسالتك هنا...';
+}
+
+async function sendSmsBulk() {
+    const nums = document.getElementById('smsNumbers').value.split('\n').map(n => n.trim()).filter(n => n.length >= 10);
+    const msg = document.getElementById('smsWarehouseMessage').value.trim();
+    if (!msg) { showWhAlert('error', 'اكتب الرسالة'); return; }
+    if (nums.length === 0) { showWhAlert('error', 'أدخل رقم واحد على الأقل'); return; }
+    if (msg.length > 160) { showWhAlert('warning', 'الرسالة أطول من 160 حرف — سيتم قصها'); }
+    if (!confirm(`إرسال SMS إلى ${nums.length} رقم؟`)) return;
+
+    let sent = 0, failed = 0;
+    for (const phone of nums) {
+        try {
+            const formatted = phone.startsWith('0') ? '20' + phone.slice(1) : phone;
+            const body = new URLSearchParams();
+            body.append('mobile', formatted);
+            body.append('message', msg.substring(0, 160));
+            body.append('encoding', 'UTF-8');
+            const resp = await fetch(SMS_API_URL_W, {
+                method: 'POST',
+                headers: { 'X-API-KEY': SMS_API_KEY_W, 'X-API-SECRET': SMS_API_SECRET_W, 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: body.toString()
+            });
+            const data = await resp.json();
+            if (data.status === 'success' || data.responseCode === '2000') sent++;
+            else failed++;
+            await fbAddDoc(WA_HISTORY, { date: today(), phone, name: '-', message: msg.substring(0, 100), status: data.status === 'success' ? 'تم الإرسال' : 'فشل' });
+        } catch(e) { failed++; }
+        await new Promise(r => setTimeout(r, 300));
+    }
+    document.getElementById('smsStatTotal').textContent = nums.length;
+    document.getElementById('smsStatSent').textContent = sent;
+    showWhAlert('success', `تم إرسال ${sent} SMS${failed ? ' — فشل ' + failed : ''}`);
 }
 
 // ===== GLOBAL SEARCH =====
