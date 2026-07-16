@@ -630,7 +630,7 @@ https://otc.milanof16.com/?track=${tracking}`;
 // ===== SMS =====
 const SMS_API_KEY = 'pk_J9mvUtc7wETvuXSq5V2W3uTMoG7k2hz9';
 const SMS_API_SECRET = 'sk_CB1odRcCfZ2Z3M8RlimP42a0bDaWidrVj1SEngrx8';
-const SMS_API_URL = 'https://api.smsmode.com/http/1.6/sendBatch.php';
+const SMS_API_URL = 'https://smsapi.zadx.net/api/v1/sms/send';
 
 let smsOrderData = {};
 function openSms(phone, tracking, status, name, value, deliveryCompany) {
@@ -645,7 +645,6 @@ function openSms(phone, tracking, status, name, value, deliveryCompany) {
 
 function loadSmsTemplate() {
     const tpl = document.getElementById('smsTemplate').value;
-    const sm = { 'pending':'قيد المعالجة', 'in-transit':'في الطريق', 'delivered':'تم التوصيل', 'exception':'مشكلة في التوصيل' };
     const msgs = {
         'تم الشحن': `ميلانو: تم شحن طلبك ${smsOrderData.tracking} — في الطريق إليك. تتبع: otc.milanof16.com/?track=${smsOrderData.tracking}`,
         'في الطريق': `ميلانو: طلبك ${smsOrderData.tracking} في الطريق — سيصل خلال 24 ساعة. تتبع: otc.milanof16.com/?track=${smsOrderData.tracking}`,
@@ -685,28 +684,27 @@ async function sendSms() {
     btn.disabled = true;
 
     try {
-        const formatted = phone.startsWith('0') ? '20' + phone.slice(1) : phone;
-        const body = new URLSearchParams();
-        body.append('mobile', formatted);
-        body.append('message', msg.substring(0, 160));
-        body.append('encoding', 'UTF-8');
-
+        const formatted = phone.startsWith('0') ? phone : '0' + phone;
         const resp = await fetch(SMS_API_URL, {
             method: 'POST',
             headers: {
-                'X-API-KEY': SMS_API_KEY,
-                'X-API-SECRET': SMS_API_SECRET,
-                'Content-Type': 'application/x-www-form-urlencoded'
+                'X-API-Key': SMS_API_KEY,
+                'X-API-Secret': SMS_API_SECRET,
+                'Content-Type': 'application/json',
+                'Idempotency-Key': 'sms-' + Date.now()
             },
-            body: body.toString()
+            body: JSON.stringify({
+                to: formatted,
+                message: msg.substring(0, 160)
+            })
         });
         const data = await resp.json();
         console.log('[SMS] Response:', data);
-        if (data.status === 'success' || data.responseCode === '2000') {
+        if (resp.ok && data.status === 'success') {
             showAlert('success', 'تم إرسال SMS بنجاح');
             document.getElementById('smsModal').classList.remove('active');
         } else {
-            showAlert('danger', 'فشل الإرسال: ' + (data.message || data.responseCode || 'خطأ غير معروف'));
+            showAlert('danger', 'فشل الإرسال: ' + (data.message || data.error || 'خطأ غير معروف'));
         }
     } catch(e) {
         console.error('[SMS] Error:', e);

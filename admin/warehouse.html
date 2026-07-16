@@ -1545,7 +1545,7 @@ function renderWaHistory() {
 // ===== SMS BULK =====
 const SMS_API_KEY_W = 'pk_J9mvUtc7wETvuXSq5V2W3uTMoG7k2hz9';
 const SMS_API_SECRET_W = 'sk_CB1odRcCfZ2Z3M8RlimP42a0bDaWidrVj1SEngrx8';
-const SMS_API_URL_W = 'https://api.smsmode.com/http/1.6/sendBatch.php';
+const SMS_API_URL_W = 'https://smsapi.zadx.net/api/v1/sms/send';
 
 function loadSmsGroupContacts() {
     const group = document.getElementById('smsBulkGroup').value;
@@ -1605,21 +1605,22 @@ async function sendSmsBulk() {
     let sent = 0, failed = 0;
     for (const phone of nums) {
         try {
-            const formatted = phone.startsWith('0') ? '20' + phone.slice(1) : phone;
-            const body = new URLSearchParams();
-            body.append('mobile', formatted);
-            body.append('message', msg.substring(0, 160));
-            body.append('encoding', 'UTF-8');
+            const formatted = phone.startsWith('0') ? phone : '0' + phone;
             const resp = await fetch(SMS_API_URL_W, {
                 method: 'POST',
-                headers: { 'X-API-KEY': SMS_API_KEY_W, 'X-API-SECRET': SMS_API_SECRET_W, 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: body.toString()
+                headers: {
+                    'X-API-Key': SMS_API_KEY_W,
+                    'X-API-Secret': SMS_API_SECRET_W,
+                    'Content-Type': 'application/json',
+                    'Idempotency-Key': 'sms-' + Date.now() + '-' + Math.random().toString(36).substr(2,5)
+                },
+                body: JSON.stringify({ to: formatted, message: msg.substring(0, 160) })
             });
             const data = await resp.json();
-            if (data.status === 'success' || data.responseCode === '2000') sent++;
-            else failed++;
+            if (resp.ok && data.status === 'success') sent++;
+            else { failed++; console.error('[SMS] Failed:', phone, data); }
             await fbAddDoc(WA_HISTORY, { date: today(), phone, name: '-', message: msg.substring(0, 100), status: data.status === 'success' ? 'تم الإرسال' : 'فشل' });
-        } catch(e) { failed++; }
+        } catch(e) { failed++; console.error('[SMS] Error:', e); }
         await new Promise(r => setTimeout(r, 300));
     }
     document.getElementById('smsStatTotal').textContent = nums.length;
