@@ -18,12 +18,10 @@
     }
   ],
   "builds": [
-    { "src": "**", "use": "@vercel/static" }
+    { "src": "api/sms.js", "use": "@vercel/node" }
   ],
   "rewrites": [
-    { "source": "/warehouse", "destination": "/admin/warehouse.html" }
-  ],
-  "routes": [
-    { "src": "/(.*)", "dest": "/$1" }
+    { "source": "/warehouse", "destination": "/admin/warehouse.html" },
+    { "source": "/api/(.*)", "destination": "/api/$1" }
   ]
 }
