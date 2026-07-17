@@ -1,9 +1,18 @@
 {
   "version": 2,
-  "functions": {
-    "api/sms.mjs": { "maxDuration": 10 }
-  },
+  "cleanUrls": true,
+  "builds": [
+    { "src": "index.html", "use": "@vercel/static" },
+    { "src": "css/**", "use": "@vercel/static" },
+    { "src": "js/**", "use": "@vercel/static" },
+    { "src": "assets/**", "use": "@vercel/static" },
+    { "src": "admin/**", "use": "@vercel/static" },
+    { "src": "api/sms.mjs", "use": "@vercel/node" }
+  ],
   "rewrites": [
     { "source": "/warehouse", "destination": "/admin/warehouse.html" }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "/$1" }
   ]
 }
