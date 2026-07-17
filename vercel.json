@@ -1,7 +1,12 @@
 {
   "version": 2,
   "cleanUrls": true,
-  "outputDirectory": ".",
+  "functions": {
+    "api/sms.js": {
+      "maxDuration": 10,
+      "runtime": "nodejs18.x"
+    }
+  },
   "rewrites": [
     { "source": "/warehouse", "destination": "/admin/warehouse.html" }
   ]
