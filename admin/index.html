@@ -576,12 +576,19 @@ async function updateStats() {
 }
 
 let ordersLineChart = null;
+function formatChartDate(val) {
+    if (!val) return '';
+    if (typeof val === 'string') return val.slice(0, 10);
+    if (val && typeof val.toDate === 'function') return val.toDate().toISOString().slice(0, 10);
+    if (val && val.seconds) return new Date(val.seconds * 1000).toISOString().slice(0, 10);
+    return '';
+}
 let statusDoughnut = null;
 function updateCharts(orders) {
     const dayMap = {};
     const dayStatus = {};
     orders.forEach(o => {
-        const d = (o.createdAt||'').slice(0,10);
+        const d = formatChartDate(o.createdAt);
         if (!d) return;
         dayMap[d] = (dayMap[d]||0) + 1;
         if (!dayStatus[d]) dayStatus[d] = {pending:0,'in-transit':0,delivered:0,exception:0};
@@ -628,9 +635,7 @@ https://otc.milanof16.com/?track=${tracking}`;
 }
 
 // ===== SMS =====
-const SMS_API_URL = 'https://smsapi.zadx.net/api/v1/sms/send';
-const SMS_API_KEY = 'pk_J9mvUtc7wETvuX5q5V2W3uTMoG7k2hz9';
-const SMS_API_SECRET = 'sk_CB1odRcCfZ23M8RlimP42a0bDaWidrVj1SEngrx8';
+const SMS_API_URL = '/api/sms';
 
 let smsOrderData = {};
 function openSms(phone, tracking, status, name, value, deliveryCompany) {
@@ -688,12 +693,7 @@ async function sendSms() {
         console.log('[SMS] Sending to:', formatted, 'msg:', msg.substring(0, 160));
         const resp = await fetch(SMS_API_URL, {
             method: 'POST',
-            headers: {
-                'X-API-Key': SMS_API_KEY,
-                'X-API-Secret': SMS_API_SECRET,
-                'Content-Type': 'application/json',
-                'Idempotency-Key': 'sms-' + Date.now()
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 to: formatted,
                 message: msg.substring(0, 160)

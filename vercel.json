@@ -6,12 +6,10 @@
     { "src": "css/**", "use": "@vercel/static" },
     { "src": "js/**", "use": "@vercel/static" },
     { "src": "assets/**", "use": "@vercel/static" },
-    { "src": "admin/**", "use": "@vercel/static" }
+    { "src": "admin/**", "use": "@vercel/static" },
+    { "src": "api/sms.js", "use": "@vercel/node" }
   ],
   "rewrites": [
     { "source": "/warehouse", "destination": "/admin/warehouse.html" }
-  ],
-  "routes": [
-    { "src": "/(.*)", "dest": "/$1" }
   ]
 }
