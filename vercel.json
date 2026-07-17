@@ -11,8 +11,5 @@
   ],
   "rewrites": [
     { "source": "/warehouse", "destination": "/admin/warehouse.html" }
-  ],
-  "routes": [
-    { "src": "/(.*)", "dest": "/$1" }
   ]
 }
