@@ -7,7 +7,7 @@
     { "src": "js/**", "use": "@vercel/static" },
     { "src": "assets/**", "use": "@vercel/static" },
     { "src": "admin/**", "use": "@vercel/static" },
-    { "src": "api/sms.mjs", "use": "@vercel/node" }
+    { "src": "api/sms.js", "use": "@vercel/node" }
   ],
   "rewrites": [
     { "source": "/warehouse", "destination": "/admin/warehouse.html" }
